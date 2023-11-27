@@ -1,10 +1,12 @@
 require('dotenv').config()
-const { sequelize } = require('./models')
+const https = require('https')
 const app = require('./app')
+
+const { SERVER_PORT: port } = process.env
 
 const Server = async function () {
     try {
-        const serverPort = process.env.SERVER_PORT || 3001
+        const serverPort = port || 3001
         app.listen(serverPort)
         console.log(` splitwise-backend server started : ${serverPort}  \n\n`)
     } catch (err) {
@@ -13,4 +15,4 @@ const Server = async function () {
     }
 }
 
-startServer()
+Server()
