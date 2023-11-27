@@ -11,7 +11,7 @@ app.use(bodyParser.json())
 
 // routes
 const { NODE_ENV: api_env } = process.env
-const api_route = `/api/${api_env}`
+const api_route = `/api`
 
 console.log(api_route)
 app.use(api_route, api)
