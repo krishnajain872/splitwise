@@ -16,4 +16,6 @@ package-lock.json
 .vscode
 
 #general
+
+# SSL CERTIFICATES
 certificates
