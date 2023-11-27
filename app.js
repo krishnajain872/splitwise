@@ -10,7 +10,8 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 // routes
-const { NODE_ENV: api_env } = process.env
+// const { NODE_ENV: api_env } = process.env
+
 const api_route = `/api`
 
 console.log(api_route)
