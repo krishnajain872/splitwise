@@ -2,8 +2,8 @@ const https = require('https')
 const http = require('http')
 const app = require('./app')
 const fs = require('fs')
+const { sequelize } = require('./models')
 require('dotenv').config()
-
 const {
     SERVER_PORT: port,
     SECURE_SERVER_PORT: secure,
@@ -12,12 +12,13 @@ const {
 
 const Server = async function () {
     try {
+        await sequelize.authenticate()
+        console.log('Database connectivity established successfully')
         const serverPort = port || 80
-        // Listen both http & https ports
         const httpServer = http.createServer(app)
         httpServer.listen(serverPort, () => {
             console.log(
-                ` \nsplitwise-backend server started @ http://${host}:${serverPort}/ `
+                ` splitwise-backend server started @ http://${host}:${serverPort}/ `
             )
         })
     } catch (err) {
@@ -29,6 +30,10 @@ const Server = async function () {
 const secureServer = async function () {
     try {
         // ssl certificates
+        await sequelize.authenticate()
+        console.log(
+            'Database connectivity established in secure server successfully'
+        )
         const options = {
             key: fs.readFileSync('certificates/key.pem'),
             cert: fs.readFileSync('certificates/cert.pem'),
