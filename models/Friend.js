@@ -22,12 +22,6 @@ module.exports = (sequelize, DataTypes) => {
     }
     FriendList.init(
         {
-            id: {
-                type: DataTypes.UUIDV4,
-                allowNull: false,
-                primaryKey: true,
-                defaultValue: UUIDV4,
-            },
             user_id: {
                 type: DataTypes.UUIDV4,
                 allowNull: false,
