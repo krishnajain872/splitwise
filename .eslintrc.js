@@ -23,5 +23,6 @@ module.exports = {
             'error',
             { vars: 'all', args: 'after-used', ignoreRestSiblings: false },
         ],
+        'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',
     },
 }
