@@ -21,12 +21,14 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
-    return errorHelper(
+    requestData = errorHelper(
         (code = 400),
         (name = error.name),
         (message = error.message || 'validation error'),
         (actual = error)
     )
+
+    res.send(requestData)
 }
 
 module.exports = {

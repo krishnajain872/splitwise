@@ -16,16 +16,16 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'payer_id',
                 as: 'transactions_as_payer',
             })
-            User.hasMany(models.Friend_List, {
+            User.hasMany(models.FriendList, {
                 foreignKey: 'user_id',
                 as: 'user',
             })
-            User.hasMany(models.Friend_List, {
+            User.hasMany(models.FriendList, {
                 foreignKey: 'friend_id',
                 as: 'friend',
             })
             User.belongsToMany(models.Group, {
-                through: models.Group_user_mapping,
+                through: models.GroupUserMapping,
                 foreignKey: 'user_id',
                 as: 'groups',
             })
