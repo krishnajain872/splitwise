@@ -7,42 +7,7 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate(models) {
-            User.hasMany(models.Transaction, {
-                foreignKey: 'payee_id',
-                as: 'transactions_as_payee',
-            })
-            User.hasMany(models.Transaction, {
-                foreignKey: 'payer_id',
-                as: 'transactions_as_payer',
-            })
-            User.hasMany(models.FriendList, {
-                foreignKey: 'user_id',
-                as: 'user',
-            })
-            User.hasMany(models.FriendList, {
-                foreignKey: 'friend_id',
-                as: 'friend',
-            })
-            User.belongsToMany(models.Group, {
-                through: models.GroupUserMapping,
-                foreignKey: 'user_id',
-                as: 'groups',
-            })
-            User.belongsToMany(models.Expense, {
-                through: models.Payee,
-                foreignKey: 'user_id',
-                as: 'payee',
-            })
-            User.hasMany(models.Group, {
-                foreignKey: 'admin_id',
-                as: 'group-admin',
-            })
-            User.hasMany(models.Comment, {
-                foreignKey: 'user_id',
-                as: 'user',
-            })
-        }
+        static associate() {}
     }
     User.init(
         {
