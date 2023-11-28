@@ -16,11 +16,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'payer_id',
                 as: 'transactions_as_payer',
             })
-            User.hasMany(models.FriendList, {
+            User.hasMany(models.Friend_List, {
                 foreignKey: 'user_id',
                 as: 'user',
             })
-            User.hasMany(models.FriendList, {
+            User.hasMany(models.Friend_List, {
                 foreignKey: 'friend_id',
                 as: 'friend',
             })
