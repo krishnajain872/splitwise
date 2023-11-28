@@ -9,9 +9,8 @@ const validateRequest = (req, res, next, schema, parameterType) => {
     } else {
         requestData = req.params
     }
-    const { value, error } = schema.validate(requestData)
-
-    if (!error) {
+    const value = schema.validate(requestData)
+    if (!value.error) {
         if (parameterType === 'body') {
             req.body = value
         } else if (parameterType === 'query') {
@@ -21,12 +20,8 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
-    requestData = errorHelper(
-        (code = 400),
-        (name = error.name),
-        (message = error.message || 'validation error'),
-        (actual = error)
-    )
+    const error = value.error.details[0].message
+    requestData = errorHelper(400, 'Bad request', error, value.error)
 
     res.send(requestData)
 }
