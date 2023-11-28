@@ -25,7 +25,7 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'friend',
             })
             User.belongsToMany(models.Group, {
-                through: models.GroupUserMapping,
+                through: models.Group_user_mapping,
                 foreignKey: 'user_id',
                 as: 'groups',
             })
@@ -72,7 +72,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            password: {
+            status: {
                 type: DataTypes.ENUM,
                 values: ['verified', 'invited', 'dummy'],
                 defaultValue: 'dummy',
