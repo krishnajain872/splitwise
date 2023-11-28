@@ -54,7 +54,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             first_name: {
                 type: DataTypes.STRING,
-                allowNull: true,
+                allowNull: false,
             },
             last_name: {
                 type: DataTypes.STRING,
@@ -67,6 +67,7 @@ module.exports = (sequelize, DataTypes) => {
             mobile: {
                 type: DataTypes.STRING,
                 allowNull: false,
+                unique: true,
             },
             password: {
                 type: DataTypes.STRING,
