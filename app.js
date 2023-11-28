@@ -11,10 +11,7 @@ app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
 
 const api_route = `/api`
-
-console.log(api_route)
 app.use(api_route, api)
-
 // health check
 app.get('/health', (req, res) => {
     res.status(200).send('splitwise backend health check ....')
