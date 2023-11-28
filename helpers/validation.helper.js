@@ -1,4 +1,4 @@
-// const { errorHelper } = require('./commonResponse.helper')
+const { errorHelper } = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
     let requestData = {}
@@ -21,7 +21,12 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
-    // return errorHelper( code=400, name=error.name, message=error.message, actual=error)
+    return errorHelper(
+        (code = 400),
+        (name = error.name),
+        (message = error.message || 'validation error'),
+        (actual = error)
+    )
 }
 
 module.exports = {
