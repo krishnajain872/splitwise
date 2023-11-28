@@ -3,7 +3,6 @@ const bodyParser = require('body-parser')
 const router = express.Router()
 const app = express()
 const api = require('./routes')
-const genericResponse = require('./helpers/commonResponse.helper')
 require('dotenv').config()
 // routes and bodyparsers
 app.use(router)
@@ -21,7 +20,6 @@ app.get('/health', (req, res) => {
 //root
 app.get('/', (req, res) => {
     res.data = 'Splitwise backend live'
-    genericResponse.sendResponse(req, res)
 })
 
 module.exports = app
