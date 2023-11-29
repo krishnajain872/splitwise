@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'expense_id',
                 as: 'expense_details',
             })
+            Expense.belongsToMany(models.User, {
+                through: models.Comment,
+                foreignKey: 'expense_id',
+                as: 'expense_comment_details',
+            })
         }
     }
     Expense.init(
