@@ -15,8 +15,14 @@ module.exports = {
                 defaultValue: 'USER',
             },
             expense_id: {
-                type: Sequelize.UUID,
                 allowNull: false,
+                type: Sequelize.UUID,
+                references: {
+                    model: 'expenses',
+                    key: 'id',
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             description: {
                 type: Sequelize.STRING,
@@ -25,6 +31,12 @@ module.exports = {
             user_id: {
                 allowNull: false,
                 type: Sequelize.UUID,
+                references: {
+                    model: 'users',
+                    key: 'id',
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             created_at: {
                 allowNull: false,
