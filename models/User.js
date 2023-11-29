@@ -16,6 +16,17 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'friend_id',
                 as: 'friend',
             })
+
+            User.belongsToMany(models.Group, {
+                through: models.GroupUserMapping,
+                foreignKey: 'user_id',
+                as: 'groups',
+            })
+
+            User.hasMany(models.Group, {
+                foreignKey: 'admin_id',
+                as: 'group-admin',
+            })
         }
     }
     User.init(
