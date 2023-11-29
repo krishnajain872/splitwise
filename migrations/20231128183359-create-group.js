@@ -35,12 +35,12 @@ module.exports = {
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             updated_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             deleted_at: {
                 allowNull: true,
