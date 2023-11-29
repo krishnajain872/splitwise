@@ -16,6 +16,7 @@ package-lock.json
 .vscode
 
 #general
+factory.js
 
 # SSL CERTIFICATES
 certificates
