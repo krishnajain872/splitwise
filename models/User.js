@@ -18,6 +18,17 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'friend_id',
                 as: 'friend',
             })
+
+            User.belongsToMany(models.Group, {
+                through: models.UserGroup,
+                foreignKey: 'user_id',
+                as: 'users',
+            })
+
+            User.hasMany(models.Group, {
+                foreignKey: 'admin_id',
+                as: 'group-admin',
+            })
         }
     }
     User.init(
