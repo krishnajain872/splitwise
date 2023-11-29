@@ -13,7 +13,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            icon: {
+            display_picture: {
                 type: Sequelize.STRING,
             },
             category: {
