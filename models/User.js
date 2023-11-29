@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            icon: {
+            avatar: {
                 type: DataTypes.STRING,
                 allowNull: true,
             },

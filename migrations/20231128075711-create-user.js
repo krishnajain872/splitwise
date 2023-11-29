@@ -18,7 +18,7 @@ module.exports = {
             last_name: {
                 type: Sequelize.STRING,
             },
-            icon: {
+            avatar: {
                 type: Sequelize.STRING,
             },
             email: {
@@ -42,12 +42,12 @@ module.exports = {
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             updated_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             deleted_at: {
                 allowNull: true,
