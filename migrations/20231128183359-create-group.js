@@ -20,7 +20,6 @@ module.exports = {
                 type: Sequelize.ENUM,
                 values: ['trip', 'home', 'couple', 'other', 'foodie'],
                 defaultValue: 'other',
-                allowNull: false,
             },
             admin_id: {
                 allowNull: false,
