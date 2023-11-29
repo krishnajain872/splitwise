@@ -13,7 +13,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            icon: {
+            display_picture: {
                 type: Sequelize.STRING,
             },
             category: {
@@ -35,12 +35,12 @@ module.exports = {
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             updated_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             deleted_at: {
                 allowNull: true,

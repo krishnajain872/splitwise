@@ -5,9 +5,9 @@ module.exports = {
         await queryInterface.createTable('groups_users', {
             id: {
                 allowNull: false,
-                autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.INTEGER,
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.literal('uuid_generate_v4()'),
             },
             user_id: {
                 allowNull: false,
@@ -32,12 +32,12 @@ module.exports = {
             created_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             updated_at: {
                 allowNull: false,
                 type: Sequelize.DATE,
-                defaultValue: Sequelize.NOW,
+                defaultValue: Sequelize.literal('now()'),
             },
             deleted_at: {
                 allowNull: true,
