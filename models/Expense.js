@@ -13,6 +13,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'group_id',
                 targetKey: 'id',
             })
+            Expense.belongsTo(models.Currency, {
+                as: 'currency_used',
+                foreignKey: 'currency_id',
+                targetKey: 'id',
+            })
         }
     }
     Expense.init(
@@ -23,9 +28,8 @@ module.exports = (sequelize, DataTypes) => {
                 defaultValue: 'other',
             },
             currency: {
-                type: DataTypes.ENUM,
-                values: ['INR', 'USD'],
-                defaultValue: 'INR',
+                type: DataTypes.UUID,
+                allowNull: false,
             },
             description: {
                 type: DataTypes.STRING,
@@ -48,6 +52,8 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Expense',
+            tableName: 'expenses',
+            paranoid: true,
         }
     )
     return Expense

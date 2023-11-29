@@ -1,0 +1,49 @@
+'use strict'
+const { Model } = require('sequelize')
+module.exports = (sequelize, DataTypes) => {
+    class Currency extends Model {
+        /**
+         * Helper method for defining associations.
+         * This method is not a part of Sequelize lifecycle.
+         * The `models/index` file will call this method automatically.
+         */
+        static associate(models) {
+            Currency.hasMany(models.Expence, {
+                foreignKey: 'currency_id',
+                as: 'currency',
+            })
+            Currency.hasMany(models.Payee, {
+                foreignKey: 'currency_id',
+                as: 'currency',
+            })
+        }
+    }
+    Currency.init(
+        {
+            code: {
+                type: DataTypes.UUID,
+                allowNull: false,
+                unique: true,
+            },
+            name: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            exchange_rate: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            is_valid: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+            },
+        },
+        {
+            sequelize,
+            modelName: 'Currency',
+            tableName: 'currencies',
+            paranoid: true,
+        }
+    )
+    return Currency
+}

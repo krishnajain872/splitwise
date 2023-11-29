@@ -19,9 +19,14 @@ module.exports = {
                 allowNull: false,
             },
             currency: {
-                type: Sequelize.ENUM,
-                values: ['INR', 'USD'],
-                defaultValue: 'INR',
+                allowNull: true,
+                type: Sequelize.UUID,
+                references: {
+                    model: 'currencies',
+                    key: 'id',
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
             },
             group_id: {
                 allowNull: true,
