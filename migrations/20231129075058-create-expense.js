@@ -33,7 +33,7 @@ module.exports = {
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE',
             },
-            base_ammount: {
+            base_amount: {
                 type: Sequelize.STRING,
                 allowNull: false,
             },

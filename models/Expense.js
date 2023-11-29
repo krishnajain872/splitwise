@@ -35,7 +35,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: true,
                 type: DataTypes.UUID,
             },
-            base_ammount: {
+            base_amount: {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
