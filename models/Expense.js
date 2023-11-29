@@ -48,6 +48,8 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Expense',
+            tableName: 'expenses',
+            paranoid: true,
         }
     )
     return Expense
