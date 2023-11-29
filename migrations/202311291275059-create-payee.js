@@ -10,7 +10,7 @@ module.exports = {
                 defaultValue: Sequelize.literal('uuid_generate_v4()'),
             },
             currency_id: {
-                allowNull: true,
+                allowNull: false,
                 type: Sequelize.UUID,
                 references: {
                     model: 'currencies',
@@ -20,7 +20,7 @@ module.exports = {
                 onUpdate: 'CASCADE',
             },
             user_id: {
-                allowNull: true,
+                allowNull: false,
                 type: Sequelize.UUID,
                 references: {
                     model: 'users',
@@ -30,7 +30,7 @@ module.exports = {
                 onUpdate: 'CASCADE',
             },
             expense_id: {
-                allowNull: true,
+                allowNull: false,
                 type: Sequelize.UUID,
                 references: {
                     model: 'expenses',
