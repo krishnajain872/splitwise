@@ -2,7 +2,7 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('groups_users', {
+        await queryInterface.createTable('users_groups', {
             id: {
                 allowNull: false,
                 primaryKey: true,
@@ -47,6 +47,6 @@ module.exports = {
         })
     },
     async down(queryInterface) {
-        await queryInterface.dropTable('groups_users')
+        await queryInterface.dropTable('users_groups')
     },
 }
