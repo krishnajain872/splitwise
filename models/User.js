@@ -30,7 +30,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
-            icon: {
+            avatar: {
                 type: DataTypes.STRING,
                 allowNull: true,
             },
@@ -51,7 +51,6 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ENUM,
                 values: ['verified', 'invited', 'dummy'],
                 defaultValue: 'dummy',
-                allowNull: false,
             },
         },
         {
