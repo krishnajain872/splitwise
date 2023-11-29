@@ -18,6 +18,9 @@ module.exports = {
             last_name: {
                 type: Sequelize.STRING,
             },
+            icon: {
+                type: Sequelize.STRING,
+            },
             email: {
                 type: Sequelize.STRING,
                 allowNull: false,
