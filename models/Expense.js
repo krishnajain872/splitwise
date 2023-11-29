@@ -7,8 +7,12 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate() {
-            // define association here
+        static associate(models) {
+            Expense.belongsTo(models.Group, {
+                as: 'group_details',
+                foreignKey: 'group_id',
+                targetKey: 'id',
+            })
         }
     }
     Expense.init(
