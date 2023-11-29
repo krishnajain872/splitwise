@@ -22,6 +22,11 @@ module.exports = (sequelize, DataTypes) => {
                 values: ['transport', 'food', 'game', 'other'],
                 defaultValue: 'other',
             },
+            currency: {
+                type: DataTypes.ENUM,
+                values: ['INR', 'USD'],
+                defaultValue: 'INR',
+            },
             description: {
                 type: DataTypes.STRING,
                 allowNull: false,

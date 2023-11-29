@@ -18,6 +18,11 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
+            currency: {
+                type: Sequelize.ENUM,
+                values: ['INR', 'USD'],
+                defaultValue: 'INR',
+            },
             group_id: {
                 allowNull: true,
                 type: Sequelize.UUID,
@@ -36,6 +41,21 @@ module.exports = {
                 type: Sequelize.ENUM,
                 values: ['equal', 'share'],
                 defaultValue: 'equal',
+            },
+            created_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.literal('now()'),
+            },
+            updated_at: {
+                allowNull: false,
+                type: Sequelize.DATE,
+                defaultValue: Sequelize.literal('now()'),
+            },
+            deleted_at: {
+                allowNull: true,
+                type: Sequelize.DATE,
+                defaultValue: null,
             },
         })
     },
