@@ -12,6 +12,7 @@ module.exports = {
             code: {
                 type: Sequelize.STRING,
                 allowNull: false,
+                unique: true,
             },
             exchange_rate: {
                 type: Sequelize.STRING,
