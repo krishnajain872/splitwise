@@ -38,7 +38,6 @@ module.exports = {
                 type: Sequelize.ENUM,
                 values: ['verified', 'invited', 'dummy'],
                 defaultValue: 'dummy',
-                allowNull: false,
             },
             created_at: {
                 allowNull: false,

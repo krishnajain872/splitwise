@@ -40,7 +40,6 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ENUM,
                 values: ['verified', 'invited', 'dummy'],
                 defaultValue: 'dummy',
-                allowNull: false,
             },
         },
         {
