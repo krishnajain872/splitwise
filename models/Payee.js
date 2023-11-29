@@ -19,7 +19,7 @@ module.exports = (sequelize, DataTypes) => {
                 targetKey: 'id',
             })
             Payee.belongsTo(models.Currency, {
-                as: 'currency',
+                as: 'payee_currency',
                 foreignKey: 'currency_id',
                 targetKey: 'id',
             })

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
             })
             Currency.hasMany(models.Payee, {
                 foreignKey: 'currency_id',
-                as: 'currency',
+                as: 'payee_currency',
             })
         }
     }
