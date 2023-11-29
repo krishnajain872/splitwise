@@ -7,8 +7,27 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of DataTypes lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate() {
-            // define association here
+        static associate(models) {
+            Transaction.belongsTo(models.Expense, {
+                as: 'expense_details',
+                foreignKey: 'expense_id',
+                targetKey: 'id',
+            })
+            Transaction.belongsTo(models.User, {
+                as: 'payer_details',
+                foreignKey: 'payer_id',
+                targetKey: 'id',
+            })
+            Transaction.belongsTo(models.User, {
+                as: 'payee_details',
+                foreignKey: 'payee_id',
+                targetKey: 'id',
+            })
+            Transaction.belongsTo(models.Currency, {
+                as: 'currency_details',
+                foreignKey: 'currency_id',
+                targetKey: 'id',
+            })
         }
     }
     Transaction.init(
@@ -40,6 +59,8 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'Transaction',
+            tableName: 'transactions',
+            paranoid: true,
         }
     )
     return Transaction
