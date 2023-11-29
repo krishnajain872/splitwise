@@ -19,7 +19,7 @@ module.exports = {
                 allowNull: false,
             },
             currency_id: {
-                allowNull: true,
+                allowNull: false,
                 type: Sequelize.UUID,
                 references: {
                     model: 'currencies',
