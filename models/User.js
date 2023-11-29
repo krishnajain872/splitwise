@@ -32,7 +32,7 @@ module.exports = (sequelize, DataTypes) => {
             User.belongsToMany(models.Expense, {
                 through: models.Payee,
                 foreignKey: 'user_id',
-                as: 'user',
+                as: 'user_details',
             })
         }
     }
