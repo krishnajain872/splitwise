@@ -18,7 +18,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            currency: {
+            currency_id: {
                 allowNull: true,
                 type: Sequelize.UUID,
                 references: {

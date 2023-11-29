@@ -27,7 +27,7 @@ module.exports = (sequelize, DataTypes) => {
                 values: ['transport', 'food', 'game', 'other'],
                 defaultValue: 'other',
             },
-            currency: {
+            currency_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },

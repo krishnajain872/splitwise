@@ -24,7 +24,6 @@ module.exports = {
             is_valid: {
                 type: Sequelize.BOOLEAN,
                 allowNull: false,
-                default: true,
             },
             created_at: {
                 allowNull: false,
