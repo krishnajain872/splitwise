@@ -2,15 +2,25 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('users_groups', {
+        await queryInterface.createTable('payees', {
             id: {
                 allowNull: false,
                 primaryKey: true,
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.literal('uuid_generate_v4()'),
             },
+            currency_id: {
+                allowNull: true,
+                type: Sequelize.UUID,
+                references: {
+                    model: 'currencies',
+                    key: 'id',
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
+            },
             user_id: {
-                allowNull: false,
+                allowNull: true,
                 type: Sequelize.UUID,
                 references: {
                     model: 'users',
@@ -19,15 +29,19 @@ module.exports = {
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE',
             },
-            group_id: {
-                allowNull: false,
+            expense_id: {
+                allowNull: true,
                 type: Sequelize.UUID,
                 references: {
-                    model: 'groups',
+                    model: 'expenses',
                     key: 'id',
                 },
                 onDelete: 'CASCADE',
                 onUpdate: 'CASCADE',
+            },
+            amount: {
+                type: Sequelize.STRING,
+                allowNull: false,
             },
             created_at: {
                 allowNull: false,
@@ -47,6 +61,6 @@ module.exports = {
         })
     },
     async down(queryInterface) {
-        await queryInterface.dropTable('users_groups')
+        await queryInterface.dropTable('payees')
     },
 }

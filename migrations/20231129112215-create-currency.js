@@ -2,40 +2,27 @@
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
     async up(queryInterface, Sequelize) {
-        await queryInterface.createTable('payees', {
+        await queryInterface.createTable('currencies', {
             id: {
                 allowNull: false,
                 primaryKey: true,
                 type: Sequelize.UUID,
                 defaultValue: Sequelize.literal('uuid_generate_v4()'),
             },
-            currency: {
-                type: Sequelize.ENUM,
-                values: ['INR', 'USD'],
-                defaultValue: 'INR',
-            },
-            user_id: {
-                allowNull: true,
-                type: Sequelize.UUID,
-                references: {
-                    model: 'users',
-                    key: 'id',
-                },
-                onDelete: 'CASCADE',
-                onUpdate: 'CASCADE',
-            },
-            expense_id: {
-                allowNull: true,
-                type: Sequelize.UUID,
-                references: {
-                    model: 'expenses',
-                    key: 'id',
-                },
-                onDelete: 'CASCADE',
-                onUpdate: 'CASCADE',
-            },
-            amount: {
+            code: {
                 type: Sequelize.STRING,
+                allowNull: false,
+            },
+            exchange_rate: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            name: {
+                type: Sequelize.STRING,
+                allowNull: false,
+            },
+            is_valid: {
+                type: Sequelize.BOOLEAN,
                 allowNull: false,
             },
             created_at: {
@@ -56,6 +43,6 @@ module.exports = {
         })
     },
     async down(queryInterface) {
-        await queryInterface.dropTable('payees')
+        await queryInterface.dropTable('currencies')
     },
 }

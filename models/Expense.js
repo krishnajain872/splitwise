@@ -13,15 +13,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'group_id',
                 targetKey: 'id',
             })
-            Expense.belongsToMany(models.User, {
-                through: models.Payee,
-                foreignKey: 'user_id',
-                as: 'user',
-            })
-            Expense.belongsToMany(models.User, {
-                through: models.Payee,
-                foreignKey: 'expense_id',
-                as: 'expense',
+            Expense.belongsTo(models.Currency, {
+                as: 'currency_used',
+                foreignKey: 'currency_id',
+                targetKey: 'id',
             })
         }
     }
@@ -32,10 +27,9 @@ module.exports = (sequelize, DataTypes) => {
                 values: ['transport', 'food', 'game', 'other'],
                 defaultValue: 'other',
             },
-            currency: {
-                type: DataTypes.ENUM,
-                values: ['INR', 'USD'],
-                defaultValue: 'INR',
+            currency_id: {
+                type: DataTypes.UUID,
+                allowNull: false,
             },
             description: {
                 type: DataTypes.STRING,

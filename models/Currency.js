@@ -1,55 +1,49 @@
 'use strict'
 const { Model } = require('sequelize')
 module.exports = (sequelize, DataTypes) => {
-    class Payee extends Model {
+    class Currency extends Model {
         /**
          * Helper method for defining associations.
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
         static associate(models) {
-            Payee.belongsTo(models.User, {
-                as: 'user_details',
-                foreignKey: 'user_id',
-                targetKey: 'id',
-            })
-            Payee.belongsTo(models.Expense, {
-                as: 'expense_details',
-                foreignKey: 'expense_id',
-                targetKey: 'id',
-            })
-            Payee.belongsTo(models.Currency, {
-                as: 'currency_used',
+            Currency.hasMany(models.Expense, {
                 foreignKey: 'currency_id',
-                targetKey: 'id',
+                as: 'currency',
+            })
+            Currency.hasMany(models.Payee, {
+                foreignKey: 'currency_id',
+                as: 'currency',
             })
         }
     }
-    Payee.init(
+    Currency.init(
         {
-            user_id: {
+            code: {
                 type: DataTypes.UUID,
                 allowNull: false,
+                unique: true,
             },
-            expense_id: {
-                type: DataTypes.UUID,
-                allowNull: false,
-            },
-            amount: {
+            name: {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            currency_id: {
-                type: DataTypes.UUID,
+            exchange_rate: {
+                type: DataTypes.STRING,
+                allowNull: false,
+            },
+            is_valid: {
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
             },
         },
         {
             sequelize,
-            modelName: 'Payee',
-            tableName: 'payees',
+            modelName: 'Currency',
+            tableName: 'currencies',
             paranoid: true,
         }
     )
-    return Payee
+    return Currency
 }

@@ -14,7 +14,7 @@ module.exports = (sequelize, DataTypes) => {
                 targetKey: 'id',
             })
             Group.belongsToMany(models.User, {
-                through: models.GroupUserMapping,
+                through: models.UserGroup,
                 foreignKey: 'group_id',
                 as: 'groups',
             })
@@ -42,7 +42,6 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.ENUM,
                 values: ['trip', 'home', 'couple', 'other', 'foodie'],
                 defaultValue: 'other',
-                allowNull: false,
             },
         },
         {
