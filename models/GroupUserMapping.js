@@ -7,8 +7,17 @@ module.exports = (sequelize, DataTypes) => {
          * This method is not a part of Sequelize lifecycle.
          * The `models/index` file will call this method automatically.
          */
-        static associate() {
-            // define association here
+        static associate(models) {
+            GroupUserMapping.belongsTo(models.User, {
+                as: 'user_details',
+                foreignKey: 'user_id',
+                targetKey: 'id',
+            })
+            GroupUserMapping.belongsTo(models.Group, {
+                as: 'group_details',
+                foreignKey: 'group_id',
+                targetKey: 'id',
+            })
         }
     }
     GroupUserMapping.init(
@@ -17,7 +26,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
-            friend_id: {
+            group_id: {
                 type: DataTypes.UUID,
                 allowNull: false,
             },
@@ -25,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             sequelize,
             modelName: 'GroupUserMapping',
-            tableName: 'group_user_mapping',
+            tableName: 'groups_users',
             paranoid: true,
         }
     )

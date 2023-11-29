@@ -1,32 +1,29 @@
 'use strict'
 /** @type {import('sequelize-cli').Migration} */
 module.exports = {
-    async up(queryInterface) {
-        await queryInterface.createTable('groups', {
+    async up(queryInterface, Sequelize) {
+        await queryInterface.createTable('groups_users', {
             id: {
                 allowNull: false,
+                autoIncrement: true,
                 primaryKey: true,
-                type: Sequelize.UUID,
-                defaultValue: Sequelize.literal('uuid_generate_v4()'),
+                type: Sequelize.INTEGER,
             },
-            title: {
-                type: Sequelize.STRING,
-                allowNull: false,
-            },
-            icon: {
-                type: Sequelize.STRING,
-            },
-            category: {
-                type: Sequelize.ENUM,
-                values: ['trip', 'home', 'couple', 'other', 'foodie'],
-                defaultValue: 'other',
-                allowNull: false,
-            },
-            admin_id: {
+            user_id: {
                 allowNull: false,
                 type: Sequelize.UUID,
                 references: {
                     model: 'users',
+                    key: 'id',
+                },
+                onDelete: 'CASCADE',
+                onUpdate: 'CASCADE',
+            },
+            group_id: {
+                allowNull: false,
+                type: Sequelize.UUID,
+                references: {
+                    model: 'groups',
                     key: 'id',
                 },
                 onDelete: 'CASCADE',
@@ -50,6 +47,6 @@ module.exports = {
         })
     },
     async down(queryInterface) {
-        await queryInterface.dropTable('groups')
+        await queryInterface.dropTable('groups_users')
     },
 }
