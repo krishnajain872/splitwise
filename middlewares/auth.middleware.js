@@ -52,7 +52,6 @@ const checkRefreshToken = async (req, res, next) => {
     }
     try {
         const decodedJwt = await jwt.verify(refresh, secret)
-
         const user = await User.findByPk({
             where: {
                 id: decodedJwt.id,
