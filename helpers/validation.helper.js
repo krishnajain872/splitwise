@@ -1,4 +1,4 @@
-const { errorHelper } = require('./commonResponse.helper')
+const generic = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
     let requestData = {}
@@ -20,10 +20,8 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
-    const error = value.error.details[0].message
-    requestData = errorHelper(400, 'Bad request', error, value.error)
-
-    res.send(requestData)
+    const errorMessage = value.error.details[0].message
+    return generic.errorHelper(req, res, errorMessage, 400, value.error)
 }
 
 module.exports = {
