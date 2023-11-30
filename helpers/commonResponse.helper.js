@@ -9,7 +9,6 @@ const errorHelper = async (
     if (message) {
         errorMessage = message
     }
-
     if (error && error.message) {
         errorMessage = error.message
     }

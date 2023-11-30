@@ -1,43 +1,31 @@
 const nodemailer = require('nodemailer')
-const { google } = require('googleapis')
+require('dotenv').config()
 
-const {
-    CLEINT_SECRET: client_secret,
-    CLIENT_ID: client_id,
-    REFRESH_TOKEN: refresh_token,
-    REDIRECT_URI: redirect_url,
-} = process.env
-
-const oAuth2Client = new google.auth.OAuth2(
-    client_id,
-    client_secret,
-    redirect_url
-)
-oAuth2Client.setCredentials({ refresh_token: refresh_token })
+const { SPLITWISE_MAIL: sender, SPLITWISE_MAIL_PASSWORD: password } =
+    process.env
 
 async function sendMail(body, subject, recipient) {
     try {
-        const accessToken = await oAuth2Client.getAccessToken()
-
-        const transport = nodemailer.createTransport({
+        // Create a nodemailer transporter
+        const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                type: 'OAuth2',
-                user: 'krishnajain@gkmit.co',
-                clientId: client_id,
-                clientSecret: client_secret,
-                refreshToken: refresh_token,
-                accessToken: accessToken,
+                user: sender,
+                pass: password,
+            },
+            tls: {
+                rejectUnauthorized: false,
             },
         })
 
         const mailOptions = {
-            from: 'krishnajain@gkmit.co',
+            from: sender,
             to: recipient,
             subject: subject,
+            headers: { 'Content-Type': 'text/html' },
             text: body,
         }
-        const result = await transport.sendMail(mailOptions)
+        const result = await transporter.sendMail(mailOptions)
         return result
     } catch (error) {
         return error
