@@ -16,6 +16,10 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'currency_id',
                 as: 'payee_currency',
             })
+            Currency.hasMany(models.Transaction, {
+                as: 'transaction_currency',
+                foreignKey: 'currency_id',
+            })
         }
     }
     Currency.init(
