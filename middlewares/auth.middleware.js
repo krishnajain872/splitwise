@@ -10,7 +10,9 @@ const checkAccessToken = async (req, res, next) => {
     const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
 
     if (!accessToken) {
-        throw new Error('UnAuthorized Access')
+        const error = new Error('UnAuthorized Access')
+        error.statusCode = 401
+        throw error
     }
     try {
         const decodedJwt = await jwt.verify(accessToken, secret)
@@ -43,8 +45,10 @@ const checkRefreshToken = async (req, res, next) => {
 
     const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
 
-    if (!accessToken) {
-        throw new Error('UnAuthorized Access')
+    if (!refresh) {
+        const error = new Error('UnAuthorized Access')
+        error.statusCode = 401
+        throw error
     }
     try {
         const decodedJwt = await jwt.verify(refresh, secret)
