@@ -53,7 +53,7 @@ module.exports = {
                 type: Sequelize.STRING,
                 allowNull: false,
             },
-            settel_up_at: {
+            settle_up_at: {
                 type: Sequelize.DATE,
             },
             created_at: {
