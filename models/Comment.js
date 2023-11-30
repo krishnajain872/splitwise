@@ -24,7 +24,7 @@ module.exports = (sequelize, DataTypes) => {
         {
             type: {
                 type: DataTypes.ENUM,
-                values: ['USER', 'SYSYTEM'],
+                values: ['USER', 'SYSTEM'],
                 defaultValue: 'USER',
             },
             expense_id: {
@@ -36,7 +36,7 @@ module.exports = (sequelize, DataTypes) => {
                 allowNull: false,
             },
             user_id: {
-                allowNull: false,
+                allowNull: true,
                 type: DataTypes.UUID,
             },
         },
