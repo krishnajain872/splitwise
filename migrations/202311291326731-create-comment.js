@@ -29,7 +29,7 @@ module.exports = {
                 allowNull: false,
             },
             user_id: {
-                allowNull: false,
+                allowNull: true,
                 type: Sequelize.UUID,
                 references: {
                     model: 'users',
