@@ -52,7 +52,7 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
-            settel_up_at: {
+            settle_up_at: {
                 type: DataTypes.DATE,
             },
         },
