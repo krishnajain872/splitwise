@@ -1,17 +1,19 @@
 const nodemailer = require('nodemailer')
 const { google } = require('googleapis')
 
-const CLIENT_ID = process.env.CLIENT_ID
-const CLEINT_SECRET = process.env.CLEINT_SECRET
-const REDIRECT_URI = process.env.REDIRECT_URI
-const REFRESH_TOKEN = process.env.REFRESH_TOKEN
+const {
+    CLEINT_SECRET: client_secret,
+    CLIENT_ID: client_id,
+    REFRESH_TOKEN: refresh_token,
+    REDIRECT_URI: redirect_url,
+} = process.env
 
 const oAuth2Client = new google.auth.OAuth2(
-    CLIENT_ID,
-    CLEINT_SECRET,
-    REDIRECT_URI
+    client_id,
+    client_secret,
+    redirect_url
 )
-oAuth2Client.setCredentials({ refresh_token: REFRESH_TOKEN })
+oAuth2Client.setCredentials({ refresh_token: refresh_token })
 
 async function sendMail(body, subject, recipient) {
     try {
@@ -22,9 +24,9 @@ async function sendMail(body, subject, recipient) {
             auth: {
                 type: 'OAuth2',
                 user: 'krishnajain@gkmit.co',
-                clientId: CLIENT_ID,
-                clientSecret: CLEINT_SECRET,
-                refreshToken: REFRESH_TOKEN,
+                clientId: client_id,
+                clientSecret: client_secret,
+                refreshToken: refresh_token,
                 accessToken: accessToken,
             },
         })
