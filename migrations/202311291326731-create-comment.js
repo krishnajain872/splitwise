@@ -11,7 +11,7 @@ module.exports = {
             },
             type: {
                 type: Sequelize.ENUM,
-                values: ['USER', 'SYSYTEM'],
+                values: ['USER', 'SYSTEM'],
                 defaultValue: 'USER',
             },
             expense_id: {
