@@ -1,6 +1,5 @@
 //refresh token
 const crypto = require('crypto')
-
 const { VERIFY_TOKEN_SECRET: secretKey, VERIFY_TOKEN_EXPIRY: TOKEN_VALIDITY } =
     process.env // Can be 10 characters
 const IV_LENGTH = 16 // For AES, this is always 16
@@ -63,6 +62,7 @@ function validateToken(token) {
         return false
     }
 }
+
 module.exports = {
     validateToken,
     generateToken,

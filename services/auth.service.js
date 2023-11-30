@@ -2,6 +2,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
+const verification = require('./../helpers/verifyRegistration.helper')
+const mailer = require('./../helpers/mail.helper')
 
 const {
     JWT_REFRESH_TOKEN_EXPIRATION: refresh_expire,
@@ -9,6 +11,23 @@ const {
     JWT_AUTH_TOKEN_SECRET: auth_secret,
     JWT_AUTH_TOKEN_EXPIRATION: auth_expire,
 } = process.env
+
+function createURL(base_url, token) {
+    return `${base_url}/user-account-verification/${token}`
+}
+const sendVerificationLink = async (payload) => {
+    const { BASE_URL: base_url } = process.env
+    const token = await verification.generateToken(payload)
+    const url = createURL(base_url, token)
+    const body = `use this link for your account verification -: ${base_url}/${url} `
+    const subject = ` Splitwise -: User Verfication`
+    mailer.sendMail(body, subject, payload.email)
+    const existingUser = await models.User.findByPk({
+        where: { id: payload },
+    })
+    payload.status = 'invited'
+    await existingUser.save()
+}
 
 const userRegistration = async (payload) => {
     const { PASSWORD_HASH_SALTS: salt } = process.env
@@ -24,6 +43,7 @@ const userRegistration = async (payload) => {
     }
     payload.status = 'dummy'
     const user = await User.create(payload)
+    sendVerificationLink(user.id)
     return user
 }
 
@@ -83,14 +103,33 @@ const generateAccessToken = async (paylaod) => {
     }
 }
 
-// const userVerification = async (payload)=>{
-//     const token = ""
-
-// }
+const userVerification = async (payload) => {
+    const response = verification.validateToken(payload)
+    if (!response.data || !response.valid) {
+        const error = new Error('UnAuthorized Access')
+        error.statusCode = 401
+        throw error
+    }
+    const userData = await User.findByPk({
+        where: {
+            id: response.data,
+        },
+    })
+    if (!userData) {
+        const error = new Error('User not found')
+        error.statusCode = 404
+        throw error
+    }
+    userData.status = 'verified'
+    await userData.save()
+    return {
+        userData,
+    }
+}
 
 module.exports = {
     userRegistration,
     userLogin,
     generateAccessToken,
-    // userVerification,
+    userVerification,
 }
