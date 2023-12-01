@@ -1,5 +1,6 @@
 const { User } = require('../models')
 const { Group } = require('../models')
+
 const createGroup = async (payload) => {
     const existingUser = await User.findByPk(payload.admin_id)
     if (!existingUser) {
@@ -18,10 +19,6 @@ const deleteGroup = async (payload) => {
         error.statusCode = 404
         throw error
     }
-
-    // it also check if all the user debts are settle up or not if not that cannot delete group
-    // check code remaining
-
     await Group.destroy({
         where: { id: payload.group_id },
     })
