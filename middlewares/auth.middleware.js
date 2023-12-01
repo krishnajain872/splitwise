@@ -16,7 +16,11 @@ const checkAccessToken = async (req, res, next) => {
     }
     try {
         const decodedJwt = await jwt.verify(accessToken, secret)
-
+        if (!decodedJwt) {
+            const error = new Error('UnAuthorized Access')
+            error.statusCode = 401
+            throw error
+        }
         const user = await User.findByPk({
             where: {
                 id: decodedJwt.id,
@@ -52,7 +56,11 @@ const checkRefreshToken = async (req, res, next) => {
     }
     try {
         const decodedJwt = await jwt.verify(refresh, secret)
-
+        if (!decodedJwt) {
+            const error = new Error('UnAuthorized Access')
+            error.statusCode = 401
+            throw error
+        }
         const user = await User.findByPk({
             where: {
                 id: decodedJwt.id,
