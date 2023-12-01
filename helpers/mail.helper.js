@@ -1,14 +1,19 @@
 const nodemailer = require('nodemailer')
 require('dotenv').config()
 
-const { SPLITWISE_MAIL: sender, SPLITWISE_MAIL_PASSWORD: password } =
-    process.env
+const {
+    E_MAIL: sender,
+    E_MAIL_PASSWORD: password,
+    E_MAIL_HOST: host,
+    E_MAIL_PORT: port,
+} = process.env
 
 async function sendMail(body, subject, recipient) {
     try {
         // Create a nodemailer transporter
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
+        var transport = nodemailer.createTransport({
+            host: host,
+            port: port,
             auth: {
                 user: sender,
                 pass: password,
@@ -17,7 +22,12 @@ async function sendMail(body, subject, recipient) {
                 rejectUnauthorized: false,
             },
         })
-
+        // verify connection configuration
+        transport.verify(function (error) {
+            if (error) {
+                return new Error(`MAIL TRANSPORTER ERROR => ${error}`)
+            }
+        })
         const mailOptions = {
             from: sender,
             to: recipient,
@@ -25,10 +35,10 @@ async function sendMail(body, subject, recipient) {
             headers: { 'Content-Type': 'text/html' },
             text: body,
         }
-        const result = await transporter.sendMail(mailOptions)
-        return result
+        const result = await transport.sendMail(mailOptions)
+        return result.messageId
     } catch (error) {
-        return error
+        return new Error(`MAIL TRANSPORTER ERROR => ${error}`)
     }
 }
 
