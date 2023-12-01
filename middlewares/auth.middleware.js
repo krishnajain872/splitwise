@@ -31,6 +31,8 @@ const checkAccessToken = async (req, res, next) => {
             const error = new Error('User not found')
             error.statusCode = 404
             throw error
+        } else {
+            next()
         }
     } catch (error) {
         return generic.errorHelper(
@@ -41,8 +43,6 @@ const checkAccessToken = async (req, res, next) => {
             error
         )
     }
-
-    next()
 }
 const checkRefreshToken = async (req, res, next) => {
     try {
@@ -71,6 +71,8 @@ const checkRefreshToken = async (req, res, next) => {
             const error = new Error('User not found')
             error.statusCode = 404
             throw error
+        } else {
+            next()
         }
     } catch (error) {
         return generic.errorHelper(
@@ -81,8 +83,6 @@ const checkRefreshToken = async (req, res, next) => {
             error
         )
     }
-
-    next()
 }
 
 module.exports = {
