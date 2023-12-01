@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const db = require('../models')
-const User = db.User
+const { User } = require('../models')
 const verification = require('../helpers/verifyRegistration.helper')
 const mailer = require('../helpers/mail.helper')
 
