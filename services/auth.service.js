@@ -106,7 +106,6 @@ const generateAccessToken = async (payload) => {
 };
 
 const userVerification = async (payload) => {
-  console.log("THIS IS RESPONSE IN payload ==>  ", payload);
   const response = verification.validateToken(payload);
   if (!response) {
     const error = new Error("UnAuthorized Access");
@@ -121,9 +120,7 @@ const userVerification = async (payload) => {
   }
   userData.status = "verified";
   await userData.save();
-  return {
-    userData,
-  };
+  return userData.dataValues;
 };
 
 module.exports = {

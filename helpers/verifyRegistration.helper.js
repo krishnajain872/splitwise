@@ -34,9 +34,6 @@ function decrypt(text) {
   let decrypted = decipher.update(encryptedText);
   decrypted = Buffer.concat([decrypted, decipher.final()]);
   let decryptedStr = decrypted.toString();
-
-  console.log("decrypted from decrypted function ====>>> ", decryptedStr);
-
   return decryptedStr;
 }
 
@@ -59,11 +56,6 @@ function validateToken(token) {
   ); // Convert to minutes
 
   if (timeDifference <= TOKEN_VALIDITY) {
-    console.log("Token is valid");
-    console.log("Info:", info);
-    console.log("Current time (in minutes):", Math.floor(Date.now() / 60000));
-    // console.log('Stored time (in minutes):', storedTime)
-    console.log("Time difference (in minutes):", timeDifference);
     return { data: info, valid: true };
   } else {
     return false;
