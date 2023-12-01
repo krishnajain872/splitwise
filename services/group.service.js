@@ -64,7 +64,7 @@ const updateGroupAdmin = async (payload) => {
             },
         }
     )
-    existingGroup.admin_id = user_id
+    existingGroup.admin_id = payload.user_id
     return existingGroup
 }
 
