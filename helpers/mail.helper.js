@@ -2,10 +2,10 @@ const nodemailer = require('nodemailer')
 require('dotenv').config()
 
 const {
-    E_MAIL: sender,
-    E_MAIL_PASSWORD: password,
-    E_MAIL_HOST: host,
-    E_MAIL_PORT: port,
+    EMAIL_PORT: port,
+    EMAIL_PASSWORD: password,
+    EMAIL_HOST: host,
+    EMAIL_ID: sender,
 } = process.env
 
 async function sendMail(body, subject, recipient) {

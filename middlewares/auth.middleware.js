@@ -5,16 +5,16 @@ require('dotenv').config()
 const generic = require('./../helpers/commonResponse.helper')
 
 const checkAccessToken = async (req, res, next) => {
-    const accessToken = req.headers['authorization']?.split(' ')[1]
-
-    const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
-
-    if (!accessToken) {
-        const error = new Error('UnAuthorized Access')
-        error.statusCode = 401
-        throw error
-    }
     try {
+        const accessToken = req.headers['authorization']?.split(' ')[1]
+
+        const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
+
+        if (!accessToken) {
+            const error = new Error('UnAuthorized Access')
+            error.statusCode = 401
+            throw error
+        }
         const decodedJwt = await jwt.verify(accessToken, secret)
         if (!decodedJwt) {
             const error = new Error('UnAuthorized Access')
@@ -45,16 +45,16 @@ const checkAccessToken = async (req, res, next) => {
     next()
 }
 const checkRefreshToken = async (req, res, next) => {
-    const refresh = req.body.refresh_token
-
-    const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
-
-    if (!refresh) {
-        const error = new Error('UnAuthorized Access')
-        error.statusCode = 401
-        throw error
-    }
     try {
+        const refresh = req.body.refresh_token
+
+        const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
+
+        if (!refresh) {
+            const error = new Error('UnAuthorized Access')
+            error.statusCode = 401
+            throw error
+        }
         const decodedJwt = await jwt.verify(refresh, secret)
         if (!decodedJwt) {
             const error = new Error('UnAuthorized Access')
