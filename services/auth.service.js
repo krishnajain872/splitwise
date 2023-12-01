@@ -26,7 +26,7 @@ const sendVerificationLink = async (payload) => {
   existingUser.status = "invited";
   await existingUser.save();
   existingUser.dataValues.token = token;
-  return existingUser;
+  return existingUser.dataValues;
 };
 
 const userRegistration = async (payload) => {
@@ -42,11 +42,7 @@ const userRegistration = async (payload) => {
   }
   payload.status = "dummy";
   const user = await User.create(payload);
-  const data = await sendVerificationLink({
-    user_id: user.id,
-    email: user.dataValues.email,
-  });
-  return data.dataValues;
+  return user.dataValues;
 };
 
 const userLogin = async (payload) => {
@@ -128,4 +124,5 @@ module.exports = {
   userLogin,
   generateAccessToken,
   userVerification,
+  sendVerificationLink,
 };
