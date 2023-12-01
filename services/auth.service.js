@@ -2,8 +2,8 @@ const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
 const db = require('../models')
 const User = db.User
-const verification = require('./../helpers/verifyRegistration.helper')
-const mailer = require('./../helpers/mail.helper')
+const verification = require('../helpers/verifyRegistration.helper')
+const mailer = require('../helpers/mail.helper')
 
 const {
     JWT_REFRESH_TOKEN_EXPIRATION: refresh_expire,
@@ -38,13 +38,11 @@ const sendVerificationLink = async (payload) => {
         throw error
     }
 
-    const existingUser = await User.findByPk(payload.user_id)
-    existingUser.status = 'invited'
+    await User.update({ status: 'invited' }, { where: { id: payload.user_id } })
 
-    await existingUser.save()
-
-    existingUser.dataValues.token = token
-    return existingUser.dataValues
+    userData.dataValues.token = token
+    userData.dataValues.status = 'invited'
+    return userData.dataValues
 }
 
 const userRegistration = async (payload) => {
