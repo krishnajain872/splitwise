@@ -3,7 +3,6 @@ const jwt = require('jsonwebtoken')
 const { User } = require('../models')
 const verification = require('../helpers/verifyRegistration.helper')
 const mailer = require('../helpers/mail.helper')
-
 const {
     JWT_REFRESH_TOKEN_EXPIRATION: refresh_expire,
     JWT_REFRESH_TOKEN_SECRET: refresh_secret,
