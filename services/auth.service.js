@@ -17,21 +17,41 @@ function createURL(base_url, token) {
 }
 const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
+
+    const userData = await User.findByPk(payload.user_id)
+    if (!userData) {
+        const error = new Error('User not found')
+        error.statusCode = 404
+        throw error
+    }
+
     const token = await verification.generateToken(payload.user_id)
+
     const url = createURL(base_url, token)
-    const body = `use this link for your account verification -:${url} `
+    const body = `use this link for your account verification -: ${url} `
     const subject = ` Splitwise -: User Verfication`
-    await mailer.sendMail(body, subject, payload.email)
+
+    const mail = await mailer.sendMail(body, subject, payload.email)
+    if (!mail) {
+        const error = new Error('mail not sent')
+        error.statusCode = 422
+        throw error
+    }
+
     const existingUser = await User.findByPk(payload.user_id)
     existingUser.status = 'invited'
+
     await existingUser.save()
+
     existingUser.dataValues.token = token
     return existingUser.dataValues
 }
 
 const userRegistration = async (payload) => {
     const { PASSWORD_HASH_SALTS: salt } = process.env
+
     payload.password = await bcrypt.hash(payload.password, Number(salt))
+
     const existingUser = await User.findOne({
         where: { mobile: payload.mobile },
     })
@@ -76,16 +96,19 @@ const userLogin = async (payload) => {
     })
 
     return {
-        id: user.id,
-        mobile: user.dataValues.mobile,
-        email: user.dataValues.email,
+        ...user,
         accessToken,
         refresh_token,
     }
 }
 
 const generateAccessToken = async (payload) => {
-    const decodedJwt = await jwt.verify(payload, refresh_secret)
+    const decodedJwt = await jwt.verify(payload.refresh_token, refresh_secret)
+    if (!decodedJwt) {
+        const error = new Error('UnAuthorized Access')
+        error.statusCode = 401
+        throw error
+    }
     const user = await User.findByPk(decodedJwt.user_id)
     if (!user) {
         const error = new Error('User not found')
@@ -102,7 +125,7 @@ const generateAccessToken = async (payload) => {
 }
 
 const userVerification = async (payload) => {
-    const response = verification.validateToken(payload)
+    const response = verification.validateToken(payload.token)
     if (!response) {
         const error = new Error('UnAuthorized Access')
         error.statusCode = 401

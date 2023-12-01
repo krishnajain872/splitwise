@@ -32,8 +32,7 @@ function decrypt(text) {
     )
     let decrypted = decipher.update(encryptedText)
     decrypted = Buffer.concat([decrypted, decipher.final()])
-    let decryptedStr = decrypted.toString()
-    return decryptedStr
+    return decrypted.toString()
 }
 
 function generateToken(info) {
