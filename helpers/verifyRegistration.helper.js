@@ -1,4 +1,3 @@
-//refresh token
 const crypto = require('crypto')
 // Can be 10 characters
 const { VERIFY_TOKEN_SECRET: secretKey, VERIFY_TOKEN_EXPIRY: validity } =
@@ -59,6 +58,7 @@ function validateToken(token) {
         return false
     }
 }
+
 module.exports = {
     validateToken,
     generateToken,
