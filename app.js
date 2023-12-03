@@ -19,7 +19,7 @@ app.get('/health', (req, res) => {
 
 //root
 app.get('/', (req, res) => {
-    res.data = 'Splitwise backend live'
+    res.status(200).send('Splitwise backend live')
 })
 
 module.exports = app
