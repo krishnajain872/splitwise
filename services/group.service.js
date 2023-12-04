@@ -79,10 +79,38 @@ const findGroupById = async (payload) => {
 
     return existingGroup.dataValues
 }
+const findGroupByName = async (payload) => {
+    const existingGroup = await Group.findOne(payload.name)
+    if (!existingGroup) {
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
+    }
 
-// findGroupByName
-// findGroupByCategory
-// findGroupByAdminId
+    return existingGroup.dataValues
+}
+const findGroupByCategory = async (payload) => {
+    const existingGroup = await Group.findOne(payload.name)
+    if (!existingGroup) {
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    return existingGroup.dataValues
+}
+const findAllGroupForCurrentUser = async (payload) => {
+    const existingGroup = await Group.findAll({
+        where: { admin_id: payload.user_id },
+    })
+    if (!existingGroup) {
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    return existingGroup.dataValues
+}
 
 module.exports = {
     createGroup,
@@ -90,4 +118,7 @@ module.exports = {
     updateGroup,
     updateGroupAdmin,
     findGroupById,
+    findGroupByName,
+    findGroupByCategory,
+    findAllGroupForCurrentUser,
 }
