@@ -1,7 +1,9 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-const { User } = require('../models')
+// const { User } = require('../models')
 const verification = require('../helpers/verifyRegistration.helper')
+const db = require('./../models')
+const User = db.User
 const mailer = require('../helpers/mail.helper')
 const {
     JWT_REFRESH_TOKEN_EXPIRATION: refresh_expire,
@@ -11,7 +13,7 @@ const {
 } = process.env
 
 function createURL(base_url, token) {
-    return `${base_url}/user-account-verification/${token}`
+    return `${base_url}/verify/${token}`
 }
 const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
@@ -44,8 +46,9 @@ const sendVerificationLink = async (payload) => {
 }
 
 const userRegistration = async (payload) => {
+    console.log('REGISTER SERVICE PAYLOAD ===>> ', payload)
+    console.log('REGISTER SERVICE ENVIROMENT ===>> ', process.env.NODE_ENV)
     const { PASSWORD_HASH_SALTS: salt } = process.env
-
     payload.password = await bcrypt.hash(payload.password, Number(salt))
 
     const existingUser = await User.findOne({
@@ -58,6 +61,7 @@ const userRegistration = async (payload) => {
     }
     payload.status = 'dummy'
     const user = await User.create(payload)
+    console.log('REGISTERED USER ===>> ', user)
     return user.dataValues
 }
 
@@ -92,7 +96,7 @@ const userLogin = async (payload) => {
     })
 
     return {
-        ...user,
+        data: user.dataValues,
         accessToken,
         refresh_token,
     }
@@ -116,10 +120,9 @@ const generateAccessToken = async (payload) => {
     })
     return {
         accessToken: newAccessToken,
-        refresh_token: payload,
+        refresh_token: payload.refresh_token,
     }
 }
-
 const userVerification = async (payload) => {
     const response = verification.validateToken(payload.token)
     if (!response) {

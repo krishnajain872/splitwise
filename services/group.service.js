@@ -1,5 +1,6 @@
 const { User } = require('../models')
 const { Group } = require('../models')
+const { UserGroup } = require('../models')
 
 const createGroup = async (payload) => {
     const existingUser = await User.findByPk(payload.admin_id)
@@ -111,6 +112,18 @@ const findAllGroupForCurrentUser = async (payload) => {
 
     return existingGroup.dataValues
 }
+const addMemberInGroup = async (payload) => {
+    const existingGroup = await UserGroup.findOne({
+        where: { admin_id: payload.admin_id },
+    })
+    if (!existingGroup) {
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    return existingGroup.dataValues
+}
 
 module.exports = {
     createGroup,
@@ -121,4 +134,5 @@ module.exports = {
     findGroupByName,
     findGroupByCategory,
     findAllGroupForCurrentUser,
+    addMemberInGroup,
 }

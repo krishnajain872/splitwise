@@ -7,7 +7,6 @@ const generic = require('./../helpers/commonResponse.helper')
 const checkAccessToken = async (req, res, next) => {
     try {
         const accessToken = req.headers['authorization']?.split(' ')[1]
-
         const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
 
         if (!accessToken) {
@@ -21,11 +20,8 @@ const checkAccessToken = async (req, res, next) => {
             error.statusCode = 401
             throw error
         }
-        const user = await User.findByPk({
-            where: {
-                id: decodedJwt.id,
-            },
-        })
+
+        const user = await User.findByPk(decodedJwt.user_id)
 
         if (!user) {
             const error = new Error('User not found')
@@ -47,7 +43,7 @@ const checkAccessToken = async (req, res, next) => {
 const checkRefreshToken = async (req, res, next) => {
     try {
         const refresh = req.body.refresh_token
-
+        console.log('refreshToken middlware PAYLAOD  ==>> ', refresh)
         const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
 
         if (!refresh) {
@@ -61,11 +57,7 @@ const checkRefreshToken = async (req, res, next) => {
             error.statusCode = 401
             throw error
         }
-        const user = await User.findByPk({
-            where: {
-                id: decodedJwt.id,
-            },
-        })
+        const user = await User.findByPk(decodedJwt.user_id)
 
         if (!user) {
             const error = new Error('User not found')

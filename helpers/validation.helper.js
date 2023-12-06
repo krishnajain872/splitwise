@@ -1,6 +1,7 @@
 const generic = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
+    console.log('Vaidator PAYLAOD  ==>>', req.body)
     let requestData = {}
     if (parameterType === 'body') {
         requestData = req.body
@@ -21,7 +22,7 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         return next()
     }
     const errorMessage = value.error.details[0].message
-    return generic.errorHelper(req, res, errorMessage, 400, value.error)
+    generic.errorHelper(req, res, errorMessage, 400, value.error)
 }
 
 module.exports = {

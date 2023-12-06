@@ -22,15 +22,14 @@ const errorHelper = async (
     res.status(statusCode).json(response)
 }
 
-const responseHelper = (req, res, code, success, message, payload) => {
+const responseHelper = async (req, res) => {
     const response = {
-        code: code,
-        success: success,
-        data: { message: message || 'success', payload: payload },
+        statusCode: res.statusCode,
+        data: res.data || {},
+        message: 'Success',
     }
-    return res.status(code).json(response)
+    return res.status(res.statusCode).json(response)
 }
-
 module.exports = {
     errorHelper,
     responseHelper,
