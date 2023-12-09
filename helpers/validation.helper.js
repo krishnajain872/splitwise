@@ -1,7 +1,10 @@
 const generic = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
-    console.log('Vaidator PAYLAOD  ==>>', req.body)
+    parameterType === 'params'
+        ? console.log('Vaidator PAYLAOD  ==>>', req.params)
+        : console.log('Vaidator PAYLAOD  ==>>', req.body)
+
     let requestData = {}
     if (parameterType === 'body') {
         requestData = req.body

@@ -31,6 +31,9 @@ const checkAccessToken = async (req, res, next) => {
             next()
         }
     } catch (error) {
+        if (error.message.toLowerCase().trim() === 'jwt expired') {
+            error.statusCode = 401
+        }
         return generic.errorHelper(
             req,
             res,
@@ -67,6 +70,9 @@ const checkRefreshToken = async (req, res, next) => {
             next()
         }
     } catch (error) {
+        if (error.message.toLowerCase().trim() === 'jwt expired') {
+            error.statusCode = 401
+        }
         return generic.errorHelper(
             req,
             res,

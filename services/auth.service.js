@@ -25,6 +25,12 @@ const sendVerificationLink = async (payload) => {
         throw error
     }
 
+    if (userData.status === 'verified') {
+        const error = new Error('User already verified')
+        error.statusCode = 409
+        throw error
+    }
+
     const token = await verification.generateToken(payload.user_id)
 
     const url = createURL(base_url, token)

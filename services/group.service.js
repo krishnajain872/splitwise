@@ -1,8 +1,7 @@
 const { User } = require('../models')
 const { Group } = require('../models')
-const { UserGroup } = require('../models')
-
 const createGroup = async (payload) => {
+    console.log('GROUP PAYLOAD ====>>> ', payload)
     const existingUser = await User.findByPk(payload.admin_id)
     if (!existingUser) {
         const error = new Error('user not found')
@@ -14,16 +13,19 @@ const createGroup = async (payload) => {
 }
 
 const deleteGroup = async (payload) => {
-    const existingGroup = await Group.findByPk(payload.group_id)
-    if (!existingGroup) {
+    console.log('DELETE SERVICE ===>>. ', payload.id)
+    const existingGroup = await Group.findByPk(payload.id)
+    if (!existingGroup || existingGroup.deleted_at != null) {
         const error = new Error('group not found')
         error.statusCode = 404
         throw error
     }
-    await Group.destroy({
-        where: { id: payload.group_id },
+    const deleted = await Group.destroy({
+        where: { id: payload.id },
     })
-    return existingGroup
+
+    console.log(deleted)
+    return deleted
 }
 
 const updateGroup = async (payload) => {
@@ -81,7 +83,9 @@ const findGroupById = async (payload) => {
     return existingGroup.dataValues
 }
 const findGroupByName = async (payload) => {
-    const existingGroup = await Group.findOne(payload.name)
+    const existingGroup = await Group.findOne({
+        where: { name: payload.name },
+    })
     if (!existingGroup) {
         const error = new Error('group not found')
         error.statusCode = 404
@@ -112,18 +116,6 @@ const findAllGroupForCurrentUser = async (payload) => {
 
     return existingGroup.dataValues
 }
-const addMemberInGroup = async (payload) => {
-    const existingGroup = await UserGroup.findOne({
-        where: { admin_id: payload.admin_id },
-    })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
-
-    return existingGroup.dataValues
-}
 
 module.exports = {
     createGroup,
@@ -134,5 +126,4 @@ module.exports = {
     findGroupByName,
     findGroupByCategory,
     findAllGroupForCurrentUser,
-    addMemberInGroup,
 }
