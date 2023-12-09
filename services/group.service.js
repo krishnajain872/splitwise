@@ -29,7 +29,9 @@ const deleteGroup = async (payload) => {
 }
 
 const updateGroup = async (payload) => {
-    const existingGroup = await Group.findByPk(payload.group_id)
+    const { id: group_id, ...rest } = payload
+    console.log('PAYLOAD ===> ', payload)
+    const existingGroup = await Group.findByPk(group_id)
     if (!existingGroup) {
         const error = new Error('group not found')
         error.statusCode = 404

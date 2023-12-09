@@ -1,5 +1,8 @@
 const { User } = require('../models')
 const { Group } = require('../models')
+const { Expense } = require('../models')
+const { Transaction } = require('../models')
+
 const { errorHelper } = require('../helpers/commonResponse.helper')
 const checkPermission = async (req, res, next) => {
     try {
@@ -57,8 +60,9 @@ const checkPermissionByRegistrationStatus = async (req, res, next) => {
 
 const checkPermissionByTransactionDebt = async (req, res, next) => {
     try {
-        const group_id = req.body.group_id
-        const existingGroup = await User.findByPk(group_id)
+        const { id: group_id } = req.params.value
+        const existingGroup = await Group.findByPk(group_id)
+        console.log('CHECK PERMISSION TRANSACTION  ===>>>  ', group_id)
         if (!existingGroup) {
             const error = new Error('group not found')
             error.statusCode = 404
@@ -88,6 +92,10 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
                 })
             })
         })
+        console.log(
+            'THIS IS CHECK TOTAL PENDING AMOUND ===>>  ',
+            totalPendingAmount
+        )
         if (totalPendingAmount > 0) {
             const error = new Error('pending debts in group')
             error.statusCode = 409
@@ -96,7 +104,8 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
             next()
         }
     } catch (error) {
-        errorHelper(req, res, error.message, res.statusCode, error)
+        console.log('CHECK PERMISSION ERROR', error)
+        errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
 

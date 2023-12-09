@@ -16,11 +16,20 @@ router.post(
     groupController.createGroup,
     genericResponse.responseHelper
 )
+router.patch(
+    '/',
+    checkAccessToken,
+    groupValidator.updateGroupSchema,
+    groupPermission.checkPermissionByRegistrationStatus,
+    groupController.createGroup,
+    genericResponse.responseHelper
+)
 router.delete(
     '/:id/:user_id',
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermission,
+    groupPermission.checkPermissionByTransactionDebt,
     groupController.deleteGroup,
     genericResponse.responseHelper
 )
