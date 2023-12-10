@@ -1,12 +1,16 @@
 const { User } = require('../models')
 const { Group } = require('../models')
+const { UserGroup } = require('../models')
 const { Expense } = require('../models')
 const { Transaction } = require('../models')
 
 const { errorHelper } = require('../helpers/commonResponse.helper')
+
+// all the permission for admin are going to be check by this
 const checkPermission = async (req, res, next) => {
     try {
-        const { id: group_id, user_id: admin_id } = req.params.value
+        const { id: group_id } = req.params.value
+        const { id: admin_id } = req.user
         console.log({ group_id, admin_id })
         const existingGroup = await Group.findByPk(group_id)
         if (!existingGroup) {
@@ -33,19 +37,62 @@ const checkPermission = async (req, res, next) => {
     }
 }
 
+// all the permissions check by this for only verified user
 const checkPermissionByRegistrationStatus = async (req, res, next) => {
     try {
-        const user_id = req.body.value.user_id
+        const { id: user_id } = req.user
         console.log({ user_id })
-        const existingUser = await User.findByPk(user_id)
+        const existingUser = await User.findOne({
+            where: {
+                id: user_id,
+            },
+        })
         if (!existingUser) {
-            const error = new Error('User not found')
+            const error = new Error('user not found')
             error.statusCode = 404
             throw error
         }
         if (
             existingUser.status === 'dummy' ||
             existingUser.status === 'invited'
+        ) {
+            const error = new Error('user is not verified')
+            error.statusCode = 403
+            throw error
+        } else {
+            next()
+        }
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+
+// all the permissions check by this for all the valid  group members
+const checkPermissionByValidGroupMember = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const { id: group_id } = req.body.value
+        console.log({ user_id, group_id })
+        const existingUser = await UserGroup.findOne({
+            include: [
+                {
+                    model: User,
+                    as: 'user_details',
+                },
+            ],
+            where: {
+                user_id,
+                group_id,
+            },
+        })
+        if (!existingUser) {
+            const error = new Error('user not found')
+            error.statusCode = 404
+            throw error
+        }
+        if (
+            existingUser.user_details.status === 'dummy' ||
+            existingUser.user_details.status === 'invited'
         ) {
             const error = new Error('user is not verified')
             error.statusCode = 403
@@ -113,4 +160,5 @@ module.exports = {
     checkPermission,
     checkPermissionByRegistrationStatus,
     checkPermissionByTransactionDebt,
+    checkPermissionByValidGroupMember,
 }

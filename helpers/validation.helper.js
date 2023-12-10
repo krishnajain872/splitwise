@@ -3,7 +3,7 @@ const generic = require('./commonResponse.helper')
 const validateRequest = (req, res, next, schema, parameterType) => {
     parameterType === 'params'
         ? console.log('Vaidator PAYLAOD  ==>>', req.params)
-        : console.log('Vaidator PAYLAOD  ==>>', req.body)
+        : console.log('Vaidator PAYLAOD  body ==>>', req.body)
 
     let requestData = {}
     if (parameterType === 'body') {

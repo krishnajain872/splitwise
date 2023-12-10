@@ -33,11 +33,6 @@ const loginSchema = (req, res, next) => {
 }
 const sendVerificationSchema = (req, res, next) => {
     const schema = Joi.object({
-        user_id: Joi.string()
-            .guid({
-                version: ['uuidv4'],
-            })
-            .required(),
         email: Joi.string()
             .email()
             .lowercase()

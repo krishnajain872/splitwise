@@ -52,8 +52,6 @@ const sendVerificationLink = async (payload) => {
 }
 
 const userRegistration = async (payload) => {
-    console.log('REGISTER SERVICE PAYLOAD ===>> ', payload)
-    console.log('REGISTER SERVICE ENVIROMENT ===>> ', process.env.NODE_ENV)
     const { PASSWORD_HASH_SALTS: salt } = process.env
     payload.password = await bcrypt.hash(payload.password, Number(salt))
 
@@ -67,8 +65,13 @@ const userRegistration = async (payload) => {
     }
     payload.status = 'dummy'
     const user = await User.create(payload)
-    console.log('REGISTERED USER ===>> ', user)
-    return user.dataValues
+    const accessToken = jwt.sign({ user_id: user.dataValues.id }, auth_secret, {
+        expiresIn: auth_expire,
+    })
+    return {
+        ...user.dataValues,
+        accessToken,
+    }
 }
 
 const userLogin = async (payload) => {
@@ -102,7 +105,7 @@ const userLogin = async (payload) => {
     })
 
     return {
-        data: user.dataValues,
+        ...user.dataValues,
         accessToken,
         refresh_token,
     }

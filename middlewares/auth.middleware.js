@@ -28,6 +28,9 @@ const checkAccessToken = async (req, res, next) => {
             error.statusCode = 404
             throw error
         } else {
+            // Add user ID to the request object
+            req.user = user
+            // Call next middleware with user ID accessible
             next()
         }
     } catch (error) {
@@ -67,6 +70,9 @@ const checkRefreshToken = async (req, res, next) => {
             error.statusCode = 404
             throw error
         } else {
+            // Add user ID to the request object
+            req.user = user
+            // Call next middleware with user ID accessible
             next()
         }
     } catch (error) {

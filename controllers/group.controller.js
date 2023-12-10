@@ -4,8 +4,12 @@ const groupService = require('../services/group.service')
 const createGroup = async (req, res, next) => {
     try {
         const { body: payload } = req
-        let { user_id, ...rest } = payload.value
-        let newPayload = { ...rest, admin_id: user_id }
+        const { id: user_id } = req.user
+        const newPayload = {
+            admin_id: user_id,
+            ...payload.value,
+        }
+        console.log('THIS IS CONTROLLER ===>>> ', newPayload)
         const data = await groupService.createGroup(newPayload)
         res.data = data
         next()
@@ -76,7 +80,7 @@ const findGroupByCategory = async (req, res, next) => {
 }
 const findAllGroupForCurrentUser = async (req, res, next) => {
     try {
-        const { params: payload } = req
+        const { id: payload } = req.user
         const data = await groupService.findAllGroupForCurrentUser(payload)
         res.data = data
         next()
@@ -85,6 +89,29 @@ const findAllGroupForCurrentUser = async (req, res, next) => {
     }
 }
 
+const addMember = async (req, res, next) => {
+    try {
+        const { body: payload } = req
+        let { user_id, ...rest } = payload.value
+        let newPayload = { ...rest }
+        const data = await groupService.addMember(newPayload)
+        res.data = data
+        res.data.added_by = user_id
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+// const removeMember = async (req, res, next) => {
+//     try {
+//         const { id: group_id, user_id } = req.params
+//         const data = await groupService.removeMember(payload.value)
+//         res.data = data
+//         next()
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
 module.exports = {
     createGroup,
     deleteGroup,
@@ -94,4 +121,6 @@ module.exports = {
     findGroupByName,
     findGroupByCategory,
     findAllGroupForCurrentUser,
+    addMember,
+    // removeMember,
 }

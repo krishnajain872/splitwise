@@ -39,6 +39,7 @@ const generateAccessToken = async (req, res, next) => {
 const sendVerificationLink = async (req, res, next) => {
     try {
         const { body: payload } = req
+        payload.value.user_id = req.user.id
         const data = await authService.sendVerificationLink(payload.value)
         res.data = data
         next()
@@ -49,7 +50,6 @@ const sendVerificationLink = async (req, res, next) => {
 const verifyUser = async (req, res, next) => {
     try {
         const { params: payload } = req
-        console.log('verify user CONTROLLER DATA ==>', payload)
         const data = await authService.userVerification(payload.value)
         res.data = data
         next()
