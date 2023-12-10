@@ -38,9 +38,10 @@ const generateAccessToken = async (req, res, next) => {
 }
 const sendVerificationLink = async (req, res, next) => {
     try {
-        const { body: payload } = req
-        payload.value.user_id = req.user.id
-        const data = await authService.sendVerificationLink(payload.value)
+        let payload = {}
+        payload.user_id = req.user.id
+        payload.email = req.user.email
+        const data = await authService.sendVerificationLink(payload)
         res.data = data
         next()
     } catch (error) {

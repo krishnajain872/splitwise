@@ -25,14 +25,12 @@ router.get(
     authController.verifyUser,
     genericResponse.responseHelper
 )
-router.patch(
+router.get(
     '/send-verification',
     authMiddleware.checkAccessToken,
-    authValidator.sendVerificationSchema,
     authController.sendVerificationLink,
     genericResponse.responseHelper
 )
-
 router.post(
     '/access-token',
     authMiddleware.checkRefreshToken,

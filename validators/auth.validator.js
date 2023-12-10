@@ -31,17 +31,6 @@ const loginSchema = (req, res, next) => {
     })
     validateRequest(req, res, next, schema, 'body')
 }
-const sendVerificationSchema = (req, res, next) => {
-    const schema = Joi.object({
-        email: Joi.string()
-            .email()
-            .lowercase()
-            .trim()
-            .required()
-            .label('Email'),
-    })
-    validateRequest(req, res, next, schema, 'body')
-}
 
 const acessTokenSchema = (req, res, next) => {
     const schema = Joi.object({
@@ -69,6 +58,5 @@ module.exports = {
     signupSchema,
     loginSchema,
     acessTokenSchema,
-    sendVerificationSchema,
     verifySchema,
 }
