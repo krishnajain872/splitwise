@@ -79,7 +79,7 @@ module.exports = (sequelize, DataTypes) => {
             },
             status: {
                 type: DataTypes.ENUM,
-                values: ['verified', 'invited', 'dummy'],
+                values: ['verified', 'unVerified', 'dummy'],
                 defaultValue: 'dummy',
             },
         },

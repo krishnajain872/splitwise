@@ -39,6 +39,10 @@ module.exports = (sequelize, DataTypes) => {
                 type: DataTypes.STRING,
                 allowNull: false,
             },
+            share: {
+                type: DataTypes.STRING,
+                allowNull: true,
+            },
             currency_id: {
                 type: DataTypes.UUID,
                 allowNull: false,

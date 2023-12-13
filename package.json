@@ -8,6 +8,11 @@
         "dev": "NODE_ENV=test nodemon index.js",
         "test": "NODE_ENV=test nodemon index.js",
         "db-setup": "NODE_ENV=test npx sequelize-cli db:migrate",
+        "db-drop": "NODE_ENV=test npx sequelize-cli db:drop",
+        "factory": "NODE_ENV=test node factory.js",
+        "db-create": "NODE_ENV=test npx sequelize-cli db:create",
+        "db-seed": "NODE_ENV=test npx sequelize-cli db:seed:all",
+        "db-seed-undo": "NODE_ENV=test npx sequelize-cli db:seed:undo:all",
         "db-undo": "NODE_ENV=test npx sequelize-cli db:migrate:undo:all",
         "gen-key": "mkdir certificates && cd certificates && openssl genrsa -out key.pem && openssl req -new -key key.pem -out csr.pem && openssl x509 -req -days 99999 -in csr.pem -signkey key.pem -out cert.pem  ",
         "prepare": "husky install"

@@ -1,5 +1,6 @@
 const { errorHelper } = require('../helpers/commonResponse.helper')
 const groupService = require('../services/group.service')
+const expenseService = require('../services/expense.service')
 
 const createGroup = async (req, res, next) => {
     try {
@@ -32,6 +33,28 @@ const updateGroup = async (req, res, next) => {
     try {
         const { body: payload } = req
         const data = await groupService.updateGroup(payload.value)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const updateExpense = async (req, res, next) => {
+    try {
+        const { body: payload } = req
+        const data = await expenseService.updateExpense(payload.value)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const addExpense = async (req, res, next) => {
+    try {
+        const { body: payload } = req
+
+        console.log('PAYLOAD FOR ADD EXPENSE ====>>', payload)
+        const data = await expenseService.addExpense(payload)
         res.data = data
         next()
     } catch (error) {
@@ -123,5 +146,8 @@ module.exports = {
     findGroupByCategory,
     findAllGroupForCurrentUser,
     addMember,
+    updateExpense,
+    addExpense,
+
     // removeMember,
 }

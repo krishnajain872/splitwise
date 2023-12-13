@@ -54,7 +54,7 @@ const checkPermissionByRegistrationStatus = async (req, res, next) => {
         }
         if (
             existingUser.status === 'dummy' ||
-            existingUser.status === 'invited'
+            existingUser.status === 'unVerified'
         ) {
             const error = new Error('user is not verified')
             error.statusCode = 403
@@ -92,7 +92,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
         }
         if (
             existingUser.user_details.status === 'dummy' ||
-            existingUser.user_details.status === 'invited'
+            existingUser.user_details.status === 'unVerified'
         ) {
             const error = new Error('user is not verified')
             error.statusCode = 403

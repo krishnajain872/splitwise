@@ -36,7 +36,7 @@ module.exports = {
             },
             status: {
                 type: Sequelize.ENUM,
-                values: ['verified', 'invited', 'dummy'],
+                values: ['verified', 'unVerified', 'dummy'],
                 defaultValue: 'dummy',
             },
             created_at: {

@@ -18,6 +18,7 @@ function createURL(base_url, token) {
 const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
 
+    console.log('THIS IS MAIL FOR SEND VERIFICATION =>', payload.email)
     const userData = await User.findByPk(payload.user_id)
     if (!userData) {
         const error = new Error('User not found')
@@ -38,16 +39,20 @@ const sendVerificationLink = async (payload) => {
     const subject = ` Splitwise -: User Verfication`
 
     const mail = await mailer.sendMail(body, subject, payload.email)
+    console.log('THIS IS MAIL FROM SEND mail ==> ', mail)
     if (!mail) {
         const error = new Error('mail not sent')
         error.statusCode = 422
         throw error
     }
 
-    await User.update({ status: 'invited' }, { where: { id: payload.user_id } })
+    await User.update(
+        { status: 'unVerified' },
+        { where: { id: payload.user_id } }
+    )
 
     userData.dataValues.token = token
-    userData.dataValues.status = 'invited'
+    userData.dataValues.status = 'unVerified'
     return userData.dataValues
 }
 

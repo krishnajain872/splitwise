@@ -36,10 +36,47 @@ const updateGroupSchema = async (req, res, next) => {
     validateRequest(req, res, next, schema, 'body')
 }
 
+const addExpenseSchema = async (req, res, next) => {
+    const payeeSchema = Joi.object({
+        user_id: Joi.number().integer().required(),
+        amount: Joi.number().precision(2).required(),
+    })
+
+    const expenseSchema = Joi.object({
+        base_amount: Joi.number().precision(2).required(),
+        split_by: Joi.string().valid('equal').required(),
+        category: Joi.string().required(),
+        currency_id: Joi.number().string().required(),
+        description: Joi.string().required(),
+        member: Joi.array().items(payeeSchema).min(1).required(),
+    })
+
+    validateRequest(req, res, next, expenseSchema, 'body')
+}
+
+const udpateExpenseSchema = async (req, res, next) => {
+    const payeeSchema = Joi.object({
+        user_id: Joi.number().integer().required(),
+        amount: Joi.number().precision(2).required(),
+    })
+
+    const expenseSchema = Joi.object({
+        base_amount: Joi.number().precision(2).required(),
+        split_by: Joi.string().valid('equal').required(),
+        category: Joi.string().required(),
+        currency_id: Joi.number().string().required(),
+        description: Joi.string().required(),
+        member: Joi.array().items(payeeSchema).min(1).required(),
+    })
+
+    validateRequest(req, res, next, expenseSchema, 'body')
+}
+
 const paramsIdCheck = async (req, res, next) => {
     const schema = Joi.object({
         id: Joi.string().guid().required(),
         user_id: Joi.string().guid(),
+        expense_id: Joi.string().guid(),
     })
     validateRequest(req, res, next, schema, 'params')
 }
@@ -48,5 +85,8 @@ module.exports = {
     createGroupSchema,
     updateGroupSchema,
     addMemberSchema,
+    addExpenseSchema,
+    udpateExpenseSchema,
+    addExpenseSchema,
     paramsIdCheck,
 }

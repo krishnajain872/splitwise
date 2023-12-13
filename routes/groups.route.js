@@ -56,5 +56,21 @@ router.delete(
     groupController.deleteGroup,
     genericResponse.responseHelper
 )
+router.put(
+    '/:id/expense/:expense_id',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermission,
+    groupController.updateExpense,
+    genericResponse.responseHelper
+)
+router.post(
+    '/:id/expense/',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermission,
+    groupController.addExpense,
+    genericResponse.responseHelper
+)
 
 module.exports = router

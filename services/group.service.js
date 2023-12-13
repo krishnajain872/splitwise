@@ -152,7 +152,7 @@ const addMember = async (payload) => {
             }
 
             const member = await UserGroup.create({ group_id, user_id })
-            addedGroupMembers[`member${i}`] = member.dataValues
+            addedGroupMembers[`member_${++i}`] = member.dataValues
         })
     )
 
