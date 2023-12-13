@@ -91,6 +91,7 @@ const addExpense = async (payload) => {
 const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
+        console.log('THIS IS UPDATE EXPENSE PAYLOAD FOR =====> ', payload)
         // Fetch the existing expense
         const expense = await Expense.findByPk(payload.expense_id)
         if (!expense) {
@@ -111,11 +112,11 @@ const updateExpense = async (payload) => {
 
         // Delete all existing payees and transactions related to this expense
         await Payee.destroy({
-            where: { expense_id: expenseId },
+            where: { expense_id: payload.expense_id },
             transaction: t,
         })
         await Transaction.destroy({
-            where: { expense_id: expenseId },
+            where: { expense_id: payload.expense_id },
             transaction: t,
         })
 

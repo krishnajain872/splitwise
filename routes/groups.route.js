@@ -57,7 +57,7 @@ router.delete(
     genericResponse.responseHelper
 )
 router.put(
-    '/:id/expense/:expense_id',
+    '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermission,

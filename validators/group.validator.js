@@ -62,6 +62,7 @@ const udpateExpenseSchema = async (req, res, next) => {
 
     const expenseSchema = Joi.object({
         base_amount: Joi.number().precision(2).required(),
+        expense_id: Joi.number().string().guid().required(),
         split_by: Joi.string().valid('equal').required(),
         category: Joi.string().required(),
         currency_id: Joi.number().string().required(),
@@ -76,7 +77,6 @@ const paramsIdCheck = async (req, res, next) => {
     const schema = Joi.object({
         id: Joi.string().guid().required(),
         user_id: Joi.string().guid(),
-        expense_id: Joi.string().guid(),
     })
     validateRequest(req, res, next, schema, 'params')
 }

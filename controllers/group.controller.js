@@ -42,7 +42,8 @@ const updateGroup = async (req, res, next) => {
 const updateExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
-        const data = await expenseService.updateExpense(payload.value)
+        console.log('Payload for ==> ', payload)
+        const data = await expenseService.updateExpense(payload)
         res.data = data
         next()
     } catch (error) {
