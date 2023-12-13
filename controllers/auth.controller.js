@@ -14,7 +14,6 @@ const userSignup = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-
 const userLogin = async (req, res, next) => {
     try {
         const { body: payload } = req
@@ -25,7 +24,6 @@ const userLogin = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-
 const generateAccessToken = async (req, res, next) => {
     try {
         const { body: payload } = req
@@ -58,7 +56,6 @@ const verifyUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-
 module.exports = {
     userSignup,
     userLogin,
