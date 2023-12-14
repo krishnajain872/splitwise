@@ -47,6 +47,13 @@ router.get(
     groupController.findAllGroupForCurrentUser,
     genericResponse.responseHelper
 )
+router.get(
+    '/:id/members',
+    checkAccessToken,
+    groupPermission.checkPermissionByRegistrationStatus,
+    groupController.findAllMemberForCurrentUser,
+    genericResponse.responseHelper
+)
 router.delete(
     '/:id',
     checkAccessToken,
@@ -60,7 +67,7 @@ router.put(
     '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupPermission.checkPermission,
+    groupPermission.checkPermissionByRegistrationStatus,
     groupController.updateExpense,
     genericResponse.responseHelper
 )
@@ -68,7 +75,7 @@ router.post(
     '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupPermission.checkPermission,
+    groupPermission.checkPermissionByRegistrationStatus,
     groupController.addExpense,
     genericResponse.responseHelper
 )

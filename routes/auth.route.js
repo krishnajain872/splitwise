@@ -38,4 +38,16 @@ router.post(
     authController.generateAccessToken,
     genericResponse.responseHelper
 )
+router.post(
+    '/forget',
+    authValidator.forgetSchema,
+    authController.forgetPassword,
+    genericResponse.responseHelper
+)
+router.post(
+    '/reset',
+    authValidator.resetSchema,
+    authController.resetPassword,
+    genericResponse.responseHelper
+)
 module.exports = router

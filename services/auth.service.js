@@ -79,6 +79,32 @@ const userRegistration = async (payload) => {
     }
 }
 
+const forgetPassword = async (payload) => {
+    const { BASE_URL: base_url } = process.env
+    console.log('THIS FROM FORGET PASSWORD SERVICE =>', payload)
+
+    const userData = await User.findOne(payload)
+    if (!userData) {
+        const error = new Error('User not found')
+        error.statusCode = 404
+        throw error
+    }
+    const token = await verification.generateToken(userData.id)
+    const url = createURL(base_url, token)
+    const body = `use this link for your reset your password -: ${url} `
+    const subject = ` Splitwise -: Forget password`
+
+    const mail = await mailer.sendMail(body, subject, userData.email)
+    console.log('THIS IS MAIL FROM Forget password SEND mail ==> ', mail)
+    if (!mail) {
+        const error = new Error('mail not sent')
+        error.statusCode = 422
+        throw error
+    }
+
+    return { token }
+}
+
 const userLogin = async (payload) => {
     const { mobile, password } = payload
     const user = await User.findOne({
@@ -154,6 +180,28 @@ const userVerification = async (payload) => {
     await userData.save()
     return userData.dataValues
 }
+const resetPassword = async (payload) => {
+    console.log('THIS IS THE PAYLOAD ===>', payload)
+
+    const { PASSWORD_HASH_SALTS: salt } = process.env
+    payload.password = await bcrypt.hash(payload.password, Number(salt))
+
+    const response = verification.validateToken(payload.token)
+    if (!response) {
+        const error = new Error('UnAuthorized Access')
+        error.statusCode = 401
+        throw error
+    }
+    const userData = await User.findByPk(response.data)
+    if (!userData) {
+        const error = new Error('User not found')
+        error.statusCode = 404
+        throw error
+    }
+    userData.password = payload.password
+    await userData.save()
+    return userData.dataValues
+}
 
 module.exports = {
     userRegistration,
@@ -161,4 +209,6 @@ module.exports = {
     generateAccessToken,
     userVerification,
     sendVerificationLink,
+    forgetPassword,
+    resetPassword,
 }

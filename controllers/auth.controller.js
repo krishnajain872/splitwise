@@ -4,7 +4,6 @@ const authService = require('../services/auth.service')
 const userSignup = async (req, res, next) => {
     try {
         const { body: payload } = req
-
         const data = await authService.userRegistration(payload.value)
         res.data = data
         console.log('REGISTERED CONTROLLER DATA ==>', data)
@@ -56,10 +55,32 @@ const verifyUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const forgetPassword = async (req, res, next) => {
+    try {
+        const { mobile: payload } = req.body
+        const data = await authService.forgetPassword(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const resetPassword = async (req, res, next) => {
+    try {
+        const { body: payload } = req
+        const data = await authService.resetPassword(payload.value)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 module.exports = {
     userSignup,
     userLogin,
     generateAccessToken,
     sendVerificationLink,
     verifyUser,
+    resetPassword,
+    forgetPassword,
 }

@@ -31,6 +31,26 @@ const loginSchema = (req, res, next) => {
     })
     validateRequest(req, res, next, schema, 'body')
 }
+const forgetSchema = (req, res, next) => {
+    const schema = Joi.object({
+        mobile: Joi.string()
+            .length(10)
+            .pattern(/^[0-9]+$/)
+            .required()
+            .label('Phone Number'),
+    })
+    validateRequest(req, res, next, schema, 'body')
+}
+const resetSchema = (req, res, next) => {
+    const schema = Joi.object({
+        token: Joi.string().required().messages({
+            'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-fA-F0-9]+,[0-9]+$/`,
+            'any.required': `"token" is a required field`,
+        }),
+        password: Joi.string().required().label('Password'),
+    })
+    validateRequest(req, res, next, schema, 'body')
+}
 
 const acessTokenSchema = (req, res, next) => {
     const schema = Joi.object({
@@ -59,4 +79,6 @@ module.exports = {
     loginSchema,
     acessTokenSchema,
     verifySchema,
+    forgetSchema,
+    resetSchema,
 }

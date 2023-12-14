@@ -40,6 +40,7 @@ const addExpenseSchema = async (req, res, next) => {
     const payeeSchema = Joi.object({
         user_id: Joi.number().integer().required(),
         amount: Joi.number().precision(2).required(),
+        share: Joi.number().precision(2),
     })
 
     const expenseSchema = Joi.object({
@@ -58,12 +59,13 @@ const udpateExpenseSchema = async (req, res, next) => {
     const payeeSchema = Joi.object({
         user_id: Joi.number().integer().required(),
         amount: Joi.number().precision(2).required(),
+        share: Joi.number().precision(2),
     })
 
     const expenseSchema = Joi.object({
         base_amount: Joi.number().precision(2).required(),
         expense_id: Joi.number().string().guid().required(),
-        split_by: Joi.string().valid('equal').required(),
+        split_by: Joi.string().valid('equal', 'share').required(),
         category: Joi.string().required(),
         currency_id: Joi.number().string().required(),
         description: Joi.string().required(),

@@ -112,11 +112,38 @@ const findGroupByCategory = async (payload) => {
 const findAllGroupForCurrentUser = async (payload) => {
     const existingGroup = await Group.findAll({
         where: { admin_id: payload },
+        attributes: ['title', 'category', 'admin_id'],
     })
     return existingGroup
 }
+const findAllMemberOfCurrentGroup = async (payload) => {
+    const existingGroup = await Group.findByPk(payload)
+    if (!existingGroup) {
+        throw Error('Group Not Found', { statusCode: 404 })
+    }
+    const members = await UserGroup.findAll({
+        include: [
+            {
+                model: User,
+                as: 'user_details',
+                attributes: ['first_name', 'mobile', 'email'],
+            },
+        ],
+        where: { group_id: payload },
+        attributes: ['user_id', 'group_id'],
+    })
+    let group_details = {
+        id: existingGroup.id,
+        title: existingGroup.title,
+        admin_id: existingGroup.admin_id,
+    }
+
+    group_and_members = { ...group_details, ...members }
+
+    return group_and_members
+}
 const addMember = async (payload) => {
-    console.log(' addMember GROUP PAYLOAD ====>>> ', payload)
+    console.log(' addMember GROUP PAYLOAD Service ====>>> ', payload)
     const group_id = payload.id
     let addedGroupMembers = {}
 
@@ -129,6 +156,10 @@ const addMember = async (payload) => {
     const userArray = payload.member
     await Promise.all(
         userArray.map(async (user_id, i) => {
+            console.log(
+                'THIS IS MAPED USER ID FROM ADD MEMEBER SERVICE==>',
+                user_id
+            )
             const [existingUser, existingMapping] = await Promise.all([
                 User.findByPk(user_id),
                 UserGroup.findOne({
@@ -170,4 +201,5 @@ module.exports = {
     findGroupByCategory,
     findAllGroupForCurrentUser,
     addMember,
+    findAllMemberOfCurrentGroup,
 }

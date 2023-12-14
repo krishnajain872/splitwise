@@ -5,7 +5,7 @@ const { sequelize } = require('../models')
 const simpliyTransaction = require('../helpers/transaction.helper')
 
 const addExpense = async (payload) => {
-    console.log('PAYLAOD FOR EXPENSE ADD FROM SERVICE ==>', payload)
+    console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', payload)
     const t = await sequelize.transaction()
     try {
         const expense = await Expense.create(
@@ -47,35 +47,55 @@ const addExpense = async (payload) => {
         let allPayeeData = payees.map((payee) => payee.dataValues)
 
         let Transactions = []
+        let transactionData
         if (payload.split_by === 'equal') {
-            let transactionData = simpliyTransaction.calculateTransactions(
+            transactionData = simpliyTransaction.calculateTransactions(
                 payload.base_amount,
                 allPayeeData
             )
-
-            if (!transactionData) {
-                throw Error('Failed to calculate transactions', {
-                    statusCode: 500,
-                })
-            }
-
-            const transactionResponse = await Transaction.bulkCreate(
-                transactionData,
-                {
-                    transaction: t,
-                }
+        } else if (payload.split_by === 'share') {
+            const totalAmount = payload.member.reduce(
+                (sum, member) => sum + Number(member.share),
+                0
             )
-            if (!transactionResponse) {
-                throw Error('Failed to create transactions', {
-                    statusCode: 500,
-                })
-            }
 
-            Transactions = transactionResponse.map(
-                (transaction) => transaction.dataValues
+            if (Number(payload.base_amount) !== totalAmount) {
+                throw Error(
+                    'Base amount and total amount by share paid by all payees is unequal',
+                    { statusCode: 409 }
+                )
+            }
+            transactionData = simpliyTransaction.calculateTransactions(
+                payload.base_amount,
+                allPayeeData
             )
         }
+        if (!transactionData) {
+            throw Error('Failed to calculate transactions', {
+                statusCode: 500,
+            })
+        }
 
+        console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
+
+        transactionData.forEach((data) => {
+            data.amount = Math.round(data.amount)
+        })
+
+        const transactionResponse = await Transaction.bulkCreate(
+            transactionData,
+            {
+                transaction: t,
+            }
+        )
+        if (!transactionResponse) {
+            throw Error('Failed to create transactions', {
+                statusCode: 500,
+            })
+        }
+        Transactions = transactionResponse.map(
+            (transaction) => transaction.dataValues
+        )
         await t.commit()
 
         return {
@@ -88,6 +108,7 @@ const addExpense = async (payload) => {
         throw error
     }
 }
+
 const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
@@ -149,34 +170,53 @@ const updateExpense = async (payload) => {
 
         let Transactions = []
         if (payload.split_by === 'equal') {
-            let transactionData = simpliyTransaction.calculateTransactions(
+            transactionData = simpliyTransaction.calculateTransactions(
                 payload.base_amount,
                 allPayeeData
             )
-
-            if (!transactionData) {
-                throw Error('Failed to calculate transactions', {
-                    statusCode: 500,
-                })
-            }
-
-            const transactionResponse = await Transaction.bulkCreate(
-                transactionData,
-                {
-                    transaction: t,
-                }
+        } else if (payload.split_by === 'share') {
+            const totalAmount = payload.member.reduce(
+                (sum, member) => sum + Number(member.share),
+                0
             )
-            if (!transactionResponse) {
-                throw Error('Failed to create transactions', {
-                    statusCode: 500,
-                })
-            }
 
-            Transactions = transactionResponse.map(
-                (transaction) => transaction.dataValues
+            if (Number(payload.base_amount) !== totalAmount) {
+                throw Error(
+                    'Base amount and total amount by share paid by all payees is unequal',
+                    { statusCode: 409 }
+                )
+            }
+            transactionData = simpliyTransaction.calculateTransactions(
+                payload.base_amount,
+                allPayeeData
             )
         }
+        if (!transactionData) {
+            throw Error('Failed to calculate transactions', {
+                statusCode: 500,
+            })
+        }
 
+        console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
+
+        transactionData.forEach((data) => {
+            data.amount = Math.round(data.amount)
+        })
+
+        const transactionResponse = await Transaction.bulkCreate(
+            transactionData,
+            {
+                transaction: t,
+            }
+        )
+        if (!transactionResponse) {
+            throw Error('Failed to create transactions', {
+                statusCode: 500,
+            })
+        }
+        Transactions = transactionResponse.map(
+            (transaction) => transaction.dataValues
+        )
         await t.commit()
 
         return {

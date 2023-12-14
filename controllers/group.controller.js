@@ -112,6 +112,16 @@ const findAllGroupForCurrentUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const findAllMemberForCurrentUser = async (req, res, next) => {
+    try {
+        const { id: payload } = req.params
+        const data = await groupService.findAllMemberOfCurrentGroup(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 
 const addMember = async (req, res, next) => {
     try {
@@ -149,6 +159,7 @@ module.exports = {
     addMember,
     updateExpense,
     addExpense,
+    findAllMemberForCurrentUser,
 
     // removeMember,
 }
