@@ -20,8 +20,9 @@ const checkAccessToken = async (req, res, next) => {
             error.statusCode = 401
             throw error
         }
-
-        const user = await User.findByPk(decodedJwt.user_id)
+        const user = await User.findByPk(decodedJwt.user_id, {
+            attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+        })
 
         if (!user) {
             const error = new Error('User not found')
@@ -29,7 +30,7 @@ const checkAccessToken = async (req, res, next) => {
             throw error
         } else {
             // Add user ID to the request object
-            req.user = user
+            req.user = user.dataValues
             // Call next middleware with user ID accessible
             next()
         }
@@ -63,7 +64,9 @@ const checkRefreshToken = async (req, res, next) => {
             error.statusCode = 401
             throw error
         }
-        const user = await User.findByPk(decodedJwt.user_id)
+        const user = await User.findByPk(decodedJwt.user_id, {
+            attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+        })
 
         if (!user) {
             const error = new Error('User not found')
@@ -71,7 +74,7 @@ const checkRefreshToken = async (req, res, next) => {
             throw error
         } else {
             // Add user ID to the request object
-            req.user = user
+            req.user = user.dataValues
             // Call next middleware with user ID accessible
             next()
         }

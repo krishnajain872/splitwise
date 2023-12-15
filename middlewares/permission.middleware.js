@@ -71,8 +71,10 @@ const checkPermissionByRegistrationStatus = async (req, res, next) => {
 const checkPermissionByValidGroupMember = async (req, res, next) => {
     try {
         const { id: user_id } = req.user
-        const { id: group_id } = req.body.value
+        const { id: group_id } = req.params.value
+        console.log('THIS IS CHECK VALID GROUP MEMBER ==> ', req.params)
         console.log({ user_id, group_id })
+
         const existingUser = await UserGroup.findOne({
             include: [
                 {
@@ -86,8 +88,10 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
             },
         })
         if (!existingUser) {
-            const error = new Error('user not found')
-            error.statusCode = 404
+            const error = new Error(
+                'unAuthorized access user is not part of the group'
+            )
+            error.statusCode = 403
             throw error
         }
         if (

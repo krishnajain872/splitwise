@@ -17,21 +17,22 @@ router.post(
     genericResponse.responseHelper
 )
 router.post(
-    '/add-member',
+    '/:id/member/add',
     checkAccessToken,
+    groupValidator.paramsIdCheck,
     groupValidator.addMemberSchema,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.addMember,
     genericResponse.responseHelper
 )
-// router.delete(
-//     '/:id/remove/:user_id',
-//     checkAccessToken,
-//     groupValidator.paramsIdCheck,
-//     groupPermission.checkPermissionByValidGroupMember,
-//     groupController.removeMember,
-//     genericResponse.responseHelper
-// )
+router.delete(
+    '/:id/member/remove/:user_id',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.removeMember,
+    genericResponse.responseHelper
+)
 router.patch(
     '/',
     checkAccessToken,
@@ -80,6 +81,14 @@ router.post(
     groupValidator.addExpenseSchema,
     groupPermission.checkPermissionByRegistrationStatus,
     groupController.addExpense,
+    genericResponse.responseHelper
+)
+router.delete(
+    '/:id/expense/:expense_id',
+    checkAccessToken,
+    groupValidator.expenseIdCheck,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.deleteExpense,
     genericResponse.responseHelper
 )
 

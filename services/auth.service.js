@@ -19,7 +19,9 @@ const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
 
     console.log('THIS IS MAIL FOR SEND VERIFICATION =>', payload.email)
-    const userData = await User.findByPk(payload.user_id)
+    const userData = await User.findByPk(payload.user_id, {
+        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+    })
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404
@@ -62,6 +64,7 @@ const userRegistration = async (payload) => {
 
     const existingUser = await User.findOne({
         where: { mobile: payload.mobile },
+        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
     })
     if (existingUser) {
         const error = new Error('user already registered')
@@ -111,6 +114,14 @@ const userLogin = async (payload) => {
         where: {
             mobile: mobile,
         },
+        attributes: [
+            'first_name',
+            'last_name',
+            'id',
+            'mobile',
+            'email',
+            'password',
+        ],
     })
     if (!user) {
         const error = new Error('user not found!')
@@ -149,7 +160,9 @@ const generateAccessToken = async (payload) => {
         error.statusCode = 401
         throw error
     }
-    const user = await User.findByPk(decodedJwt.user_id)
+    const user = await User.findByPk(decodedJwt.user_id, {
+        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+    })
     if (!user) {
         const error = new Error('User not found')
         error.statusCode = 404
@@ -170,7 +183,9 @@ const userVerification = async (payload) => {
         error.statusCode = 401
         throw error
     }
-    const userData = await User.findByPk(response.data)
+    const userData = await User.findByPk(response.data, {
+        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+    })
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404
@@ -190,7 +205,9 @@ const resetPassword = async (payload) => {
         error.statusCode = 401
         throw error
     }
-    const userData = await User.findByPk(response.data)
+    const userData = await User.findByPk(response.data, {
+        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+    })
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404

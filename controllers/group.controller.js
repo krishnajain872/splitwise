@@ -18,7 +18,6 @@ const createGroup = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-
 const deleteGroup = async (req, res, next) => {
     try {
         const { params: payload } = req
@@ -42,8 +41,21 @@ const updateGroup = async (req, res, next) => {
 const updateExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
+        const { id: group_id } = req.params.value
+        payload.value.group_id = group_id
         console.log('Payload for ==> ', payload)
         const data = await expenseService.updateExpense(payload.value)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const deleteExpense = async (req, res, next) => {
+    try {
+        const { expense_id: payload } = req.params.value
+        console.log('Payload for ==> ', payload)
+        const data = await expenseService.deleteExpense(payload)
         res.data = data
         next()
     } catch (error) {
@@ -53,8 +65,9 @@ const updateExpense = async (req, res, next) => {
 const addExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
-
-        console.log('PAYLOAD FOR ADD EXPENSE ====>>', payload)
+        const { id: group_id } = req.params.value
+        console.log('PAYLOAD FOR ADD EXPENSE ====>>', req.params)
+        payload.value.group_id = group_id
         const data = await expenseService.addExpense(payload.value)
         res.data = data
         next()
@@ -125,9 +138,10 @@ const findAllMemberForCurrentUser = async (req, res, next) => {
 
 const addMember = async (req, res, next) => {
     try {
-        const { body: payload } = req
-        let { user_id, ...rest } = payload.value
-        let newPayload = { ...rest }
+        const member = req.body.value
+        const user_id = req.user.id
+        const { id: group_id } = req.params.value
+        let newPayload = { group_id, ...member }
         const data = await groupService.addMember(newPayload)
         res.data = data
         res.data.added_by = user_id
@@ -136,16 +150,18 @@ const addMember = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-// const removeMember = async (req, res, next) => {
-//     try {
-//         const { id: group_id, user_id } = req.params
-//         const data = await groupService.removeMember(payload.value)
-//         res.data = data
-//         next()
-//     } catch (error) {
-//         errorHelper(req, res, error.message, error.statusCode, error)
-//     }
-// }
+const removeMember = async (req, res, next) => {
+    try {
+        const payload = req.params.value
+        const removedBy = req.user
+        const data = await groupService.removeMember(payload)
+        res.data = data
+        res.data.removed_by = { ...removedBy }
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 
 module.exports = {
     createGroup,
@@ -160,6 +176,6 @@ module.exports = {
     updateExpense,
     addExpense,
     findAllMemberForCurrentUser,
-
-    // removeMember,
+    deleteExpense,
+    removeMember,
 }
