@@ -26,10 +26,11 @@ const addExpense = async (payload) => {
         )
 
         if (Number(payload.base_amount) !== totalAmount) {
-            throw Error(
-                'Base amount and total amount paid by all payees is unequal',
-                { statusCode: 409 }
+            const error = Error(
+                'Expense base Amount and total amount of pay by all payee is unequal'
             )
+            error.statusCode = 409
+            throw error
         }
 
         const payeePayload = payload.member.map((member) => ({
@@ -39,10 +40,6 @@ const addExpense = async (payload) => {
         }))
 
         const payees = await Payee.bulkCreate(payeePayload, { transaction: t })
-
-        if (!payees) {
-            throw Error('Failed to create payees', { statusCode: 500 })
-        }
 
         let allPayeeData = payees.map((payee) => payee.dataValues)
 
@@ -60,10 +57,11 @@ const addExpense = async (payload) => {
             )
 
             if (Number(payload.base_amount) !== totalAmount) {
-                throw Error(
-                    'Base amount and total amount by share paid by all payees is unequal',
-                    { statusCode: 409 }
+                const error = Error(
+                    'Expense base Amount and total amount of share by all payee is unequal'
                 )
+                error.statusCode = 409
+                throw error
             }
             transactionData = simpliyTransaction.calculateTransactions(
                 payload.base_amount,
@@ -71,9 +69,9 @@ const addExpense = async (payload) => {
             )
         }
         if (!transactionData) {
-            throw Error('Failed to calculate transactions', {
-                statusCode: 500,
-            })
+            const error = Error('Faild to calculate data')
+            error.statusCode = 422
+            throw error
         }
 
         console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
@@ -88,11 +86,6 @@ const addExpense = async (payload) => {
                 transaction: t,
             }
         )
-        if (!transactionResponse) {
-            throw Error('Failed to create transactions', {
-                statusCode: 500,
-            })
-        }
         Transactions = transactionResponse.map(
             (transaction) => transaction.dataValues
         )
@@ -116,7 +109,9 @@ const updateExpense = async (payload) => {
         // Fetch the existing expense
         const expense = await Expense.findByPk(payload.expense_id)
         if (!expense) {
-            throw Error('Expense not Found', { statusCode: 404 })
+            const error = Error('Expense not Found')
+            error.statusCode = 404
+            throw error
         }
         // Update the expense details
         await expense.update(
@@ -148,10 +143,11 @@ const updateExpense = async (payload) => {
         )
 
         if (Number(payload.base_amount) !== totalAmount) {
-            throw Error(
-                'Base amount and total amount paid by all payees is unequal',
-                { statusCode: 409 }
+            const error = Error(
+                'Expense base Amount and total amount of pay by all payee is unequal'
             )
+            error.statusCode = 409
+            throw error
         }
 
         const payeePayload = payload.member.map((member) => ({
@@ -162,13 +158,10 @@ const updateExpense = async (payload) => {
 
         const payees = await Payee.bulkCreate(payeePayload, { transaction: t })
 
-        if (!payees) {
-            throw Error('Failed to create payees', { statusCode: 500 })
-        }
-
         let allPayeeData = payees.map((payee) => payee.dataValues)
 
         let Transactions = []
+        let transactionData
         if (payload.split_by === 'equal') {
             transactionData = simpliyTransaction.calculateTransactions(
                 payload.base_amount,
@@ -181,24 +174,17 @@ const updateExpense = async (payload) => {
             )
 
             if (Number(payload.base_amount) !== totalAmount) {
-                throw Error(
-                    'Base amount and total amount by share paid by all payees is unequal',
-                    { statusCode: 409 }
+                const error = Error(
+                    'Expense base Amount and total amount of pay by all payee is unequal'
                 )
+                error.statusCode = 409
+                throw error
             }
             transactionData = simpliyTransaction.calculateTransactions(
                 payload.base_amount,
                 allPayeeData
             )
         }
-        if (!transactionData) {
-            throw Error('Failed to calculate transactions', {
-                statusCode: 500,
-            })
-        }
-
-        console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
-
         transactionData.forEach((data) => {
             data.amount = Math.round(data.amount)
         })
@@ -230,7 +216,6 @@ const updateExpense = async (payload) => {
     }
 }
 
-// const udpateExpense = async (payload) => {}
 // const deleteExpense = async (payload) => {}
 // const getExpenseById = async (payload) => {}
 // const getExpenseByCurrentUser = async (payload) => {}

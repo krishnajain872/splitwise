@@ -43,7 +43,7 @@ const updateExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
         console.log('Payload for ==> ', payload)
-        const data = await expenseService.updateExpense(payload)
+        const data = await expenseService.updateExpense(payload.value)
         res.data = data
         next()
     } catch (error) {
@@ -55,7 +55,7 @@ const addExpense = async (req, res, next) => {
         const { body: payload } = req
 
         console.log('PAYLOAD FOR ADD EXPENSE ====>>', payload)
-        const data = await expenseService.addExpense(payload)
+        const data = await expenseService.addExpense(payload.value)
         res.data = data
         next()
     } catch (error) {

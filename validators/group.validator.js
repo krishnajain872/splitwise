@@ -38,7 +38,7 @@ const updateGroupSchema = async (req, res, next) => {
 
 const addExpenseSchema = async (req, res, next) => {
     const payeeSchema = Joi.object({
-        user_id: Joi.number().integer().required(),
+        user_id: Joi.string().guid().required(),
         amount: Joi.number().precision(2).required(),
         share: Joi.number().precision(2),
     })
@@ -47,7 +47,7 @@ const addExpenseSchema = async (req, res, next) => {
         base_amount: Joi.number().precision(2).required(),
         split_by: Joi.string().valid('equal').required(),
         category: Joi.string().required(),
-        currency_id: Joi.number().string().required(),
+        currency_id: Joi.string().guid().required(),
         description: Joi.string().required(),
         member: Joi.array().items(payeeSchema).min(1).required(),
     })
@@ -57,17 +57,17 @@ const addExpenseSchema = async (req, res, next) => {
 
 const udpateExpenseSchema = async (req, res, next) => {
     const payeeSchema = Joi.object({
-        user_id: Joi.number().integer().required(),
+        user_id: Joi.string().guid().required(),
         amount: Joi.number().precision(2).required(),
         share: Joi.number().precision(2),
     })
 
     const expenseSchema = Joi.object({
         base_amount: Joi.number().precision(2).required(),
-        expense_id: Joi.number().string().guid().required(),
+        expense_id: Joi.string().guid().required(),
         split_by: Joi.string().valid('equal', 'share').required(),
         category: Joi.string().required(),
-        currency_id: Joi.number().string().required(),
+        currency_id: Joi.string().guid().required(),
         description: Joi.string().required(),
         member: Joi.array().items(payeeSchema).min(1).required(),
     })

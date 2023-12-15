@@ -68,6 +68,7 @@ router.put(
     '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
+    groupValidator.udpateExpenseSchema,
     groupPermission.checkPermissionByRegistrationStatus,
     groupController.updateExpense,
     genericResponse.responseHelper
@@ -76,6 +77,7 @@ router.post(
     '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
+    groupValidator.addExpenseSchema,
     groupPermission.checkPermissionByRegistrationStatus,
     groupController.addExpense,
     genericResponse.responseHelper
