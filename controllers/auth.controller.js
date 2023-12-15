@@ -57,8 +57,9 @@ const verifyUser = async (req, res, next) => {
 }
 const forgetPassword = async (req, res, next) => {
     try {
-        const { mobile: payload } = req.body
-        const data = await authService.forgetPassword(payload)
+        const { value: payload } = req.body
+        // console.log('THIS IS CONTROLLER FOR FORGET PASSWORD===> ', req.body)
+        const data = await authService.forgetPassword(payload.mobile)
         res.data = data
         next()
     } catch (error) {

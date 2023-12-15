@@ -81,9 +81,10 @@ const userRegistration = async (payload) => {
 
 const forgetPassword = async (payload) => {
     const { BASE_URL: base_url } = process.env
-    console.log('THIS FROM FORGET PASSWORD SERVICE =>', payload)
+    const userData = await User.findOne({
+        where: { mobile: payload },
+    })
 
-    const userData = await User.findOne(payload)
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404
@@ -95,7 +96,6 @@ const forgetPassword = async (payload) => {
     const subject = ` Splitwise -: Forget password`
 
     const mail = await mailer.sendMail(body, subject, userData.email)
-    console.log('THIS IS MAIL FROM Forget password SEND mail ==> ', mail)
     if (!mail) {
         const error = new Error('mail not sent')
         error.statusCode = 422
@@ -181,10 +181,8 @@ const userVerification = async (payload) => {
     return userData.dataValues
 }
 const resetPassword = async (payload) => {
-    console.log('THIS IS THE PAYLOAD ===>', payload)
-
     const { PASSWORD_HASH_SALTS: salt } = process.env
-    payload.password = await bcrypt.hash(payload.password, Number(salt))
+    const passHash = await bcrypt.hash(payload.password, Number(salt))
 
     const response = verification.validateToken(payload.token)
     if (!response) {
@@ -198,8 +196,13 @@ const resetPassword = async (payload) => {
         error.statusCode = 404
         throw error
     }
-    userData.password = payload.password
-    await userData.save()
+    const updateResponse = await User.update(
+        { password: passHash },
+        { where: { id: userData.id } }
+    )
+    if (updateResponse) {
+        userData.dataValues.password = passHash
+    }
     return userData.dataValues
 }
 

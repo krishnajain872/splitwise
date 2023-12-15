@@ -114,7 +114,7 @@ const findAllGroupForCurrentUser = async (req, res, next) => {
 }
 const findAllMemberForCurrentUser = async (req, res, next) => {
     try {
-        const { id: payload } = req.params
+        const { id: payload } = req.params.value
         const data = await groupService.findAllMemberOfCurrentGroup(payload)
         res.data = data
         next()

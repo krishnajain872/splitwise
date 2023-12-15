@@ -50,6 +50,7 @@ router.get(
 router.get(
     '/:id/members',
     checkAccessToken,
+    groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByRegistrationStatus,
     groupController.findAllMemberForCurrentUser,
     genericResponse.responseHelper

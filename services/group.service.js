@@ -117,6 +117,7 @@ const findAllGroupForCurrentUser = async (payload) => {
     return existingGroup
 }
 const findAllMemberOfCurrentGroup = async (payload) => {
+    console.log('findAllMemberOfCurrentGroup ==>>>>  ', payload)
     const existingGroup = await Group.findByPk(payload)
     if (!existingGroup) {
         throw Error('Group Not Found', { statusCode: 404 })
