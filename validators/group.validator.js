@@ -23,7 +23,7 @@ const updateGroupSchema = async (req, res, next) => {
     const schema = Joi.object({
         id: Joi.string().guid().required(),
         title: Joi.string().min(3),
-        display_picture: Joi.string().min(1),
+        display_picture: Joi.string(),
         category: Joi.string().valid(
             'trip',
             'home',
@@ -49,6 +49,7 @@ const addExpenseSchema = async (req, res, next) => {
         currency_id: Joi.string().guid().required(),
         description: Joi.string().required(),
         member: Joi.array().items(payeeSchema).min(1).required(),
+        group_id: Joi.string().guid(),
     })
 
     validateRequest(req, res, next, expenseSchema, 'body')

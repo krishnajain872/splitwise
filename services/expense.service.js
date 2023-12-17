@@ -3,6 +3,7 @@ const { Transaction } = require('../models')
 const { Payee } = require('../models')
 const { sequelize } = require('../models')
 const simpliyTransaction = require('../helpers/transaction.helper')
+// const { Group } = require('../models')
 
 const addExpense = async (payload) => {
     console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', payload)
@@ -38,11 +39,8 @@ const addExpense = async (payload) => {
             currency_id: payload.currency_id,
             expense_id: expense.dataValues.id,
         }))
-
         const payees = await Payee.bulkCreate(payeePayload, { transaction: t })
-
         let allPayeeData = payees.map((payee) => payee.dataValues)
-
         let Transactions = []
         let transactionData
         if (payload.split_by === 'equal') {
@@ -294,7 +292,13 @@ const getPendingExpenseByCurrentUser = async (payload) => {
                 ],
             },
         ],
-        attributes: ['description', 'category', 'id', 'group_id'],
+        attributes: [
+            'description',
+            'category',
+            'id',
+            'group_id',
+            'base_amount',
+        ],
     })
 
     console.log(
@@ -313,12 +317,46 @@ const getPendingExpenseByCurrentUser = async (payload) => {
 }
 // const getExpenseByGroupId = async (payload) => {}
 
+const getExpenseByGroup = async (payload) => {
+    const existingExpense = await Expense.findAll({
+        where: { group_id: payload },
+        attributes: [
+            'description',
+            'category',
+            'id',
+            'group_id',
+            'base_amount',
+        ],
+
+        include: [
+            {
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                include: [
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                ],
+            },
+        ],
+    })
+    return existingExpense
+}
+
 module.exports = {
     addExpense,
     updateExpense,
     deleteExpense,
-    getExpenseById,
+    // getExpenseById,
     getPendingExpenseByCurrentUser,
     // getExpense,
-    // getExpenseByGroup,
+    getExpenseByGroup,
 }

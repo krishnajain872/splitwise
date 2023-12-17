@@ -14,6 +14,7 @@ const createGroup = async (payload) => {
         throw error
     }
     let addAdminInGroup
+
     const group = await Group.create(payload)
     console.log('GROUP CREATED ====>>> ', group)
     if (group) {
