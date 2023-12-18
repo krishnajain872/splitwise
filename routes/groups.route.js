@@ -11,8 +11,8 @@ const router = Router()
 router.post(
     '/',
     checkAccessToken,
-    groupValidator.createGroupSchema,
     groupPermission.checkPermissionByRegistrationStatus,
+    groupValidator.createGroupSchema,
     groupController.createGroup,
     genericResponse.responseHelper
 )
@@ -20,8 +20,8 @@ router.post(
     '/:id/member/add',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupValidator.addMemberSchema,
     groupPermission.checkPermissionByValidGroupMember,
+    groupValidator.addMemberSchema,
     groupController.addMember,
     genericResponse.responseHelper
 )
@@ -52,8 +52,8 @@ router.get(
     '/:id/members',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupPermission.checkPermissionByRegistrationStatus,
-    groupController.findAllMemberForCurrentUser,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.findAllMemberForGroup,
     genericResponse.responseHelper
 )
 router.delete(
@@ -70,7 +70,7 @@ router.put(
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupValidator.udpateExpenseSchema,
-    groupPermission.checkPermissionByRegistrationStatus,
+    groupPermission.checkPermissionByValidGroupMember,
     groupController.updateExpense,
     genericResponse.responseHelper
 )
@@ -79,8 +79,24 @@ router.post(
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupValidator.addExpenseSchema,
-    groupPermission.checkPermissionByRegistrationStatus,
+    groupPermission.checkPermissionByValidGroupMember,
     groupController.addExpense,
+    genericResponse.responseHelper
+)
+router.get(
+    '/:id/member/expense/amount',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.getTotalAmountOwedByCurrentUser,
+    genericResponse.responseHelper
+)
+router.get(
+    '/:id/member/expenses',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.getAllGroupExpensesByCurrentUser,
     genericResponse.responseHelper
 )
 router.delete(

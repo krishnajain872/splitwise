@@ -22,6 +22,10 @@ module.exports = (sequelize, DataTypes) => {
                 as: 'transaction',
                 foreignKey: 'expense_id',
             })
+            Expense.hasMany(models.Payee, {
+                as: 'payees',
+                foreignKey: 'expense_id',
+            })
             Expense.belongsToMany(models.User, {
                 through: models.Payee,
                 foreignKey: 'expense_id',

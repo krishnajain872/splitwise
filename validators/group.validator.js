@@ -84,7 +84,7 @@ const paramsIdCheck = async (req, res, next) => {
 }
 const expenseIdCheck = async (req, res, next) => {
     const schema = Joi.object({
-        id: Joi.string().guid().required(),
+        id: Joi.string().guid(),
         expense_id: Joi.string().guid().required(),
     })
     validateRequest(req, res, next, schema, 'params')

@@ -23,6 +23,11 @@ module.exports = (sequelize, DataTypes) => {
                 foreignKey: 'currency_id',
                 targetKey: 'id',
             })
+            Payee.belongsTo(models.Expense, {
+                as: 'expense_payee',
+                foreignKey: 'expense_id',
+                targetKey: 'id',
+            })
         }
     }
     Payee.init(

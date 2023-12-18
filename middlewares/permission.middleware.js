@@ -108,45 +108,39 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-
 const checkPermissionByTransactionDebt = async (req, res, next) => {
     try {
         const { id: group_id } = req.params.value
         const existingGroup = await Group.findByPk(group_id)
-        console.log('CHECK PERMISSION TRANSACTION  ===>>>  ', group_id)
+
         if (!existingGroup) {
             const error = new Error('group not found')
             error.statusCode = 404
             throw error
         }
-        // eager loading
+
         let totalPendingAmount = 0
 
-        const groupExpence = await Group.findAll({
+        const groupExpenses = await Expense.findAll({
+            where: { group_id },
             include: {
-                model: Expense,
-                as: 'group_expenses',
-                include: {
-                    model: Transaction,
-                    as: 'transaction',
-                    where: { settle_up_at: null },
-                },
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                attributes: ['amount'],
             },
-            where: { id: group_id },
         })
-        groupExpence.forEach((group) => {
-            group.group_expenses.forEach((expense) => {
-                expense.transaction.forEach((transaction) => {
-                    totalPendingAmount =
-                        Number(transaction.dataValues.amount) +
-                        Number(totalPendingAmount)
-                })
+
+        console.log(
+            'THIS IS GROUP EXPENSES FROM PERMISSION==>  ',
+            groupExpenses
+        )
+        groupExpenses.forEach((expense) => {
+            expense.transaction.forEach((transaction) => {
+                totalPendingAmount += Number(transaction.amount)
             })
         })
-        console.log(
-            'THIS IS CHECK TOTAL PENDING AMOUND ===>>  ',
-            totalPendingAmount
-        )
+
         if (totalPendingAmount > 0) {
             const error = new Error('pending debts in group')
             error.statusCode = 409
@@ -155,7 +149,49 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
             next()
         }
     } catch (error) {
-        console.log('CHECK PERMISSION ERROR', error)
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+
+const checkPermissionByUserDebt = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.params.value
+        const existingUser = await User.findByPk(user_id)
+
+        if (!existingUser) {
+            const error = new Error('user not found')
+            error.statusCode = 404
+            throw error
+        }
+
+        let totalPendingAmount = 0
+
+        const userTransactions = await Transaction.findAll({
+            where: {
+                [Op.and]: [
+                    { settle_up_at: null },
+                    {
+                        [Op.or]: [{ payer_id: user_id }, { payee_id: user_id }],
+                    },
+                ],
+            },
+            attributes: ['amount', 'payer_id'],
+        })
+
+        userTransactions.forEach((transaction) => {
+            if (transaction.payer_id === user_id) {
+                totalPendingAmount += Number(transaction.amount)
+            }
+        })
+
+        if (totalPendingAmount > 0) {
+            const error = new Error('pending debts for user')
+            error.statusCode = 409
+            throw error
+        } else {
+            next()
+        }
+    } catch (error) {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
@@ -165,4 +201,5 @@ module.exports = {
     checkPermissionByRegistrationStatus,
     checkPermissionByTransactionDebt,
     checkPermissionByValidGroupMember,
+    checkPermissionByUserDebt,
 }

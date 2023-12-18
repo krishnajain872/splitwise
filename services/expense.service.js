@@ -1,8 +1,13 @@
 const { Expense } = require('../models')
+const { User } = require('../models')
+const { Group } = require('../models')
 const { Transaction } = require('../models')
 const { Payee } = require('../models')
+const { Currency } = require('../models')
 const { sequelize } = require('../models')
 const simpliyTransaction = require('../helpers/transaction.helper')
+const { Op } = require('sequelize')
+
 // const { Group } = require('../models')
 
 const addExpense = async (payload) => {
@@ -25,7 +30,7 @@ const addExpense = async (payload) => {
             (sum, member) => sum + Number(member.amount),
             0
         )
-
+        console.log('expense ==> ', expense)
         if (Number(payload.base_amount) !== totalAmount) {
             const error = Error(
                 'Expense base Amount and total amount of pay by all payee is unequal'
@@ -217,103 +222,147 @@ const updateExpense = async (payload) => {
 }
 
 const deleteExpense = async (payload) => {
-    const existingExpense = await Expense.findOne({
-        include: {
-            model: Transaction,
-            as: 'transaction',
-            where: { settle_up_at: null },
-        },
-        where: { id: payload },
-    })
+    console.log('THIS IS DELETE PAYLOAD :: From service ==>> ', payload)
+    const t = await sequelize.transaction()
+    try {
+        const existingExpense = await Expense.findOne(
+            {
+                include: {
+                    model: Transaction,
+                    as: 'transaction',
+                    where: { settle_up_at: null },
+                },
+                where: { id: payload.expense_id },
+            },
+            { transaction: t }
+        )
 
-    if (!existingExpense) {
-        const error = Error('Expense Not Found')
-        error.statusCode = 404
+        if (!existingExpense) {
+            throw new NotFoundError('Expense Not Found')
+        }
+
+        let totalPendingAmount = 0
+        existingExpense.transaction.forEach((transaction) => {
+            totalPendingAmount += Number(transaction.dataValues.amount)
+        })
+
+        if (totalPendingAmount > 0) {
+            const error = Error('Expense contain pending Transactions')
+            error.statusCode = 422
+            throw error
+        }
+
+        await deleteRecords('Expense', payload.expense_id, t)
+        await deleteRecords('Transaction', payload.expense_id, t)
+        await deleteRecords('Payee', payload.expense_id, t)
+
+        await t.commit()
+        return true
+    } catch (error) {
+        await t.rollback()
         throw error
     }
-    let totalPendingAmount = 0
-    existingExpense.transaction.forEach((transaction) => {
-        totalPendingAmount =
-            Number(transaction.dataValues.amount) + Number(totalPendingAmount)
-    })
-    console.log(
-        'THIS IS CHECK TOTAL PENDING AMOUND ===>>  ',
-        totalPendingAmount
-    )
-
-    if (Number(totalPendingAmount) > 0) {
-        const error = Error('Expense contain pending Transactions ')
-        error.statusCode = 409
-        throw error
-    }
-    const deletedExpense = await Expense.destroy({
-        where: { expense_id: payload.expense_id },
-        transaction: t,
-    })
-    return deletedExpense
 }
+
 // const getExpenseById = async (payload) => {}
 
-const getPendingExpenseByCurrentUser = async (payload) => {
-    const existingExpense = await Expense.findAll({
-        include: [
-            {
-                model: Transaction,
-                as: 'transaction',
-                where: {
-                    [Op.and]: [
-                        {
-                            [Op.or]: [
-                                { payer_id: payload.user_id },
-                                { payee_id: payload.user_id },
-                            ],
-                        },
-                        { settle_up_at: null },
+// const getPendingExpenseByCurrentUser = async (payload) => {
+//     const existingExpense = await Expense.findAll({
+//         include: [
+//             {
+//                 model: Transaction,
+//                 as: 'transaction',
+//                 where: {
+//                     [Op.and]: [
+//                         {
+//                             [Op.or]: [
+//                                 { payer_id: payload.user_id },
+//                                 { payee_id: payload.user_id },
+//                             ],
+//                         },
+//                         { settle_up_at: null },
+//                     ],
+//                 },
+//                 include: [
+//                     {
+//                         model: User,
+//                         as: 'payer_details',
+//                         attributes: ['first_name', 'email', 'mobile'],
+//                     },
+//                     {
+//                         model: User,
+//                         as: 'payee_details',
+//                         attributes: ['first_name', 'email', 'mobile'],
+//                     },
+//                     {
+//                         model: Currency,
+//                         as: 'currency_details',
+//                         attributes: ['code'],
+//                     },
+//                 ],
+//                 attributes: ['id', 'amount'],
+//             },
+//             {
+//                 model: Group,
+//                 as: 'group_details',
+//                 attributes: ['title', 'category'], // Removed 'description'
+//             },
+//         ],
+//         attributes: ['description', 'category', 'id', 'base_amount'],
+//     })
+
+//     return existingExpense.map((expense) => expense.get({ plain: true }))
+// }
+
+const getTotalAmountOwedByCurrentUser = async (payload) => {
+    const transactions = await Transaction.findAll({
+        where: {
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        { payer_id: payload.user_id },
+                        { payee_id: payload.user_id },
                     ],
                 },
-                include: [
-                    {
-                        model: User,
-                        as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
-                    },
-                    {
-                        model: User,
-                        as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
-                    },
-                ],
-                attributes: [
-                    'payer_id',
-                    'payee_id',
-                    'currency_id',
-                    'id',
-                    'amount',
-                ],
+                { settle_up_at: null },
+            ],
+        },
+        include: [
+            {
+                model: User,
+                as: 'payer_details',
+                attributes: ['first_name', 'email', 'mobile'],
+            },
+            {
+                model: User,
+                as: 'payee_details',
+                attributes: ['first_name', 'email', 'mobile'],
+            },
+            {
+                model: Currency,
+                as: 'currency_details',
+                attributes: ['code'],
             },
         ],
-        attributes: [
-            'description',
-            'category',
-            'id',
-            'group_id',
-            'base_amount',
-        ],
+        attributes: ['id', 'amount', 'payer_id', 'payee_id'],
     })
 
-    console.log(
-        'THIS IS EXPENSE DETAILS FOR CURRENT USER  ==> ',
-        existingExpense.map((expense) => expense.get({ plain: true }))
-    )
+    let totalPayeeAmount = 0
+    let totalPayerAmount = 0
 
-    // If you want to return the dataValues of each expense, you can uncomment the following lines:
-    /*
-    let response = [];
-    existingExpense.forEach((data) => {
-        response.push(data.get({ plain: true }));
-    });
-    return response;
-    */
+    transactions.forEach((transaction) => {
+        const { amount, payer_id } = transaction.get({ plain: true })
+
+        if (payer_id === payload.user_id) {
+            totalPayerAmount += Number(amount)
+        } else {
+            totalPayeeAmount += Number(amount)
+        }
+    })
+
+    const total_amount_owed = totalPayeeAmount - totalPayerAmount
+
+    return { ...transactions, total_amount_owed }
 }
 // const getExpenseByGroupId = async (payload) => {}
 
@@ -350,13 +399,244 @@ const getExpenseByGroup = async (payload) => {
     })
     return existingExpense
 }
+const getAllExpensesByUser = async (user_id) => {
+    const payeeExpenses = await Payee.findAll({
+        where: { user_id },
+        attributes: ['expense_id'],
+    })
 
+    // Extract the expense IDs
+    const expenseIds = payeeExpenses.map((payee) => payee.expense_id)
+
+    // Then, find all the expenses with those IDs
+    const expenses = await Expense.findAll({
+        where: { id: expenseIds },
+        attributes: ['description', 'category', 'base_amount', 'group_id'],
+        include: [
+            {
+                model: Payee,
+                as: 'payees',
+                required: true,
+                attributes: ['amount'],
+                include: [
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                ],
+            },
+            {
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                include: [
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: Currency,
+                        as: 'currency_details',
+                        attributes: ['code', 'exchange_rate'],
+                    },
+                ],
+                attributes: ['amount'],
+            },
+        ],
+    })
+
+    return expenses
+}
+const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
+    const payeeExpenses = await Payee.findAll({
+        where: { user_id },
+        include: [
+            {
+                model: Expense,
+                as: 'expense_details',
+                required: true,
+                attributes: [
+                    'base_amount',
+                    'description',
+                    'category',
+                    'group_id',
+                ],
+            },
+        ],
+        attributes: ['expense_id'],
+    })
+    // Extract the expense IDs
+    const expenseIds = []
+    payeeExpenses.map((payee) => {
+        // only non-group expenses
+        if (!payee.expense_details.dataValues.group_id) {
+            expenseIds.push(payee.expense_id)
+        }
+    })
+    // Then, find all the expenses with those IDs
+    const expenses = await Expense.findAll({
+        where: { id: expenseIds, group_id: null },
+        attributes: ['description', 'category', 'base_amount'],
+        include: [
+            {
+                model: Payee,
+                as: 'payees',
+                required: true,
+                attributes: ['amount'],
+                include: [
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                ],
+            },
+            {
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                include: [
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: Currency,
+                        as: 'currency_details',
+                        attributes: ['code', 'exchange_rate'],
+                    },
+                ],
+                attributes: ['amount'],
+            },
+        ],
+    })
+
+    return expenses
+}
+const getAllGroupExpensesByCurrentUser = async (user_id) => {
+    const payeeExpenses = await Payee.findAll({
+        where: { user_id },
+        include: [
+            {
+                model: Expense,
+                as: 'expense_details',
+                required: true,
+                attributes: [
+                    'base_amount',
+                    'description',
+                    'category',
+                    'group_id',
+                ],
+            },
+        ],
+        attributes: ['expense_id'],
+    })
+    // Extract the expense IDs
+    const expenseIds = []
+    payeeExpenses.map((payee) => {
+        // only non-group expenses
+        if (payee.expense_details.dataValues.group_id) {
+            expenseIds.push(payee.expense_id)
+        }
+    })
+    // Then, find all the expenses with those IDs
+    const expenses = await Expense.findAll({
+        where: { id: expenseIds, group_id: null },
+        attributes: ['description', 'category', 'base_amount'],
+        include: [
+            {
+                model: Payee,
+                as: 'payees',
+                required: true,
+                attributes: ['amount'],
+                include: [
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                ],
+            },
+            {
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                include: [
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                    {
+                        model: Currency,
+                        as: 'currency_details',
+                        attributes: ['code', 'exchange_rate'],
+                    },
+                ],
+                attributes: ['amount'],
+            },
+
+            {
+                model: Group,
+                as: 'group_details',
+                required: true,
+                attributes: ['title', 'category', 'admin_id'],
+                include: [
+                    {
+                        model: User,
+                        as: 'admin_details',
+                        attributes: ['first_name', 'email', 'mobile'],
+                    },
+                ],
+            },
+        ],
+    })
+
+    return expenses
+}
 module.exports = {
     addExpense,
     updateExpense,
     deleteExpense,
     // getExpenseById,
-    getPendingExpenseByCurrentUser,
+    // getPendingExpenseByUser,
     // getExpense,
+    getTotalAmountOwedByCurrentUser,
     getExpenseByGroup,
+    getAllExpensesByUser,
+    getAllNonGroupExpensesByCurrentUser,
+    getAllGroupExpensesByCurrentUser,
 }

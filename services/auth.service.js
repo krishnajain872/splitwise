@@ -1,9 +1,7 @@
 const bcrypt = require('bcrypt')
 const jwt = require('jsonwebtoken')
-// const { User } = require('../models')
 const verification = require('../helpers/verifyRegistration.helper')
-const db = require('./../models')
-const User = db.User
+const { User } = require('../models')
 const mailer = require('../helpers/mail.helper')
 const {
     JWT_REFRESH_TOKEN_EXPIRATION: refresh_expire,
@@ -87,7 +85,6 @@ const forgetPassword = async (payload) => {
     const userData = await User.findOne({
         where: { mobile: payload },
     })
-
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404

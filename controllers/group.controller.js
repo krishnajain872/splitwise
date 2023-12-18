@@ -53,9 +53,8 @@ const updateExpense = async (req, res, next) => {
 }
 const deleteExpense = async (req, res, next) => {
     try {
-        const { expense_id: payload } = req.params.value
-        console.log('Payload for ==> ', payload)
-        const data = await expenseService.deleteExpense(payload)
+        const expense_id = req.params
+        const data = await expenseService.deleteExpense(expense_id.value)
         res.data = data
         next()
     } catch (error) {
@@ -125,7 +124,7 @@ const findAllGroupForCurrentUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-const findAllMemberForCurrentUser = async (req, res, next) => {
+const findAllMemberForGroup = async (req, res, next) => {
     try {
         const { id: payload } = req.params.value
         const data = await groupService.findAllMemberOfCurrentGroup(payload)
@@ -163,6 +162,35 @@ const removeMember = async (req, res, next) => {
     }
 }
 
+const getTotalAmountOwedByCurrentUser = async (req, res, next) => {
+    try {
+        const { id: group_id } = req.params.value
+        const { id: user_id } = req.user
+        const payload = {
+            group_id,
+            user_id,
+        }
+        const data =
+            await expenseService.getTotalAmountOwedByCurrentUser(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+
+const getAllGroupExpensesByCurrentUser = async (req, res, next) => {
+    try {
+        const { id: payload } = req.user
+        const data =
+            await expenseService.getAllGroupExpensesByCurrentUser(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+
 module.exports = {
     createGroup,
     deleteGroup,
@@ -175,7 +203,9 @@ module.exports = {
     addMember,
     updateExpense,
     addExpense,
-    findAllMemberForCurrentUser,
+    findAllMemberForGroup,
     deleteExpense,
     removeMember,
+    getTotalAmountOwedByCurrentUser,
+    getAllGroupExpensesByCurrentUser,
 }

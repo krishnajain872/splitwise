@@ -132,7 +132,9 @@ function calculateTransactions(expense, payees) {
     let updatedPayees = payees.map((payee) => {
         let share = Number(payee.share)
         let amount = Number(payee.amount)
-        let calculatedShare = share ? share : expense / payees.length
+        let calculatedShare = !(share === null || share === undefined)
+            ? share
+            : expense / payees.length
         let balance = amount - calculatedShare
         balance = Number(balance.toFixed(2))
         return { ...payee, balance }

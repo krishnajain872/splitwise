@@ -240,6 +240,9 @@ const removeMember = async (payload) => {
         error.statusCode = 404
         throw error
     }
+
+    // const deptOfUser = tran
+
     const removedMember = await UserGroup.destroy({
         where: {
             [Op.and]: [{ user_id: payload.user_id }, { group_id: payload.id }],

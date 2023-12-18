@@ -3,7 +3,7 @@ module.exports = {
     up: async (queryInterface) => {
         const botUsers = []
         for (let i = 1; i <= 9; i++) {
-            botUsers.push({
+            let bot = {
                 first_name: `Bot${i}`,
                 last_name: `User${i}`,
                 avatar: `bot${i}.jpg`,
@@ -13,9 +13,11 @@ module.exports = {
                 status: 'verified',
                 created_at: new Date(),
                 updated_at: new Date(),
-            })
+                deleted_at: new Date(),
+            }
+            botUsers.push(bot)
         }
-        return queryInterface.bulkInsert(botUsers)
+        return queryInterface.bulkInsert('users', botUsers)
     },
 
     down: async (queryInterface) => {
