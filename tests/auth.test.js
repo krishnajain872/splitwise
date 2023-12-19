@@ -20,6 +20,7 @@ const userFakeData = () => {
 }
 let refresh
 let access
+// let access2
 let user_id
 let token
 let expired_token =
@@ -42,21 +43,31 @@ beforeAll(async () => {
             ...data[3],
             password,
         },
+        {
+            ...data[4],
+            password,
+        },
     ]
 
     const user = await User.bulkCreate(payload)
     const verified_user_response = await request(app)
         .post('/api/auth/login')
-        .send({ mobile: data[1].mobile, password: data[1].password })
+        .send({ mobile: user[0].mobile, password: data[1].password })
     verified_user_access_token = verified_user_response.body.data.accessToken
+    console.log(
+        'THIS IS VERIFIED ACCESS TOKEN ===> 4000 ',
+        verified_user_access_token
+    )
     const user_not_found_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[3].mobile, password: data[1].password })
+
     user_not_found_access_token = user_not_found_response.body.data.accessToken
     const user_not_found_token_response = await request(app)
         .get('/api/auth/send-verification')
         .set('authorization', `Bearer ${user_not_found_access_token}`)
     user_not_found_token = user_not_found_token_response.body.data.token
+
     await User.destroy({
         where: {
             id: user[1].dataValues.id,
@@ -206,6 +217,7 @@ describe('TEST get api/auth/send-verification', () => {
         const res = await request(app)
             .get('/api/auth/send-verification')
             .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log('THIS IS FROM TEST SEND _VERIFICATIO => ', res.body)
         expect(res.statusCode).toEqual(409)
         // Add more assertions here to check the response body
     })
@@ -236,11 +248,11 @@ describe('TEST get api/auth/send-verification', () => {
 })
 describe('TEST get api/auth/verify', () => {
     // Test case for successful verification
-
     it('should accept a valid token and verify the user', async () => {
         const res = await request(app)
             .get(`/api/auth/verify/${token}`)
-            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .set('authorization', `Bearer ${access}`)
+        console.log('THIS IS FROM 200 verify', res.body)
         expect(res.statusCode).toEqual(200)
         expect(res.body).toHaveProperty('data.id')
         expect(res.body).toHaveProperty('data.status', 'verified')
@@ -249,20 +261,20 @@ describe('TEST get api/auth/verify', () => {
     it('should reject an exprired or invalid ', async () => {
         const res = await request(app)
             .get(`/api/auth/verify/${expired_token}`)
-            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .set('authorization', `Bearer ${access}`)
         expect(res.statusCode).toEqual(401)
     })
     it('should response 404 if user not found ', async () => {
         const res = await request(app)
             .get(`/api/auth/verify/${user_not_found_token}`)
-            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .set('authorization', `Bearer ${access}`)
 
         expect(res.statusCode).toEqual(404)
     })
     it('should reject an invalid format token in the path', async () => {
         const res = await request(app)
             .get('/api/auth/verify/not_a_token')
-            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .set('authorization', `Bearer ${access}`)
         expect(res.statusCode).toEqual(400)
     })
 })

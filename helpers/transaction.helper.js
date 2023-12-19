@@ -8,12 +8,6 @@ function calculateTransactions(expense, payees) {
         balance = Number(balance.toFixed(2))
         return { ...payee, balance }
     })
-
-    console.log(
-        'THIS IS UPDATED PAYESS FROM TRANSACTION CALCULATION ==>> \n',
-        updatedPayees
-    )
-
     updatedPayees.sort((a, b) => a.balance - b.balance)
 
     let payerIndex = 0
@@ -53,12 +47,6 @@ function calculateTransactionsByShare(expense, payees) {
         balance = Number(balance.toFixed(2))
         return { ...payee, balance }
     })
-
-    console.log(
-        'THIS IS UPDATED PAYESS FROM TRANSACTION CALCULATION ==>> \n',
-        updatedPayees
-    )
-
     updatedPayees.sort((a, b) => a.balance - b.balance)
 
     let payerIndex = 0

@@ -2,6 +2,7 @@
 const express = require('express')
 const router = express.Router()
 const userController = require('../controllers/user.controller')
+const transactionController = require('../controllers/transaction.controller')
 const { checkAccessToken } = require('../middlewares/auth.middleware')
 const genericResponse = require('./../helpers/commonResponse.helper')
 const groupValidator = require('../validators/group.validator.js')
@@ -31,13 +32,19 @@ router.get(
     userController.getCurrentUser,
     genericResponse.responseHelper
 )
-
 router.post(
     '/expense/',
     checkAccessToken,
     groupValidator.addExpenseSchema,
     permission.checkPermissionByRegistrationStatus,
     userController.addNonGroupExpense,
+    genericResponse.responseHelper
+)
+router.post(
+    '/expense/:id/transaction/:transaction_id/settle-up',
+    checkAccessToken,
+    permission.checkPermissionByRegistrationStatus,
+    transactionController.settleUpTransaction,
     genericResponse.responseHelper
 )
 router.put(

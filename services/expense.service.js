@@ -1,6 +1,7 @@
 const { Expense } = require('../models')
 const { User } = require('../models')
 const { Group } = require('../models')
+const { UserGroup } = require('../models')
 const { Transaction } = require('../models')
 const { Payee } = require('../models')
 const { Currency } = require('../models')
@@ -12,8 +13,24 @@ const { Op } = require('sequelize')
 
 const addExpense = async (payload) => {
     console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', payload)
+
     const t = await sequelize.transaction()
     try {
+        if (payload.group_id) {
+            payload.member.map(async (payee) => {
+                const data = await UserGroup.findAll({
+                    where: {
+                        [Op.and]: [
+                            { group_id: payload.group_id },
+                            { user_id: payee.user_id },
+                        ],
+                    },
+                })
+                if (!data) {
+                    payload.group_id = null
+                }
+            })
+        }
         const expense = await Expense.create(
             {
                 base_amount: payload.base_amount,
@@ -80,7 +97,7 @@ const addExpense = async (payload) => {
         console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
 
         transactionData.forEach((data) => {
-            data.amount = Math.round(data.amount)
+            data.amount = data.amount
         })
 
         const transactionResponse = await Transaction.bulkCreate(
@@ -92,13 +109,12 @@ const addExpense = async (payload) => {
         Transactions = transactionResponse.map(
             (transaction) => transaction.dataValues
         )
+        const response = {}
+        response.expense = expense
+        response.allPayeeData = allPayeeData
+        response.Transactions = Transactions
         await t.commit()
-
-        return {
-            expense: expense.dataValues,
-            allPayeeData,
-            Transactions,
-        }
+        return response
     } catch (error) {
         await t.rollback()
         throw error
@@ -109,6 +125,21 @@ const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
         console.log('THIS IS UPDATE EXPENSE PAYLOAD FOR =====> ', payload)
+        if (payload.group_id) {
+            payload.member.map(async (payee) => {
+                const data = await UserGroup.findAll({
+                    where: {
+                        [Op.and]: [
+                            { group_id: payload.group_id },
+                            { user_id: payee.user_id },
+                        ],
+                    },
+                })
+                if (!data) {
+                    payload.group_id = null
+                }
+            })
+        }
         // Fetch the existing expense
         const expense = await Expense.findByPk(payload.expense_id)
         if (!expense) {
@@ -189,7 +220,7 @@ const updateExpense = async (payload) => {
             )
         }
         transactionData.forEach((data) => {
-            data.amount = Math.round(data.amount)
+            data.amount = data.amount
         })
 
         if (!transactionData) {

@@ -21,7 +21,6 @@ const addMemberSchema = async (req, res, next) => {
 
 const updateGroupSchema = async (req, res, next) => {
     const schema = Joi.object({
-        id: Joi.string().guid().required(),
         title: Joi.string().min(3),
         display_picture: Joi.string(),
         category: Joi.string().valid(
@@ -41,7 +40,6 @@ const addExpenseSchema = async (req, res, next) => {
         amount: Joi.number().precision(2).required(),
         share: Joi.number().precision(2),
     })
-
     const expenseSchema = Joi.object({
         base_amount: Joi.number().precision(2).required(),
         split_by: Joi.string().valid('equal', 'share').required(),

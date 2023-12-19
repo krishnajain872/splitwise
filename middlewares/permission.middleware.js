@@ -92,7 +92,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
             existingUser.user_details.status === 'unVerified'
         ) {
             const error = new Error('user is not verified')
-            error.statusCode = 403
+            error.statusCode = 401
             throw error
         } else {
             next()

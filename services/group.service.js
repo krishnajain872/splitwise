@@ -47,11 +47,14 @@ const deleteGroup = async (payload) => {
 
 const updateGroup = async (payload) => {
     const { id: group_id, ...rest } = payload
+    console.log('THIS IS SERVICE PAYLOAD ==> ', payload)
     const existingGroup = await Group.findByPk(group_id, {
         attributes: ['title', 'category', 'id', 'admin_id'],
     })
     if (!existingGroup) {
-        throw new Error('Group not found', { statusCode: 404 })
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
     }
     const updatedData = { ...existingGroup.dataValues, ...rest }
     const update = await Group.update(updatedData, { where: { id: group_id } })
@@ -154,7 +157,6 @@ const findAllMemberOfCurrentGroup = async (payload) => {
     return group_and_members
 }
 const addMember = async (payload) => {
-    console.log(' addMember GROUP PAYLOAD Service ====>>> ', payload)
     const group_id = payload.group_id
     let addedGroupMembers = {}
 
@@ -169,10 +171,6 @@ const addMember = async (payload) => {
     const userArray = payload.member
     await Promise.all(
         userArray.map(async (user_id, i) => {
-            console.log(
-                'THIS IS MAPED USER ID FROM ADD MEMEBER SERVICE==>',
-                user_id
-            )
             const [existingUser, existingMapping] = await Promise.all([
                 User.findByPk(user_id),
                 UserGroup.findOne({

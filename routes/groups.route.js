@@ -1,6 +1,7 @@
 const { Router } = require('express')
 
 const groupController = require('../controllers/group.controller')
+const transactionController = require('../controllers/transaction.controller')
 const groupPermission = require('../middlewares/permission.middleware')
 const groupValidator = require('../validators/group.validator.js')
 const genericResponse = require('./../helpers/commonResponse.helper')
@@ -25,6 +26,13 @@ router.post(
     groupController.addMember,
     genericResponse.responseHelper
 )
+router.post(
+    '/:id/expense/:expense_id/transaction/settle-up',
+    checkAccessToken,
+    groupPermission.checkPermissionByRegistrationStatus,
+    transactionController.settleUpTransaction,
+    genericResponse.responseHelper
+)
 router.delete(
     '/:id/member/remove/:user_id',
     checkAccessToken,
@@ -34,10 +42,11 @@ router.delete(
     genericResponse.responseHelper
 )
 router.patch(
-    '/',
+    '/:id',
     checkAccessToken,
+    groupValidator.paramsIdCheck,
     groupValidator.updateGroupSchema,
-    groupPermission.checkPermissionByRegistrationStatus,
+    groupPermission.checkPermissionByValidGroupMember,
     groupController.updateGroup,
     genericResponse.responseHelper
 )

@@ -29,8 +29,10 @@ const deleteGroup = async (req, res, next) => {
 }
 const updateGroup = async (req, res, next) => {
     try {
-        const { body: payload } = req
-        const data = await groupService.updateGroup(payload.value)
+        let payload
+        const { body: payload_data } = req
+        payload = { ...payload_data.value, id: req.params.value.id }
+        const data = await groupService.updateGroup(payload)
         res.data = data
         next()
     } catch (error) {
@@ -73,16 +75,16 @@ const addExpense = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-const updateGroupAdmin = async (req, res, next) => {
-    try {
-        const { body: payload } = req
-        const data = await groupService.updateGroupAdmin(payload.value)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
+// const updateGroupAdmin = async (req, res, next) => {
+//     try {
+//         const { body: payload } = req
+//         const data = await groupService.updateGroupAdmin(payload.value)
+//         res.data = data
+//         next()
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
 const findGroupById = async (req, res, next) => {
     try {
         const { params: payload } = req
@@ -151,6 +153,7 @@ const addMember = async (req, res, next) => {
 const removeMember = async (req, res, next) => {
     try {
         const payload = req.params.value
+        console.log('REMOVE MEMBER SERVICE CALLED ', payload)
         const removedBy = req.user
         const data = await groupService.removeMember(payload)
         res.data = data
@@ -194,7 +197,7 @@ module.exports = {
     createGroup,
     deleteGroup,
     updateGroup,
-    updateGroupAdmin,
+    // updateGroupAdmin,
     findGroupById,
     findGroupByName,
     findGroupByCategory,

@@ -17,7 +17,7 @@ getAllTransactionByExpenseId = async (payload) => {
     return transaction
 }
 settleUpTransaction = async (payload) => {
-    const transaction = await Transaction.findById(payload)
+    const transaction = await Transaction.findById(payload.transaction_id)
     if (!transaction) {
         const error = Error('Transaction not found')
         error.statusCode = 404
