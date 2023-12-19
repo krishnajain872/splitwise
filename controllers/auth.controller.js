@@ -6,10 +6,9 @@ const userSignup = async (req, res, next) => {
         const { body: payload } = req
         const data = await authService.userRegistration(payload.value)
         res.data = data
-        console.log('REGISTERED CONTROLLER DATA ==>', data)
+
         next()
     } catch (error) {
-        console.log('User Registration error ==> ', error)
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }

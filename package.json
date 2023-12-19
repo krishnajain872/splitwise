@@ -7,7 +7,7 @@
         "start": "node index.js",
         "dev": "NODE_ENV=test nodemon index.js",
         "dev-setup": " NODE_ENV=test npx sequelize-cli db:migrate:undo:all && NODE_ENV=test npx sequelize-cli db:migrate &&NODE_ENV=test npx sequelize-cli db:seed:all && NODE_ENV=test nodemon index.js",
-        "test": "NODE_ENV=test nodemon index.js",
+        "test": "NODE_ENV=test npx --detectOpenHandles jest ",
         "db-setup": "NODE_ENV=test npx sequelize-cli db:migrate &&NODE_ENV=test npx sequelize-cli db:seed:all",
         "db-drop": "NODE_ENV=test npx sequelize-cli db:drop",
         "factory": "NODE_ENV=test node factory.js",

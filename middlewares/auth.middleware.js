@@ -9,6 +9,8 @@ const checkAccessToken = async (req, res, next) => {
         const accessToken = req.headers['authorization']?.split(' ')[1]
         const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
 
+        console.log('THIS IS ACCESS TOKEN FROM MIDDLEWARE ==> ', accessToken)
+
         if (!accessToken) {
             const error = new Error('UnAuthorized Access')
             error.statusCode = 401
@@ -48,38 +50,24 @@ const checkAccessToken = async (req, res, next) => {
     }
 }
 const checkRefreshToken = async (req, res, next) => {
+    const { refresh_token: refresh } = req.body
+    const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
+
+    if (!refresh) {
+        const error = new Error('token not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    let decodedJwt
     try {
-        const refresh = req.body.refresh_token
-        console.log('refreshToken middlware PAYLAOD  ==>> ', refresh)
-        const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
-
-        if (!refresh) {
-            const error = new Error('UnAuthorized Access')
-            error.statusCode = 401
-            throw error
-        }
-        const decodedJwt = await jwt.verify(refresh, secret)
-        if (!decodedJwt) {
-            const error = new Error('UnAuthorized Access')
-            error.statusCode = 401
-            throw error
-        }
-        const user = await User.findByPk(decodedJwt.user_id, {
-            attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
-        })
-
-        if (!user) {
-            const error = new Error('User not found')
-            error.statusCode = 404
-            throw error
-        } else {
-            // Add user ID to the request object
-            req.user = user.dataValues
-            // Call next middleware with user ID accessible
-            next()
-        }
+        decodedJwt = await jwt.verify(refresh, secret)
     } catch (error) {
-        if (error.message.toLowerCase().trim() === 'jwt expired') {
+        if (
+            ['jwt expired', 'jwt malformed', 'invalid signature'].includes(
+                error.message.toLowerCase().trim()
+            )
+        ) {
             error.statusCode = 401
         }
         return generic.errorHelper(
@@ -90,6 +78,19 @@ const checkRefreshToken = async (req, res, next) => {
             error
         )
     }
+
+    const user = await User.findByPk(decodedJwt.user_id)
+
+    if (!user) {
+        const error = new Error('User not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    // Add user ID to the request object
+    req.user = user.get({ plain: true }) // Use Sequelize's `get` method to get plain object
+    // Call next middleware with user ID accessible
+    next()
 }
 
 module.exports = {

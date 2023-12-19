@@ -15,8 +15,6 @@ function createURL(base_url, token) {
 }
 const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
-
-    console.log('THIS IS MAIL FOR SEND VERIFICATION =>', payload.email)
     const userData = await User.findByPk(payload.user_id, {
         attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
     })
@@ -39,7 +37,6 @@ const sendVerificationLink = async (payload) => {
     const subject = ` Splitwise -: User Verfication`
 
     const mail = await mailer.sendMail(body, subject, payload.email)
-    console.log('THIS IS MAIL FROM SEND mail ==> ', mail)
     if (!mail) {
         const error = new Error('mail not sent')
         error.statusCode = 422
@@ -55,27 +52,32 @@ const sendVerificationLink = async (payload) => {
     userData.dataValues.status = 'unVerified'
     return userData.dataValues
 }
-
 const userRegistration = async (payload) => {
     const { PASSWORD_HASH_SALTS: salt } = process.env
-    payload.password = await bcrypt.hash(payload.password, Number(salt))
 
+    // Check if the user already exists before hashing the password
     const existingUser = await User.findOne({
         where: { mobile: payload.mobile },
-        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+        attributes: ['id'],
     })
     if (existingUser) {
-        const error = new Error('user already registered')
+        const error = new Error('User already registered')
         error.statusCode = 409
         throw error
     }
+
+    // Hash the password only if the user does not exist
+    payload.password = await bcrypt.hash(payload.password, parseInt(salt))
     payload.status = 'dummy'
+
     const user = await User.create(payload)
-    const accessToken = jwt.sign({ user_id: user.dataValues.id }, auth_secret, {
+
+    const accessToken = jwt.sign({ user_id: user.id }, auth_secret, {
         expiresIn: auth_expire,
     })
+
     return {
-        ...user.dataValues,
+        ...user.get({ plain: true }), // Use Sequelize's `get` method to get plain object
         accessToken,
     }
 }
@@ -152,11 +154,13 @@ const userLogin = async (payload) => {
 
 const generateAccessToken = async (payload) => {
     const decodedJwt = await jwt.verify(payload.refresh_token, refresh_secret)
+
     if (!decodedJwt) {
         const error = new Error('UnAuthorized Access')
         error.statusCode = 401
         throw error
     }
+
     const user = await User.findByPk(decodedJwt.user_id, {
         attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
     })

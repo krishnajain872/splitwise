@@ -21,7 +21,6 @@ const errorHelper = async (
     }
     res.status(statusCode).json(response)
 }
-
 const responseHelper = async (req, res) => {
     const response = {
         statusCode: res.statusCode,

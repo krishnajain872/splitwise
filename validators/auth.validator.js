@@ -5,7 +5,7 @@ const signupSchema = (req, res, next) => {
         first_name: Joi.string().min(3).max(30).required().label('First Name'),
         last_name: Joi.string().min(3).max(30).required().label('Last Name'),
         email: Joi.string()
-            .email()
+            .email({ tlds: { allow: false } }) // Disallow top-level domains to allow more email formats
             .lowercase()
             .trim()
             .required()
@@ -15,11 +15,12 @@ const signupSchema = (req, res, next) => {
             .pattern(/^[0-9]+$/)
             .required()
             .label('Phone Number'),
-        password: Joi.string().required().label('Password'),
-        avatar: Joi.string(),
+        password: Joi.string().min(8).required().label('Password'), // Add a minimum length to the password for security
+        avatar: Joi.string().uri(), // Validate that the avatar is a URI
     })
     validateRequest(req, res, next, schema, 'body')
 }
+
 const loginSchema = (req, res, next) => {
     const schema = Joi.object({
         mobile: Joi.string()
@@ -52,18 +53,19 @@ const resetSchema = (req, res, next) => {
     validateRequest(req, res, next, schema, 'body')
 }
 
-const acessTokenSchema = (req, res, next) => {
+const accessTokenSchema = (req, res, next) => {
     const schema = Joi.object({
         refresh_token: Joi.string()
-            .regex(/^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/)
+            .pattern(/^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/)
             .required()
             .messages({
-                'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/`,
-                'any.required': `"token" is a required field`,
+                'string.pattern.base': `"refresh_token" with value "{:refresh_token}" fails to match the required pattern: /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/`,
+                'any.required': `"refresh_token" is a required field`,
             }),
     })
     validateRequest(req, res, next, schema, 'body')
 }
+
 const verifySchema = (req, res, next) => {
     const schema = Joi.object({
         token: Joi.string().required().messages({
@@ -77,7 +79,7 @@ const verifySchema = (req, res, next) => {
 module.exports = {
     signupSchema,
     loginSchema,
-    acessTokenSchema,
+    accessTokenSchema,
     verifySchema,
     forgetSchema,
     resetSchema,

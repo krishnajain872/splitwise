@@ -34,7 +34,7 @@ router.get(
 router.post(
     '/access-token',
     authMiddleware.checkRefreshToken,
-    authValidator.acessTokenSchema,
+    authValidator.accessTokenSchema,
     authController.generateAccessToken,
     genericResponse.responseHelper
 )
