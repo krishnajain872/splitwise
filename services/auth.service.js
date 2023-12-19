@@ -10,21 +10,27 @@ const {
     JWT_AUTH_TOKEN_EXPIRATION: auth_expire,
 } = process.env
 
-function createURL(base_url, token) {
-    return `${base_url}/verify/${token}`
+function createURL(base_url, route, token) {
+    return `${base_url}/api/auth/${route}/${token}`
 }
 const sendVerificationLink = async (payload) => {
     const { BASE_URL: base_url } = process.env
     const userData = await User.findByPk(payload.user_id, {
-        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+        attributes: [
+            'first_name',
+            'last_name',
+            'id',
+            'mobile',
+            'email',
+            'status',
+        ],
     })
     if (!userData) {
         const error = new Error('User not found')
         error.statusCode = 404
         throw error
     }
-
-    if (userData.status === 'verified') {
+    if (userData.dataValues.status === 'verified') {
         const error = new Error('User already verified')
         error.statusCode = 409
         throw error
@@ -32,7 +38,7 @@ const sendVerificationLink = async (payload) => {
 
     const token = await verification.generateToken(payload.user_id)
 
-    const url = createURL(base_url, token)
+    const url = createURL(base_url, 'verify', token)
     const body = `use this link for your account verification -: ${url} `
     const subject = ` Splitwise -: User Verfication`
 
@@ -42,7 +48,7 @@ const sendVerificationLink = async (payload) => {
         error.statusCode = 422
         throw error
     }
-
+    console.log('THIS IS MAIL FROM SERVICE =>>', mail)
     await User.update(
         { status: 'unVerified' },
         { where: { id: payload.user_id } }
@@ -93,7 +99,7 @@ const forgetPassword = async (payload) => {
         throw error
     }
     const token = await verification.generateToken(userData.id)
-    const url = createURL(base_url, token)
+    const url = createURL(base_url, 'reset-password', token)
     const body = `use this link for your reset your password -: ${url} `
     const subject = ` Splitwise -: Forget password`
 

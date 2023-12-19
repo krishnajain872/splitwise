@@ -39,13 +39,13 @@ router.post(
     genericResponse.responseHelper
 )
 router.post(
-    '/forget',
+    '/forget-password',
     authValidator.forgetSchema,
     authController.forgetPassword,
     genericResponse.responseHelper
 )
 router.post(
-    '/reset',
+    '/reset-password',
     authValidator.resetSchema,
     authController.resetPassword,
     genericResponse.responseHelper

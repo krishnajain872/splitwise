@@ -8,9 +8,6 @@ const checkAccessToken = async (req, res, next) => {
     try {
         const accessToken = req.headers['authorization']?.split(' ')[1]
         const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
-
-        console.log('THIS IS ACCESS TOKEN FROM MIDDLEWARE ==> ', accessToken)
-
         if (!accessToken) {
             const error = new Error('UnAuthorized Access')
             error.statusCode = 401

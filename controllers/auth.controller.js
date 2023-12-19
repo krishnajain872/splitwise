@@ -15,6 +15,7 @@ const userSignup = async (req, res, next) => {
 const userLogin = async (req, res, next) => {
     try {
         const { body: payload } = req
+
         const data = await authService.userLogin(payload.value)
         res.data = data
         next()

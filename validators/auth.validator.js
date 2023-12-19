@@ -58,6 +58,7 @@ const accessTokenSchema = (req, res, next) => {
         refresh_token: Joi.string()
             .pattern(/^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/)
             .required()
+            .min(10)
             .messages({
                 'string.pattern.base': `"refresh_token" with value "{:refresh_token}" fails to match the required pattern: /^[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+\.[a-zA-Z0-9-_]+$/`,
                 'any.required': `"refresh_token" is a required field`,
@@ -68,10 +69,14 @@ const accessTokenSchema = (req, res, next) => {
 
 const verifySchema = (req, res, next) => {
     const schema = Joi.object({
-        token: Joi.string().required().messages({
-            'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-fA-F0-9]+,[0-9]+$/`,
-            'any.required': `"token" is a required field`,
-        }),
+        token: Joi.string()
+            .pattern(/^[a-fA-F0-9]+:[a-fA-F0-9]+,[0-9]+$/)
+            .min(10)
+            .required()
+            .messages({
+                'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-fA-F0-9]+,[0-9]+$/`,
+                'any.required': `"token" is a required field`,
+            }),
     })
     validateRequest(req, res, next, schema, 'params')
 }

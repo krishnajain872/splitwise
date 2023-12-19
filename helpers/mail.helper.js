@@ -25,7 +25,11 @@ async function sendMail(body, subject, recipient) {
         // verify connection configuration
         transport.verify(function (error) {
             if (error) {
-                return new Error(`MAIL TRANSPORTER ERROR => ${error}`)
+                const errordata = new Error(
+                    `MAIL TRANSPORTER ERROR => ${error}`
+                )
+                errordata.statusCode = 422
+                return errordata
             }
         })
         const mailOptions = {
@@ -38,7 +42,16 @@ async function sendMail(body, subject, recipient) {
         const result = await transport.sendMail(mailOptions)
         return result.messageId
     } catch (error) {
-        return new Error(`MAIL TRANSPORTER ERROR => ${error}`)
+        const errordata = new Error(
+            `MAIL TRANSPORTER ERROR => ${error.message}`
+        )
+        console.error('ERROR FROM MAIL HELPER ', error)
+        if (error.message.includes('Verification email could not be sent')) {
+            errordata.statusCode = 422
+        } else {
+            errordata.statusCode = 500
+        }
+        return errordata
     }
 }
 
