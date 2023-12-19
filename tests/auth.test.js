@@ -196,6 +196,7 @@ describe('TEST get api/auth/send-verification', () => {
     // Test case for unAuthorized access to the route
     it('should fail when  unAuthorized access', async () => {
         const res = await request(app).get('/api/auth/send-verification')
+        console.log('THIS IS RESPONSE OF SEND_VERFIFICATION 401 ==> ', res.body)
         expect(res.statusCode).toEqual(401)
         // Add more assertions here to check the response body
     })
@@ -308,11 +309,11 @@ describe('TEST post api/auth/forget-password', () => {
             .post('/api/auth/forget-password')
             .set('authorization', `Bearer ${access}`)
             .send({
-                mobile: '1234567890',
+                mobile: data[2].mobile,
             })
         // Expect a 422 status code
         expect(res.body.statusCode).toEqual(422)
-
+        console.log('THIS IS FROM MAIL TESTER ===> ', res.body)
         // Assert on the error message in the response body
         expect(res.body.message).toEqual(
             'Verification email could not be sent due to a temporary network issue.'
@@ -361,5 +362,6 @@ describe('POST/reset-password API endpoint', () => {
         expect(response.body.data).toHaveProperty('email')
     })
 })
-
-afterAll(async () => {})
+afterAll(async () => {
+    await User.truncate()
+})

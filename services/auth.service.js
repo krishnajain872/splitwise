@@ -48,7 +48,6 @@ const sendVerificationLink = async (payload) => {
         error.statusCode = 422
         throw error
     }
-    console.log('THIS IS MAIL FROM SERVICE =>>', mail)
     await User.update(
         { status: 'unVerified' },
         { where: { id: payload.user_id } }

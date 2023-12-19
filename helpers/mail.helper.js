@@ -48,9 +48,8 @@ async function sendMail(body, subject, recipient) {
         console.error('ERROR FROM MAIL HELPER ', error)
         if (error.message.includes('Verification email could not be sent')) {
             errordata.statusCode = 422
-        } else {
-            errordata.statusCode = 500
         }
+
         return errordata
     }
 }
