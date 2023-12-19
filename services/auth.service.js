@@ -212,6 +212,7 @@ const resetPassword = async (payload) => {
         error.statusCode = 401
         throw error
     }
+
     const userData = await User.findByPk(response.data, {
         attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
     })

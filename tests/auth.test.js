@@ -57,10 +57,6 @@ beforeAll(async () => {
         .get('/api/auth/send-verification')
         .set('authorization', `Bearer ${user_not_found_access_token}`)
     user_not_found_token = user_not_found_token_response.body.data.token
-    console.log(
-        ' user_not_found_token_response, ==>',
-        user_not_found_token_response.body
-    )
     await User.destroy({
         where: {
             id: user[1].dataValues.id,
@@ -228,7 +224,6 @@ describe('TEST get api/auth/send-verification', () => {
             .set('authorization', `Bearer ${access}`)
             .send({ user_id })
         // Expect a 422 status code
-        console.log('THIS IS FROM MAIL TEST ==>', res.body)
         expect(res.body.statusCode).toEqual(422)
         // Assert on the error message in the response body
         expect(res.body.message).toEqual(
@@ -267,7 +262,6 @@ describe('TEST get api/auth/verify', () => {
         const res = await request(app)
             .get('/api/auth/verify/not_a_token')
             .set('authorization', `Bearer ${verified_user_access_token}`)
-        console.log('Invalid token formate USER TOKEN TEST CASE ==> ', res.body)
         expect(res.statusCode).toEqual(400)
     })
 })
@@ -317,7 +311,6 @@ describe('TEST post api/auth/forget-password', () => {
                 mobile: '1234567890',
             })
         // Expect a 422 status code
-        console.log('THIS IS FROM MAIL TEST ==>', res.body)
         expect(res.body.statusCode).toEqual(422)
 
         // Assert on the error message in the response body
@@ -326,6 +319,46 @@ describe('TEST post api/auth/forget-password', () => {
         )
         // Restore the original implementation of sendMail
         jest.spyOn(mailer, 'sendMail').mockRestore()
+    })
+})
+
+describe('POST/reset-password API endpoint', () => {
+    it('should return 401 if the token is invalidor expired', async () => {
+        const response = await request(app)
+            .post('/api/auth/reset-password')
+            .send({
+                token: '510cf1718890ce023fbab1a32d265527:bc3e40e3967a8d2cafe9b3aa7755aef9b66b39e1cf220ba36cd680f86e7c2bfb26004c98a32166bd6a6c4c25b3c876fb,28381879',
+                password: 'newPassword',
+            })
+        expect(response.statusCode).toBe(401)
+    })
+    it('should return 404 if the user does not exist', async () => {
+        const response = await request(app)
+            .post('/api/auth/reset-password')
+            .send({
+                token: user_not_found_token,
+                password: 'newPassword',
+            })
+        expect(response.statusCode).toBe(404)
+    })
+    it('should return 400 if the user does not exist', async () => {
+        const response = await request(app)
+            .post('/api/auth/reset-password')
+            .send({
+                token: user_not_found_token,
+            })
+        expect(response.statusCode).toBe(400)
+    })
+    it('should return the user data if the password is successfully updated', async () => {
+        const response = await request(app)
+            .post('/api/auth/reset-password')
+            .send({ token: token, password: 'newPassword' })
+        expect(response.statusCode).toBe(200)
+        expect(response.body.data).toHaveProperty('first_name')
+        expect(response.body.data).toHaveProperty('last_name')
+        expect(response.body.data).toHaveProperty('id')
+        expect(response.body.data).toHaveProperty('mobile')
+        expect(response.body.data).toHaveProperty('email')
     })
 })
 

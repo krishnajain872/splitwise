@@ -69,6 +69,7 @@ const forgetPassword = async (req, res, next) => {
 const resetPassword = async (req, res, next) => {
     try {
         const { body: payload } = req
+        console.log('THIS IS FROM RESET Controller ==> ', payload)
         const data = await authService.resetPassword(payload.value)
         res.data = data
         next()

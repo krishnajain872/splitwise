@@ -44,10 +44,14 @@ const forgetSchema = (req, res, next) => {
 }
 const resetSchema = (req, res, next) => {
     const schema = Joi.object({
-        token: Joi.string().required().messages({
-            'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-fA-F0-9]+,[0-9]+$/`,
-            'any.required': `"token" is a required field`,
-        }),
+        token: Joi.string()
+            .pattern(/^[a-fA-F0-9]+:[a-fA-F0-9]+,[0-9]+$/)
+            .min(10)
+            .required()
+            .messages({
+                'string.pattern.base': `"token" with value "{:token}" fails to match the required pattern: /^[a-fA-F0-9]+,[0-9]+$/`,
+                'any.required': `"token" is a required field`,
+            }),
         password: Joi.string().required().label('Password'),
     })
     validateRequest(req, res, next, schema, 'body')
