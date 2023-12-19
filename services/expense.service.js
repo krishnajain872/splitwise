@@ -66,7 +66,7 @@ const addExpense = async (payload) => {
                 error.statusCode = 409
                 throw error
             }
-            transactionData = simpliyTransaction.calculateTransactions(
+            transactionData = simpliyTransaction.calculateTransactionsByShare(
                 payload.base_amount,
                 allPayeeData
             )
@@ -183,7 +183,7 @@ const updateExpense = async (payload) => {
                 error.statusCode = 409
                 throw error
             }
-            transactionData = simpliyTransaction.calculateTransactions(
+            transactionData = simpliyTransaction.calculateTransactionsByShare(
                 payload.base_amount,
                 allPayeeData
             )
@@ -248,7 +248,7 @@ const deleteExpense = async (payload) => {
 
         if (totalPendingAmount > 0) {
             const error = Error('Expense contain pending Transactions')
-            error.statusCode = 422
+            error.statusCode = 409
             throw error
         }
 

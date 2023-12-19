@@ -1,10 +1,11 @@
 const { User } = require('../models')
 const { Group } = require('../models')
+const { Transaction } = require('../models')
+const { Expense } = require('../models')
 const { UserGroup } = require('../models')
 const { Op } = require('sequelize')
 
 const createGroup = async (payload) => {
-    console.log('GROUP PAYLOAD ====>>> ', payload)
     const existingUser = await User.findByPk(payload.admin_id, {
         attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
     })
@@ -16,7 +17,6 @@ const createGroup = async (payload) => {
     let addAdminInGroup
 
     const group = await Group.create(payload)
-    console.log('GROUP CREATED ====>>> ', group)
     if (group) {
         addAdminInGroup = await UserGroup.create({
             group_id: group.dataValues.id,
@@ -200,7 +200,6 @@ const addMember = async (payload) => {
         })
     )
 
-    console.log('ADDED MEMBER   ===>>  ', addedGroupMembers)
     return addedGroupMembers
 }
 
@@ -217,14 +216,9 @@ const removeMember = async (payload) => {
     const group = await Group.findByPk(payload.id, {
         attributes: ['admin_id', 'title', 'category', 'id'],
     })
-    if (!group) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
 
     if (payload.user_id === group.dataValues.admin_id) {
-        const error = new Error('unAuthorized Access')
+        const error = new Error('unAuthorized Access , cannot remove admin')
         error.statusCode = 403
         throw error
     }
@@ -241,7 +235,48 @@ const removeMember = async (payload) => {
         throw error
     }
 
-    // const deptOfUser = tran
+    let totalPendingAmount = 0
+
+    const userTransactions = await Transaction.findAll({
+        where: {
+            [Op.and]: [
+                { settle_up_at: null },
+                {
+                    [Op.or]: [
+                        { payer_id: payload.user_id },
+                        { payee_id: payload.user_id },
+                    ],
+                },
+            ],
+        },
+        include: [
+            {
+                model: Expense,
+                as: 'expense_details',
+                attributes: ['group_id'],
+                where: {
+                    group_id: payload.id,
+                },
+            },
+        ],
+        attributes: ['amount', 'payer_id'],
+    })
+
+    userTransactions.forEach((transaction) => {
+        if (
+            (transaction.settle_up_at === null &&
+                transaction.payee_id === payload.user_id) ||
+            transaction.payer_id === payload.user_id
+        ) {
+            totalPendingAmount += Number(transaction.amount)
+        }
+    })
+
+    if (totalPendingAmount > 0) {
+        const error = new Error('pending debts for user')
+        error.statusCode = 409
+        throw error
+    }
 
     const removedMember = await UserGroup.destroy({
         where: {

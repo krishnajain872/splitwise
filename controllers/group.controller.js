@@ -10,7 +10,6 @@ const createGroup = async (req, res, next) => {
             admin_id: user_id,
             ...payload.value,
         }
-        console.log('THIS IS CONTROLLER ===>>> ', newPayload)
         const data = await groupService.createGroup(newPayload)
         res.data = data
         next()

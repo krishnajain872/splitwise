@@ -41,12 +41,8 @@ const checkPermission = async (req, res, next) => {
 const checkPermissionByRegistrationStatus = async (req, res, next) => {
     try {
         const { id: user_id } = req.user
-        console.log({ user_id })
-        const existingUser = await User.findOne({
-            where: {
-                id: user_id,
-            },
-        })
+
+        const existingUser = await User.findByPk(user_id)
         if (!existingUser) {
             const error = new Error('user not found')
             error.statusCode = 404
@@ -72,9 +68,6 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
     try {
         const { id: user_id } = req.user
         const { id: group_id } = req.params.value
-        console.log('THIS IS CHECK VALID GROUP MEMBER ==> ', req.params)
-        console.log({ user_id, group_id })
-
         const existingUser = await UserGroup.findOne({
             include: [
                 {
@@ -156,6 +149,7 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
 const checkPermissionByUserDebt = async (req, res, next) => {
     try {
         const { id: user_id } = req.params.value
+
         const existingUser = await User.findByPk(user_id)
 
         if (!existingUser) {
@@ -175,6 +169,16 @@ const checkPermissionByUserDebt = async (req, res, next) => {
                     },
                 ],
             },
+            include: [
+                {
+                    Model: Expense,
+                    as: 'expense_details',
+                    attributes: ['group_id'],
+                    where: {
+                        group_id: null,
+                    },
+                },
+            ],
             attributes: ['amount', 'payer_id'],
         })
 
@@ -185,7 +189,7 @@ const checkPermissionByUserDebt = async (req, res, next) => {
         })
 
         if (totalPendingAmount > 0) {
-            const error = new Error('pending debts for user')
+            const error = new Error('pending debts for  user')
             error.statusCode = 409
             throw error
         } else {
