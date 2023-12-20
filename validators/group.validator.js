@@ -34,7 +34,7 @@ const updateGroupSchema = async (req, res, next) => {
     validateRequest(req, res, next, schema, 'body')
 }
 
-const addExpenseSchema = async (req, res, next) => {
+const expenseSchema = async (req, res, next) => {
     const payeeSchema = Joi.object({
         user_id: Joi.string().guid().required(),
         amount: Joi.number().precision(2).required(),
@@ -52,27 +52,6 @@ const addExpenseSchema = async (req, res, next) => {
 
     validateRequest(req, res, next, expenseSchema, 'body')
 }
-
-const udpateExpenseSchema = async (req, res, next) => {
-    const payeeSchema = Joi.object({
-        user_id: Joi.string().guid().required(),
-        amount: Joi.number().precision(2).required(),
-        share: Joi.number().precision(2),
-    })
-
-    const expenseSchema = Joi.object({
-        base_amount: Joi.number().precision(2).required(),
-        expense_id: Joi.string().guid().required(),
-        split_by: Joi.string().valid('equal', 'share').required(),
-        category: Joi.string().required(),
-        currency_id: Joi.string().guid().required(),
-        description: Joi.string().required(),
-        member: Joi.array().items(payeeSchema).min(1).required(),
-    })
-
-    validateRequest(req, res, next, expenseSchema, 'body')
-}
-
 const paramsIdCheck = async (req, res, next) => {
     const schema = Joi.object({
         id: Joi.string().guid().required(),
@@ -92,9 +71,7 @@ module.exports = {
     createGroupSchema,
     updateGroupSchema,
     addMemberSchema,
-    addExpenseSchema,
-    udpateExpenseSchema,
-    addExpenseSchema,
+    expenseSchema,
     paramsIdCheck,
     expenseIdCheck,
 }

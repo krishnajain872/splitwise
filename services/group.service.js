@@ -60,32 +60,6 @@ const updateGroup = async (payload) => {
     const update = await Group.update(updatedData, { where: { id: group_id } })
     return update
 }
-// const updateGroupAdmin = async (payload) => {
-//     const existingGroup = await Group.findByPk(payload.group_id)
-//     if (!existingGroup) {
-//         const error = new Error('group not found')
-//         error.statusCode = 404
-//         throw error
-//     }
-//     const existingUser = await User.findByPk(payload.user_id)
-//     if (!existingUser) {
-//         const error = new Error('user not found')
-//         error.statusCode = 404
-//         throw error
-//     }
-
-//     await Group.update(
-//         { ...existingGroup, admin_id: payload.user_id },
-//         {
-//             where: {
-//                 id: existingGroup.id,
-//             },
-//         }
-//     )
-//     existingGroup.admin_id = payload.user_id
-//     return existingGroup
-// }
-
 // filters
 const findGroupById = async (payload) => {
     const existingGroup = await Group.findByPk(payload.group_id, {
@@ -127,7 +101,7 @@ const findGroupByCategory = async (payload) => {
 const findAllGroupForCurrentUser = async (payload) => {
     const existingGroup = await Group.findAll({
         where: { admin_id: payload },
-        attributes: ['title', 'category', 'admin_id'],
+        attributes: ['title', 'category', 'id', 'admin_id'],
     })
     return existingGroup
 }
@@ -145,7 +119,7 @@ const findAllMemberOfCurrentGroup = async (payload) => {
             {
                 model: User,
                 as: 'user_details',
-                attributes: ['first_name', 'mobile', 'email'],
+                attributes: ['first_name', 'mobile', 'id', 'email'],
             },
         ],
         where: { group_id: payload },
@@ -204,7 +178,7 @@ const addMember = async (payload) => {
 const removeMember = async (payload) => {
     console.log('Remove MEMBER Service Paylaod   ===>>  ', payload)
     const existingUser = await User.findByPk(payload.user_id, {
-        attributes: ['first_name', 'mobile', 'email', 'id'],
+        attributes: ['first_name', 'mobile', 'email', 'status', 'id'],
     })
     if (!existingUser) {
         const error = new Error('User not found')
@@ -251,13 +225,13 @@ const removeMember = async (payload) => {
             {
                 model: Expense,
                 as: 'expense_details',
-                attributes: ['group_id'],
+                attributes: ['id', 'group_id'],
                 where: {
                     group_id: payload.id,
                 },
             },
         ],
-        attributes: ['amount', 'payer_id'],
+        attributes: ['amount', 'id', 'payer_id'],
     })
 
     userTransactions.forEach((transaction) => {

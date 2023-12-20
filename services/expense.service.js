@@ -16,6 +16,7 @@ const addExpense = async (payload) => {
 
     const t = await sequelize.transaction()
     try {
+        let group_id = payload.group_id
         if (payload.group_id) {
             payload.member.map(async (payee) => {
                 const data = await UserGroup.findAll({
@@ -27,15 +28,16 @@ const addExpense = async (payload) => {
                     },
                 })
                 if (!data) {
-                    payload.group_id = null
+                    group_id = null
                 }
             })
         }
+        console.log(payload.group_id)
         const expense = await Expense.create(
             {
                 base_amount: payload.base_amount,
                 split_by: payload.split_by,
-                group_id: payload.group_id,
+                group_id: group_id,
                 category: payload.category,
                 currency_id: payload.currency_id,
                 description: payload.description,
@@ -124,7 +126,6 @@ const addExpense = async (payload) => {
 const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
-        console.log('THIS IS UPDATE EXPENSE PAYLOAD FOR =====> ', payload)
         if (payload.group_id) {
             payload.member.map(async (payee) => {
                 const data = await UserGroup.findAll({
@@ -141,6 +142,10 @@ const updateExpense = async (payload) => {
             })
         }
         // Fetch the existing expense
+        console.log(
+            'THIS IS UPDATE EXPENSE PAYLOAD FOR service =====> ',
+            payload
+        )
         const expense = await Expense.findByPk(payload.expense_id)
         if (!expense) {
             const error = Error('Expense not Found')
@@ -261,19 +266,21 @@ const deleteExpense = async (payload) => {
                 include: {
                     model: Transaction,
                     as: 'transaction',
-                    where: { settle_up_at: null },
                 },
                 where: { id: payload.expense_id },
             },
             { transaction: t }
         )
-
+        console.log('THIS IS  error from delete expense => ', existingExpense)
         if (!existingExpense) {
-            throw new NotFoundError('Expense Not Found')
+            const error = Error('Expense not found')
+            error.statusCode = 404
+            throw error
         }
 
         let totalPendingAmount = 0
         existingExpense.transaction.forEach((transaction) => {
+            // if (transaction.settle_up_at === null || transaction  )
             totalPendingAmount += Number(transaction.dataValues.amount)
         })
 
@@ -290,6 +297,7 @@ const deleteExpense = async (payload) => {
         await t.commit()
         return true
     } catch (error) {
+        console.log('THIS IS ERROR FROM delete expense ', error)
         await t.rollback()
         throw error
     }
@@ -358,7 +366,7 @@ const getTotalAmountOwedByCurrentUserForParticularGroup = async (payload) => {
     const total_amount_owed =
         totalPayeeAmount.toFixed(2) - totalPayerAmount.toFixed(2)
 
-    return { ...transactions, total_amount_owed }
+    return { transactions: [...transactions], total_amount_owed }
 }
 
 const getTotalAmountOwedByCurrentUser = async (payload) => {
@@ -372,6 +380,7 @@ const getTotalAmountOwedByCurrentUser = async (payload) => {
                     ],
                 },
                 { settle_up_at: null },
+                { deleted_at: null },
             ],
         },
         include: [
@@ -410,7 +419,7 @@ const getTotalAmountOwedByCurrentUser = async (payload) => {
     const total_amount_owed =
         totalPayeeAmount.toFixed(2) - totalPayerAmount.toFixed(2)
 
-    return { ...transactions, total_amount_owed }
+    return { transactions: [...transactions], total_amount_owed }
 }
 const getAllExpensesByUser = async (user_id) => {
     const payeeExpenses = await Payee.findAll({
@@ -430,6 +439,7 @@ const getAllExpensesByUser = async (user_id) => {
             'split_by',
             'base_amount',
             'group_id',
+            'id',
         ],
         include: [
             {
@@ -441,12 +451,12 @@ const getAllExpensesByUser = async (user_id) => {
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'mobile', 'id'],
                     },
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'mobile', 'id'],
                     },
                 ],
             },
@@ -458,20 +468,20 @@ const getAllExpensesByUser = async (user_id) => {
                     {
                         model: User,
                         as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'mobile', 'id'],
                     },
                     {
                         model: User,
                         as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'mobile', 'id'],
                     },
                     {
                         model: Currency,
                         as: 'currency_details',
-                        attributes: ['code', 'exchange_rate'],
+                        attributes: ['code'],
                     },
                 ],
-                attributes: ['amount'],
+                attributes: ['amount', 'id'],
             },
         ],
     })
@@ -528,12 +538,12 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                 ],
             },
@@ -545,20 +555,20 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
                     {
                         model: User,
                         as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: User,
                         as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: Currency,
                         as: 'currency_details',
-                        attributes: ['code', 'exchange_rate'],
+                        attributes: ['code'],
                     },
                 ],
-                attributes: ['amount'],
+                attributes: ['id', 'amount'],
             },
         ],
     })
@@ -615,12 +625,12 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: User,
                         as: 'user_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                 ],
             },
@@ -632,20 +642,20 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
                     {
                         model: User,
                         as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: User,
                         as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
                     },
                     {
                         model: Currency,
                         as: 'currency_details',
-                        attributes: ['code', 'exchange_rate'],
+                        attributes: ['code'],
                     },
                 ],
-                attributes: ['amount'],
+                attributes: ['id', 'amount'],
             },
         ],
     })

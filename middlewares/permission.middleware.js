@@ -1,6 +1,7 @@
 const { User } = require('../models')
 const { Group } = require('../models')
 const { UserGroup } = require('../models')
+const { Payee } = require('../models')
 const { Expense } = require('../models')
 const { Transaction } = require('../models')
 
@@ -90,6 +91,52 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
         if (
             existingUser.user_details.status === 'dummy' ||
             existingUser.user_details.status === 'unVerified'
+        ) {
+            const error = new Error('user is not verified')
+            error.statusCode = 401
+            throw error
+        } else {
+            next()
+        }
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+// all the permissions check by this for all the valid  group members
+const checkPermissionByValidExpenseMember = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const { expense_id: expense } = req.params.value
+
+        const existingExpense = await Expense.findByPk(expense)
+        if (!existingExpense) {
+            const error = new Error('Expense not found')
+            error.statusCode = 404
+            throw error
+        }
+        const existingPayee = await Payee.findOne({
+            where: {
+                user_id,
+                expense_id: expense,
+            },
+        })
+        if (!existingPayee) {
+            const error = new Error(
+                'unauthorized access user is not part of the expense'
+            )
+            error.statusCode = 403
+            throw error
+        }
+        const existingUser = await User.findByPk(user_id)
+        if (!existingUser) {
+            const error = new Error('user not found')
+            error.statusCode = 404
+            throw error
+        }
+
+        if (
+            existingUser.status === 'dummy' ||
+            existingUser.status === 'unVerified'
         ) {
             const error = new Error('user is not verified')
             error.statusCode = 401
@@ -206,4 +253,5 @@ module.exports = {
     checkPermissionByTransactionDebt,
     checkPermissionByValidGroupMember,
     checkPermissionByUserDebt,
+    checkPermissionByValidExpenseMember,
 }

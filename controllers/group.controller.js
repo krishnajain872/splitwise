@@ -42,8 +42,9 @@ const updateGroup = async (req, res, next) => {
 const updateExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
-        const { id: group_id } = req.params.value
+        const { id: group_id, expense_id } = req.params.value
         payload.value.group_id = group_id
+        payload.value.expense_id = expense_id
         console.log('Payload for ==> ', payload)
         const data = await expenseService.updateExpense(payload.value)
         res.data = data

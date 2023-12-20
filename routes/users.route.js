@@ -41,23 +41,24 @@ router.get(
 router.post(
     '/expense/',
     checkAccessToken,
-    groupValidator.addExpenseSchema,
+    groupValidator.expenseSchema,
     permission.checkPermissionByRegistrationStatus,
     userController.addNonGroupExpense,
     genericResponse.responseHelper
 )
-router.post(
+router.get(
     '/expense/:id/transaction/:transaction_id/settle-up',
     checkAccessToken,
-    permission.checkPermissionByRegistrationStatus,
+    permission.checkPermissionByValidExpenseMember,
     transactionController.settleUpTransaction,
     genericResponse.responseHelper
 )
 router.put(
-    '/expense/',
+    '/expense/:expense_id',
     checkAccessToken,
-    groupValidator.udpateExpenseSchema,
-    permission.checkPermissionByRegistrationStatus,
+    groupValidator.expenseIdCheck,
+    groupValidator.expenseSchema,
+    permission.checkPermissionByValidExpenseMember,
     userController.updateNonGroupExpense,
     genericResponse.responseHelper
 )
@@ -65,7 +66,7 @@ router.delete(
     '/expense/:expense_id',
     checkAccessToken,
     groupValidator.expenseIdCheck,
-    permission.checkPermissionByRegistrationStatus,
+    permission.checkPermissionByValidExpenseMember,
     userController.deleteNonGroupExpense,
     genericResponse.responseHelper
 )

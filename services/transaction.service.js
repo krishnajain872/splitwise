@@ -2,21 +2,33 @@
 const { Transaction } = require('../models')
 const { Expense } = require('../models')
 
-getAllTransactionByExpenseId = async (payload) => {
+const getAllTransactionByExpenseId = async (payload) => {
     const transaction = await Expense.findAll({
         where: { expense_id: payload },
-        attributes: ['category', 'description', 'split_by', 'base_amount'],
+        attributes: [
+            'category',
+            'id',
+            'description',
+            'split_by',
+            'base_amount',
+        ],
         include: [
             {
                 Model: Transaction,
                 as: 'transaction',
-                attributes: ['payer_id', 'payee_id', 'amount', 'currency_id'],
+                attributes: [
+                    'payer_id',
+                    'id',
+                    'payee_id',
+                    'amount',
+                    'currency_id',
+                ],
             },
         ],
     })
     return transaction
 }
-settleUpTransaction = async (payload) => {
+const settleUpTransaction = async (payload) => {
     const transaction = await Transaction.findById(payload.transaction_id)
     if (!transaction) {
         const error = Error('Transaction not found')
@@ -37,40 +49,46 @@ settleUpTransaction = async (payload) => {
     if (updated) return response
 }
 
-settleUpAllTransactionOfExpense = async (payload) => {
-    const expense = await Expense.findByPk(payload.id)
+const settleUpAllTransactionOfExpense = async (payload) => {
+    const expense = await Expense.findByPk(payload.expense_id)
+    console.log('THIS IS SETTLE UP PAYLOAD ==> ', payload.expense_id)
     if (!expense) {
-        const error = Error('expense not found')
+        const error = new Error('Expense not found')
         error.statusCode = 404
         throw error
     }
 
-    const transactions = await Transaction.findAll({
+    let transactions = await Transaction.findAll({
         where: {
-            expense_id: payload.id,
+            expense_id: payload.expense_id,
         },
+        attributes: ['id'],
     })
-
-    if (!transactions) {
-        const error = Error('Transactions not found')
+    if (transactions.length === 0) {
+        const error = new Error('Transactions not found')
         error.statusCode = 404
         throw error
     }
-    // let updated
+
     const settle_up_at = new Date()
-    transactions.map(async (transaction) => {
-        updated = await Transaction.update(
-            {
-                settle_up_at,
-            },
-            {
-                where: { id: transaction.dataValues.id },
-            }
-        )
-    })
-    const response = { ...transactions }
-    return response
+    transactions = await Promise.all(
+        transactions.map(async (transaction) => {
+            console.log('THESE ARE THE TRANSACTIONS ==> ', transaction)
+            await Transaction.update(
+                {
+                    settle_up_at,
+                },
+                {
+                    where: { id: transaction.id },
+                }
+            )
+            return transaction
+        })
+    )
+
+    return transactions
 }
+
 module.exports = {
     getAllTransactionByExpenseId,
     settleUpTransaction,

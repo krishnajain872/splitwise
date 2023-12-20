@@ -125,6 +125,7 @@ const userLogin = async (payload) => {
             'mobile',
             'email',
             'password',
+            'status',
         ],
     })
     if (!user) {

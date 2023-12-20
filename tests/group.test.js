@@ -579,17 +579,9 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
 })
 
 // delete expense
-describe('TEST DELETE api/groups/id/ delete group API', () => {
+describe('TEST DELETE api/groups/id/ delete expense API', () => {
     // Test case for successful user registration
-    it('should return 403 if logined user not admin of the group  ', async () => {
-        const response = await request(app)
-            .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
-            )
-            .set('authorization', `Bearer ${non_verified_user_access_token}`)
-        console.log('THIS IS REMOVE TEST RESPONSE 403 => ', response.body)
-        expect(response.statusCode).toEqual(403)
-    })
+
     it('should fail when group having pending depts in expense', async () => {
         const response = await request(app)
             .delete(
@@ -599,7 +591,21 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
         console.log('THIS IS REMOVE TEST RESPONSE 409 => ', response.body)
         expect(response.statusCode).toEqual(409)
     })
+    it('should return 403 if logined user not admin of the group  ', async () => {
+        const response = await request(app)
+            .delete(
+                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
+            )
+            .set('authorization', `Bearer ${non_verified_user_access_token}`)
+        console.log('THIS IS REMOVE TEST RESPONSE 403 => ', response.body)
+        expect(response.statusCode).toEqual(403)
+    })
     it('should fail not valid group_id ', async () => {
+        // const settel = await request(app)
+        //     .get(
+        //         `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}/transactions/settle-up`
+        //     )
+        //     .set('authorization', `Bearer ${verified_user_access_token}`)
         const response = await request(app)
             .delete(
                 `/api/groups/${group_id}/expense/${expense.data.expense.id}`
@@ -608,13 +614,14 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
         console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
         expect(response.statusCode).toEqual(400)
     })
+
     it('should delete group after all valid checks and condition fullfiled', async () => {
         const response = await request(app)
             .delete(
                 `/api/groups/${group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
-        console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
+        console.log('THIS IS REMOVE TEST RESPONSE 200 => ', response.body)
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
     })

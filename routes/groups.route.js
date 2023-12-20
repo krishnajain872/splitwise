@@ -26,13 +26,6 @@ router.post(
     groupController.addMember,
     genericResponse.responseHelper
 )
-router.post(
-    '/:id/expense/:expense_id/transactions/settle-up',
-    checkAccessToken,
-    groupPermission.checkPermission,
-    transactionController.settleUpAllTransactionOfExpense,
-    genericResponse.responseHelper
-)
 router.delete(
     '/:id/member/remove/:user_id',
     checkAccessToken,
@@ -75,11 +68,13 @@ router.delete(
     genericResponse.responseHelper
 )
 router.put(
-    '/:id/expense/',
+    '/:id/expense/:expense_id',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupValidator.udpateExpenseSchema,
+    groupValidator.expenseIdCheck,
+    groupValidator.expenseSchema,
     groupPermission.checkPermissionByValidGroupMember,
+    groupPermission.checkPermissionByValidExpenseMember,
     groupController.updateExpense,
     genericResponse.responseHelper
 )
@@ -87,7 +82,7 @@ router.post(
     '/:id/expense/',
     checkAccessToken,
     groupValidator.paramsIdCheck,
-    groupValidator.addExpenseSchema,
+    groupValidator.expenseSchema,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.addExpense,
     genericResponse.responseHelper
@@ -108,11 +103,20 @@ router.get(
     groupController.getAllGroupExpensesByCurrentUser,
     genericResponse.responseHelper
 )
+router.get(
+    '/:id/expense/:expense_id/transactions/settle-up',
+    checkAccessToken,
+    groupValidator.expenseIdCheck,
+    groupPermission.checkPermission,
+    transactionController.settleUpAllTransactionOfExpense,
+    genericResponse.responseHelper
+)
 router.delete(
     '/:id/expense/:expense_id',
     checkAccessToken,
     groupValidator.expenseIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
+    groupPermission.checkPermissionByValidExpenseMember,
     groupController.deleteExpense,
     genericResponse.responseHelper
 )

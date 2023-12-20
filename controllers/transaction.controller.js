@@ -37,9 +37,10 @@ const getAllTransactionByGroup = async (req, res, next) => {
 }
 const settleUpAllTransactionOfExpense = async (req, res, next) => {
     try {
-        const { id } = req.params
+        const { id, expense_id } = req.params.value
         const payload = {
             id,
+            expense_id,
         }
         const data =
             await transactionService.settleUpAllTransactionOfExpense(payload)
