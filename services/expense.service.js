@@ -481,7 +481,7 @@ const getAllExpensesByUser = async (user_id) => {
                         attributes: ['code'],
                     },
                 ],
-                attributes: ['amount', 'id'],
+                attributes: ['amount', 'id', 'settle_up_at'],
             },
         ],
     })
@@ -568,7 +568,7 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
                         attributes: ['code'],
                     },
                 ],
-                attributes: ['id', 'amount'],
+                attributes: ['id', 'amount', 'settle_up_at'],
             },
         ],
     })
@@ -655,7 +655,7 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
                         attributes: ['code'],
                     },
                 ],
-                attributes: ['id', 'amount'],
+                attributes: ['id', 'amount', 'settle_up_at'],
             },
         ],
     })

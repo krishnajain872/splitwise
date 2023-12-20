@@ -52,10 +52,16 @@ const settleUpAllTransactionOfExpense = async (req, res, next) => {
 }
 const settleUpTransaction = async (req, res, next) => {
     try {
-        const { id } = req.params
+        const { expense_id, transaction_id } = req.params.value
         const payload = {
-            id,
+            expense_id,
+            transaction_id,
         }
+
+        console.log(
+            'THIS IS PAYLAOD OF THE SETTLE TRANSACTION CONTROLLER ==> ',
+            payload
+        )
         const data = await transactionService.settleUpTransaction(payload)
         res.data = data
         next()

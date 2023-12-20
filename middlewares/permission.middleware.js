@@ -108,6 +108,7 @@ const checkPermissionByValidExpenseMember = async (req, res, next) => {
         const { id: user_id } = req.user
         const { expense_id: expense } = req.params.value
 
+        console.log('THIS IS PERMISSION MIDDLEWARE PAYLOADS ==> ', expense)
         const existingExpense = await Expense.findByPk(expense)
         if (!existingExpense) {
             const error = new Error('Expense not found')

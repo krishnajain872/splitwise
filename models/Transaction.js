@@ -32,6 +32,11 @@ module.exports = (sequelize, DataTypes) => {
     }
     Transaction.init(
         {
+            id: {
+                allowNull: false,
+                primaryKey: true,
+                type: DataTypes.UUID,
+            },
             currency_id: {
                 allowNull: false,
                 type: DataTypes.UUID,

@@ -231,7 +231,7 @@ const removeMember = async (payload) => {
                 },
             },
         ],
-        attributes: ['amount', 'id', 'payer_id'],
+        attributes: ['amount', 'id', , 'settle_up_at', 'payer_id'],
     })
 
     userTransactions.forEach((transaction) => {

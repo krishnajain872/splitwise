@@ -1,6 +1,8 @@
 const generic = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
+    console.log('THIS IS VALIDATORS PAYLOAD body ==> ', req.body)
+    console.log('THIS IS VALIDATORS PAYLOAD params ==> ', req.params)
     let requestData = {}
     if (parameterType === 'body') {
         requestData = req.body

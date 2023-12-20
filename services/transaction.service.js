@@ -22,6 +22,7 @@ const getAllTransactionByExpenseId = async (payload) => {
                     'payee_id',
                     'amount',
                     'currency_id',
+                    'settle_up_at',
                 ],
             },
         ],
@@ -29,7 +30,9 @@ const getAllTransactionByExpenseId = async (payload) => {
     return transaction
 }
 const settleUpTransaction = async (payload) => {
-    const transaction = await Transaction.findById(payload.transaction_id)
+    console.log({ 'payload tr': payload.transaction_id })
+    const transaction = await Transaction.findByPk(payload.transaction_id)
+    console.log('THIS IS SETTLE UP PAYLOAD  SERVICE ==> ', transaction)
     if (!transaction) {
         const error = Error('Transaction not found')
         error.statusCode = 404
@@ -51,7 +54,7 @@ const settleUpTransaction = async (payload) => {
 
 const settleUpAllTransactionOfExpense = async (payload) => {
     const expense = await Expense.findByPk(payload.expense_id)
-    console.log('THIS IS SETTLE UP PAYLOAD ==> ', payload.expense_id)
+
     if (!expense) {
         const error = new Error('Expense not found')
         error.statusCode = 404

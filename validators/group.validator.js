@@ -66,6 +66,13 @@ const expenseIdCheck = async (req, res, next) => {
     })
     validateRequest(req, res, next, schema, 'params')
 }
+const transactionIdCheck = async (req, res, next) => {
+    const schema = Joi.object({
+        expense_id: Joi.string().guid().required(),
+        transaction_id: Joi.string().guid().required(),
+    })
+    validateRequest(req, res, next, schema, 'params')
+}
 
 module.exports = {
     createGroupSchema,
@@ -74,4 +81,5 @@ module.exports = {
     expenseSchema,
     paramsIdCheck,
     expenseIdCheck,
+    transactionIdCheck,
 }

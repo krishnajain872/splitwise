@@ -47,8 +47,9 @@ router.post(
     genericResponse.responseHelper
 )
 router.get(
-    '/expense/:id/transaction/:transaction_id/settle-up',
+    '/expense/:expense_id/transaction/:transaction_id/settle-up',
     checkAccessToken,
+    groupValidator.transactionIdCheck,
     permission.checkPermissionByValidExpenseMember,
     transactionController.settleUpTransaction,
     genericResponse.responseHelper
