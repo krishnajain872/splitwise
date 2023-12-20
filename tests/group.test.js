@@ -577,6 +577,8 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
         expect(response.statusCode).toEqual(409)
     })
 })
+
+// delete expense
 describe('TEST DELETE api/groups/id/ delete group API', () => {
     // Test case for successful user registration
     it('should return 403 if logined user not admin of the group  ', async () => {

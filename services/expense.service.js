@@ -1,6 +1,6 @@
 const { Expense } = require('../models')
 const { User } = require('../models')
-const { Group } = require('../models')
+// const { Group } = require('../models')
 const { UserGroup } = require('../models')
 const { Transaction } = require('../models')
 const { Payee } = require('../models')
@@ -295,55 +295,71 @@ const deleteExpense = async (payload) => {
     }
 }
 
-// const getExpenseById = async (payload) => {}
+const getTotalAmountOwedByCurrentUserForParticularGroup = async (payload) => {
+    const transactions = await Transaction.findAll({
+        where: {
+            [Op.and]: [
+                {
+                    [Op.or]: [
+                        { payer_id: payload.user_id },
+                        { payee_id: payload.user_id },
+                    ],
+                },
+                { settle_up_at: null },
+            ],
+        },
+        include: [
+            {
+                model: User,
+                as: 'payer_details',
+                attributes: ['first_name', 'email', 'mobile'],
+            },
+            {
+                model: User,
+                as: 'payee_details',
+                attributes: ['first_name', 'email', 'mobile'],
+            },
+            {
+                model: Currency,
+                as: 'currency_details',
+                attributes: ['code'],
+            },
+            {
+                model: Expense,
+                as: 'expense_details',
+                required: true,
+                attributes: [
+                    'base_amount',
+                    'description',
+                    'category',
+                    'group_id',
+                    'id',
+                    'split_by',
+                ],
+                where: { group_id: { [Op.ne]: null } },
+            },
+        ],
+        attributes: ['id', 'amount', 'payer_id', 'payee_id'],
+    })
 
-// const getPendingExpenseByCurrentUser = async (payload) => {
-//     const existingExpense = await Expense.findAll({
-//         include: [
-//             {
-//                 model: Transaction,
-//                 as: 'transaction',
-//                 where: {
-//                     [Op.and]: [
-//                         {
-//                             [Op.or]: [
-//                                 { payer_id: payload.user_id },
-//                                 { payee_id: payload.user_id },
-//                             ],
-//                         },
-//                         { settle_up_at: null },
-//                     ],
-//                 },
-//                 include: [
-//                     {
-//                         model: User,
-//                         as: 'payer_details',
-//                         attributes: ['first_name', 'email', 'mobile'],
-//                     },
-//                     {
-//                         model: User,
-//                         as: 'payee_details',
-//                         attributes: ['first_name', 'email', 'mobile'],
-//                     },
-//                     {
-//                         model: Currency,
-//                         as: 'currency_details',
-//                         attributes: ['code'],
-//                     },
-//                 ],
-//                 attributes: ['id', 'amount'],
-//             },
-//             {
-//                 model: Group,
-//                 as: 'group_details',
-//                 attributes: ['title', 'category'], // Removed 'description'
-//             },
-//         ],
-//         attributes: ['description', 'category', 'id', 'base_amount'],
-//     })
+    let totalPayeeAmount = 0
+    let totalPayerAmount = 0
 
-//     return existingExpense.map((expense) => expense.get({ plain: true }))
-// }
+    transactions.forEach((transaction) => {
+        const { amount, payer_id } = transaction.get({ plain: true })
+
+        if (payer_id === payload.user_id) {
+            totalPayerAmount += Number(amount)
+        } else {
+            totalPayeeAmount += Number(amount)
+        }
+    })
+
+    const total_amount_owed =
+        totalPayeeAmount.toFixed(2) - totalPayerAmount.toFixed(2)
+
+    return { ...transactions, total_amount_owed }
+}
 
 const getTotalAmountOwedByCurrentUser = async (payload) => {
     const transactions = await Transaction.findAll({
@@ -391,44 +407,10 @@ const getTotalAmountOwedByCurrentUser = async (payload) => {
         }
     })
 
-    const total_amount_owed = totalPayeeAmount - totalPayerAmount
+    const total_amount_owed =
+        totalPayeeAmount.toFixed(2) - totalPayerAmount.toFixed(2)
 
     return { ...transactions, total_amount_owed }
-}
-// const getExpenseByGroupId = async (payload) => {}
-
-const getExpenseByGroup = async (payload) => {
-    const existingExpense = await Expense.findAll({
-        where: { group_id: payload },
-        attributes: [
-            'description',
-            'category',
-            'id',
-            'group_id',
-            'base_amount',
-        ],
-
-        include: [
-            {
-                model: Transaction,
-                as: 'transaction',
-                where: { settle_up_at: null },
-                include: [
-                    {
-                        model: User,
-                        as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
-                    },
-                    {
-                        model: User,
-                        as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
-                    },
-                ],
-            },
-        ],
-    })
-    return existingExpense
 }
 const getAllExpensesByUser = async (user_id) => {
     const payeeExpenses = await Payee.findAll({
@@ -442,7 +424,13 @@ const getAllExpensesByUser = async (user_id) => {
     // Then, find all the expenses with those IDs
     const expenses = await Expense.findAll({
         where: { id: expenseIds },
-        attributes: ['description', 'category', 'base_amount', 'group_id'],
+        attributes: [
+            'description',
+            'category',
+            'split_by',
+            'base_amount',
+            'group_id',
+        ],
         include: [
             {
                 model: Payee,
@@ -503,6 +491,8 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
                     'description',
                     'category',
                     'group_id',
+                    'id',
+                    'split_by',
                 ],
             },
         ],
@@ -513,13 +503,21 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
     payeeExpenses.map((payee) => {
         // only non-group expenses
         if (!payee.expense_details.dataValues.group_id) {
-            expenseIds.push(payee.expense_id)
+            expenseIds.push(payee.expense_details.id)
         }
     })
+    console.log('THIS IS PAYEEE => ', expenseIds)
     // Then, find all the expenses with those IDs
     const expenses = await Expense.findAll({
         where: { id: expenseIds, group_id: null },
-        attributes: ['description', 'category', 'base_amount'],
+        attributes: [
+            'base_amount',
+            'description',
+            'category',
+            'group_id',
+            'id',
+            'split_by',
+        ],
         include: [
             {
                 model: Payee,
@@ -580,6 +578,8 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
                     'description',
                     'category',
                     'group_id',
+                    'id',
+                    'split_by',
                 ],
             },
         ],
@@ -590,13 +590,21 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
     payeeExpenses.map((payee) => {
         // only non-group expenses
         if (payee.expense_details.dataValues.group_id) {
-            expenseIds.push(payee.expense_id)
+            expenseIds.push(payee.expense_details.id)
         }
     })
+    console.log('THIS IS PAYEEE => ', expenseIds)
     // Then, find all the expenses with those IDs
     const expenses = await Expense.findAll({
-        where: { id: expenseIds, group_id: null },
-        attributes: ['description', 'category', 'base_amount'],
+        where: { id: expenseIds },
+        attributes: [
+            'base_amount',
+            'description',
+            'category',
+            'group_id',
+            'id',
+            'split_by',
+        ],
         include: [
             {
                 model: Payee,
@@ -639,22 +647,10 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
                 ],
                 attributes: ['amount'],
             },
-
-            {
-                model: Group,
-                as: 'group_details',
-                required: true,
-                attributes: ['title', 'category', 'admin_id'],
-                include: [
-                    {
-                        model: User,
-                        as: 'admin_details',
-                        attributes: ['first_name', 'email', 'mobile'],
-                    },
-                ],
-            },
         ],
     })
+
+    console.log('THESES ARE EXPESNSE FOR GROUP ===> ', expenses)
 
     return expenses
 }
@@ -662,11 +658,8 @@ module.exports = {
     addExpense,
     updateExpense,
     deleteExpense,
-    // getExpenseById,
-    // getPendingExpenseByUser,
-    // getExpense,
+    getTotalAmountOwedByCurrentUserForParticularGroup,
     getTotalAmountOwedByCurrentUser,
-    getExpenseByGroup,
     getAllExpensesByUser,
     getAllNonGroupExpensesByCurrentUser,
     getAllGroupExpensesByCurrentUser,

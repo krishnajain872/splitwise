@@ -27,6 +27,12 @@ router.get(
     genericResponse.responseHelper
 )
 router.get(
+    '/expenses/amount',
+    checkAccessToken,
+    userController.getTotalAmountOwedByCurrentUser,
+    genericResponse.responseHelper
+)
+router.get(
     '/',
     checkAccessToken,
     userController.getCurrentUser,

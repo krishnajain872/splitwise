@@ -164,7 +164,11 @@ const removeMember = async (req, res, next) => {
     }
 }
 
-const getTotalAmountOwedByCurrentUser = async (req, res, next) => {
+const getTotalAmountOwedByCurrentUserForParticularGroup = async (
+    req,
+    res,
+    next
+) => {
     try {
         const { id: group_id } = req.params.value
         const { id: user_id } = req.user
@@ -173,7 +177,9 @@ const getTotalAmountOwedByCurrentUser = async (req, res, next) => {
             user_id,
         }
         const data =
-            await expenseService.getTotalAmountOwedByCurrentUser(payload)
+            await expenseService.getTotalAmountOwedByCurrentUserForParticularGroup(
+                payload
+            )
         res.data = data
         next()
     } catch (error) {
@@ -208,6 +214,6 @@ module.exports = {
     findAllMemberForGroup,
     deleteExpense,
     removeMember,
-    getTotalAmountOwedByCurrentUser,
     getAllGroupExpensesByCurrentUser,
+    getTotalAmountOwedByCurrentUserForParticularGroup,
 }

@@ -35,11 +35,24 @@ const getAllTransactionByGroup = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const settleUpAllTransactionOfExpense = async (req, res, next) => {
+    try {
+        const { id } = req.params
+        const payload = {
+            id,
+        }
+        const data =
+            await transactionService.settleUpAllTransactionOfExpense(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 const settleUpTransaction = async (req, res, next) => {
     try {
-        const { transaction_id, id } = req.params.value
+        const { id } = req.params
         const payload = {
-            transaction_id,
             id,
         }
         const data = await transactionService.settleUpTransaction(payload)
@@ -55,4 +68,5 @@ module.exports = {
     getAllTransactionByCurrentUser,
     getAllTransactionByGroup,
     settleUpTransaction,
+    settleUpAllTransactionOfExpense,
 }

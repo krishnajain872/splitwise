@@ -36,7 +36,43 @@ settleUpTransaction = async (payload) => {
     const response = { ...transaction.dataValues, settle_up_at }
     if (updated) return response
 }
+
+settleUpAllTransactionOfExpense = async (payload) => {
+    const expense = await Expense.findByPk(payload.id)
+    if (!expense) {
+        const error = Error('expense not found')
+        error.statusCode = 404
+        throw error
+    }
+
+    const transactions = await Transaction.findAll({
+        where: {
+            expense_id: payload.id,
+        },
+    })
+
+    if (!transactions) {
+        const error = Error('Transactions not found')
+        error.statusCode = 404
+        throw error
+    }
+    // let updated
+    const settle_up_at = new Date()
+    transactions.map(async (transaction) => {
+        updated = await Transaction.update(
+            {
+                settle_up_at,
+            },
+            {
+                where: { id: transaction.dataValues.id },
+            }
+        )
+    })
+    const response = { ...transactions }
+    return response
+}
 module.exports = {
     getAllTransactionByExpenseId,
     settleUpTransaction,
+    settleUpAllTransactionOfExpense,
 }

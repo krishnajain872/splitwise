@@ -27,10 +27,10 @@ router.post(
     genericResponse.responseHelper
 )
 router.post(
-    '/:id/expense/:expense_id/transaction/settle-up',
+    '/:id/expense/:expense_id/transactions/settle-up',
     checkAccessToken,
-    groupPermission.checkPermissionByRegistrationStatus,
-    transactionController.settleUpTransaction,
+    groupPermission.checkPermission,
+    transactionController.settleUpAllTransactionOfExpense,
     genericResponse.responseHelper
 )
 router.delete(
@@ -97,7 +97,7 @@ router.get(
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
-    groupController.getTotalAmountOwedByCurrentUser,
+    groupController.getTotalAmountOwedByCurrentUserForParticularGroup,
     genericResponse.responseHelper
 )
 router.get(

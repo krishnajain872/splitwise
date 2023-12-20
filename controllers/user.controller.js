@@ -72,6 +72,20 @@ const getAllNonGroupExpensesByCurrentUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const getTotalAmountOwedByCurrentUser = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const payload = {
+            user_id,
+        }
+        const data =
+            await expenseService.getTotalAmountOwedByCurrentUser(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 
 module.exports = {
     addNonGroupExpense,
@@ -81,4 +95,5 @@ module.exports = {
     updateNonGroupExpense,
     deleteNonGroupExpense,
     getCurrentUser,
+    getTotalAmountOwedByCurrentUser,
 }
