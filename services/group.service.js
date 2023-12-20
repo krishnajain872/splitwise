@@ -126,7 +126,7 @@ const findAllMemberOfCurrentGroup = async (payload) => {
         attributes: ['user_id', 'group_id'],
     })
 
-    group_and_members = { ...existingGroup.dataValues, ...members }
+    group_and_members = { ...existingGroup.dataValues, members: [...members] }
 
     return group_and_members
 }
@@ -142,7 +142,8 @@ const addMember = async (payload) => {
         error.statusCode = 404
         throw error
     }
-    const userArray = payload.member
+    const userArray = payload.members
+    console.log('ADD MEMBER SERVICE ===> ', payload.members)
     await Promise.all(
         userArray.map(async (user_id, i) => {
             const [existingUser, existingMapping] = await Promise.all([
@@ -188,7 +189,11 @@ const removeMember = async (payload) => {
     const group = await Group.findByPk(payload.id, {
         attributes: ['admin_id', 'title', 'category', 'id'],
     })
-
+    if (!group) {
+        const error = new Error('group not found')
+        error.statusCode = 404
+        throw error
+    }
     if (payload.user_id === group.dataValues.admin_id) {
         const error = new Error('unAuthorized Access , cannot remove admin')
         error.statusCode = 403
@@ -209,41 +214,51 @@ const removeMember = async (payload) => {
 
     let totalPendingAmount = 0
 
-    const userTransactions = await Transaction.findAll({
+    console.log('BEFORE TRANSACTION PAYLOAD ==> ', payload)
+
+    const userTransactions = await Expense.findAll({
         where: {
-            [Op.and]: [
-                { settle_up_at: null },
-                {
-                    [Op.or]: [
-                        { payer_id: payload.user_id },
-                        { payee_id: payload.user_id },
-                    ],
-                },
-            ],
+            group_id: payload.id,
         },
         include: [
             {
-                model: Expense,
-                as: 'expense_details',
-                attributes: ['id', 'group_id'],
+                model: Transaction,
+                as: 'transaction',
+                attributes: [
+                    'amount',
+                    'id',
+                    'settle_up_at',
+                    'payer_id',
+                    'payee_id',
+                ],
                 where: {
-                    group_id: payload.id,
+                    [Op.and]: [
+                        { settle_up_at: null },
+                        {
+                            [Op.or]: [
+                                { payer_id: payload.user_id },
+                                { payee_id: payload.user_id },
+                            ],
+                        },
+                    ],
                 },
             },
         ],
-        attributes: ['amount', 'id', , 'settle_up_at', 'payer_id'],
     })
 
-    userTransactions.forEach((transaction) => {
-        if (
-            (transaction.settle_up_at === null &&
-                transaction.payee_id === payload.user_id) ||
-            transaction.payer_id === payload.user_id
-        ) {
-            totalPendingAmount += Number(transaction.amount)
-        }
+    console.log('AFTER TRANSCATION ==> ', userTransactions)
+    userTransactions.forEach((transactions) => {
+        transactions.transaction.forEach((transaction) => {
+            if (
+                (transaction.settle_up_at === null &&
+                    transaction.payee_id === payload.user_id) ||
+                transaction.payer_id === payload.user_id
+            ) {
+                console.log(transaction.amount)
+                totalPendingAmount += Number(transaction.amount)
+            }
+        })
     })
-
     if (totalPendingAmount > 0) {
         const error = new Error('pending debts for user')
         error.statusCode = 409

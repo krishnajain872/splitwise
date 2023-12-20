@@ -22,6 +22,7 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
+    console.log('VALIDATOR ERROR ==> ', value.error)
     const errorMessage = value.error.details[0].message
     generic.errorHelper(req, res, errorMessage, 400, value.error)
 }

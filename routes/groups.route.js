@@ -18,7 +18,7 @@ router.post(
     genericResponse.responseHelper
 )
 router.post(
-    '/:id/member/add',
+    '/:id/members/add',
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
@@ -70,7 +70,6 @@ router.delete(
 router.put(
     '/:id/expense/:expense_id',
     checkAccessToken,
-    groupValidator.paramsIdCheck,
     groupValidator.expenseIdCheck,
     groupValidator.expenseSchema,
     groupPermission.checkPermissionByValidGroupMember,

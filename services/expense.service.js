@@ -12,14 +12,14 @@ const { Op } = require('sequelize')
 // const { Group } = require('../models')
 
 const addExpense = async (payload) => {
-    console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', payload)
-
     const t = await sequelize.transaction()
     try {
-        let group_id = payload.group_id
+        let group_id
+        let data
+
         if (payload.group_id) {
-            payload.member.map(async (payee) => {
-                const data = await UserGroup.findAll({
+            const promises = payload.member.map((payee) => {
+                return UserGroup.findAll({
                     where: {
                         [Op.and]: [
                             { group_id: payload.group_id },
@@ -27,12 +27,25 @@ const addExpense = async (payload) => {
                         ],
                     },
                 })
-                if (!data) {
-                    group_id = null
-                }
             })
+            data = await Promise.all(promises)
+            console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', data)
+            console.log(
+                'LENGTH OF DATA  FOR EXPENSE ADD FROM SERVICE ==>',
+                data.flat().length
+            )
+            console.log(
+                'LENGTH OF PAYEE MEMBER FOR EXPENSE ADD FROM SERVICE ==>',
+                payload.member.length
+            )
         }
-        console.log(payload.group_id)
+
+        if (data.flat().length != payload.member.length) {
+            group_id = null
+        } else {
+            group_id = payload.group_id
+        }
+
         const expense = await Expense.create(
             {
                 base_amount: payload.base_amount,
@@ -126,9 +139,12 @@ const addExpense = async (payload) => {
 const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
+        let group_id
+        let data
+
         if (payload.group_id) {
-            payload.member.map(async (payee) => {
-                const data = await UserGroup.findAll({
+            const promises = payload.member.map((payee) => {
+                return UserGroup.findAll({
                     where: {
                         [Op.and]: [
                             { group_id: payload.group_id },
@@ -136,16 +152,25 @@ const updateExpense = async (payload) => {
                         ],
                     },
                 })
-                if (!data) {
-                    payload.group_id = null
-                }
             })
+            data = await Promise.all(promises)
+            console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', data)
+            console.log(
+                'LENGTH OF DATA  FOR EXPENSE ADD FROM SERVICE ==>',
+                data.flat().length
+            )
+            console.log(
+                'LENGTH OF PAYEE MEMBER FOR EXPENSE ADD FROM SERVICE ==>',
+                payload.member.length
+            )
         }
-        // Fetch the existing expense
-        console.log(
-            'THIS IS UPDATE EXPENSE PAYLOAD FOR service =====> ',
-            payload
-        )
+
+        if (data.flat().length != payload.member.length) {
+            group_id = null
+        } else {
+            group_id = payload.group_id
+        }
+
         const expense = await Expense.findByPk(payload.expense_id)
         if (!expense) {
             const error = Error('Expense not Found')
@@ -157,7 +182,7 @@ const updateExpense = async (payload) => {
             {
                 base_amount: payload.base_amount,
                 split_by: payload.split_by,
-                group_id: payload.group_id,
+                group_id: group_id,
                 category: payload.category,
                 currency_id: payload.currency_id,
                 description: payload.description,
@@ -280,8 +305,8 @@ const deleteExpense = async (payload) => {
 
         let totalPendingAmount = 0
         existingExpense.transaction.forEach((transaction) => {
-            // if (transaction.settle_up_at === null || transaction  )
-            totalPendingAmount += Number(transaction.dataValues.amount)
+            if (transaction.settle_up_at === null)
+                totalPendingAmount += Number(transaction.dataValues.amount)
         })
 
         if (totalPendingAmount > 0) {
@@ -290,9 +315,9 @@ const deleteExpense = async (payload) => {
             throw error
         }
 
-        await deleteRecords('Expense', payload.expense_id, t)
-        await deleteRecords('Transaction', payload.expense_id, t)
-        await deleteRecords('Payee', payload.expense_id, t)
+        await Expense.destroy({ where: { id: payload.expense_id } })
+        await Payee.destroy({ where: { id: payload.expense_id } })
+        await Transaction.destroy({ where: { id: payload.expense_id } })
 
         await t.commit()
         return true

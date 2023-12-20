@@ -139,10 +139,10 @@ const findAllMemberForGroup = async (req, res, next) => {
 
 const addMember = async (req, res, next) => {
     try {
-        const member = req.body.value
+        const members = req.body.value
         const user_id = req.user.id
         const { id: group_id } = req.params.value
-        let newPayload = { group_id, ...member }
+        let newPayload = { group_id, ...members }
         const data = await groupService.addMember(newPayload)
         res.data = data
         res.data.added_by = user_id

@@ -31,7 +31,9 @@ const getAllTransactionByExpenseId = async (payload) => {
 }
 const settleUpTransaction = async (payload) => {
     console.log({ 'payload tr': payload.transaction_id })
-    const transaction = await Transaction.findByPk(payload.transaction_id)
+    const transaction = await Transaction.findOne({
+        where: { id: payload.transaction_id },
+    })
     console.log('THIS IS SETTLE UP PAYLOAD  SERVICE ==> ', transaction)
     if (!transaction) {
         const error = Error('Transaction not found')
@@ -45,7 +47,7 @@ const settleUpTransaction = async (payload) => {
             settle_up_at,
         },
         {
-            where: { id: transaction.dataValues.id },
+            where: { id: payload.transaction_id },
         }
     )
     const response = { ...transaction.dataValues, settle_up_at }
