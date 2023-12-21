@@ -3,9 +3,12 @@ const { faker } = require('@faker-js/faker')
 const app = require('../app')
 const bcrypt = require('bcrypt')
 const { User } = require('../models')
-// const { UserGroup } = require('../models')
-// const { Group } = require('../models')
-// const jest = require('jest')
+const { UserGroup } = require('../models')
+const { Group } = require('../models')
+const { Payee } = require('../models')
+const { Transaction } = require('../models')
+const { Expense } = require('../models')
+
 const mail = require('../helpers/mail.helper')
 // user payload
 
@@ -83,7 +86,36 @@ let token
 let expiredToken =
     'aea430dea2094d3a8603646d65b4e5ff:9f5b86ab64fdee8618e5e2e9ee88bb943908e2114536e2238ba60dd3e907ad29b3b4b24d14a2829d0a63a1495c9dde66,28384499'
 beforeAll(async () => {
-    await User.truncate()
+    await User.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await UserGroup.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Group.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Expense.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Transaction.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Payee.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
     hashedPassword = await bcrypt.hash(fakeUserData[0].password, 10)
     const usersPayload = [
         {
@@ -573,5 +605,34 @@ describe('TEST GET api/currencies/ ', () => {
 })
 
 afterAll(async () => {
-    await User.truncate()
+    await User.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await UserGroup.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Group.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Expense.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Transaction.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Payee.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
 })

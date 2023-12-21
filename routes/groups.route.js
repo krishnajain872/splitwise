@@ -103,6 +103,14 @@ router.get(
     genericResponse.responseHelper
 )
 router.get(
+    '/:id/member/expenses/all',
+    checkAccessToken,
+    groupValidator.paramsIdCheck,
+    groupPermission.checkPermissionByValidGroupMember,
+    groupController.getAllGroupExpensesByCurrentGroup,
+    genericResponse.responseHelper
+)
+router.get(
     '/:id/expense/:expense_id/transactions/settle-up',
     checkAccessToken,
     groupValidator.expenseIdCheck,

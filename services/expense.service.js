@@ -662,6 +662,67 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
 
     return expenses
 }
+const getAllGroupExpensesByCurrentGroup = async (group_id) => {
+    // Then, find all the expenses with those IDs
+    const expenses = await Expense.findAll({
+        where: { group_id },
+        attributes: [
+            'base_amount',
+            'description',
+            'category',
+            'group_id',
+            'id',
+            'split_by',
+        ],
+        include: [
+            {
+                model: Payee,
+                as: 'payees',
+                required: true,
+                attributes: ['amount'],
+                include: [
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
+                    },
+                ],
+            },
+            {
+                model: Transaction,
+                as: 'transaction',
+                where: { settle_up_at: null },
+                include: [
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
+                    },
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['first_name', 'email', 'id', 'mobile'],
+                    },
+                    {
+                        model: Currency,
+                        as: 'currency_details',
+                        attributes: ['code'],
+                    },
+                ],
+                attributes: ['id', 'amount', 'settle_up_at'],
+            },
+        ],
+    })
+
+    console.log('THESES ARE EXPESNSE FOR GROUP ===> ', expenses)
+
+    return expenses
+}
 module.exports = {
     addExpense,
     updateExpense,
@@ -671,4 +732,5 @@ module.exports = {
     getAllExpensesByUser,
     getAllNonGroupExpensesByCurrentUser,
     getAllGroupExpensesByCurrentUser,
+    getAllGroupExpensesByCurrentGroup,
 }

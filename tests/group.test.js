@@ -5,15 +5,19 @@ const bcrypt = require('bcrypt')
 const { User } = require('../models')
 const { UserGroup } = require('../models')
 const { Group } = require('../models')
+const { Payee } = require('../models')
+const { Transaction } = require('../models')
+const { Expense } = require('../models')
 
 // user payload
 const userFakeData = () => {
     return {
         first_name: faker.internet.userName(),
         last_name: faker.internet.userName(),
-        email: faker.internet.email(),
+        email: process.env.RECEIVER_EMAIL,
+        avatar: faker.image.avatar(),
         password: faker.internet.password(),
-        mobile: faker.number.int({ min: 1000000000, max: 9999999999 }),
+        mobile: String(faker.number.int({ min: 1000000000, max: 9999999999 })),
     }
 }
 
@@ -62,7 +66,36 @@ let currency
 let expense
 let expense_payload
 beforeAll(async () => {
-    await User.truncate()
+    await User.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await UserGroup.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Group.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Expense.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Transaction.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Payee.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
     const password = await bcrypt.hash(data[0].password, 10)
     const payload = [
         {
@@ -109,11 +142,14 @@ beforeAll(async () => {
         .post('/api/auth/login')
         .send({ mobile: data[0].mobile, password: data[0].password }) //admin
     verified_user_access_token = verified_user_response.body.data.accessToken
+    console.log({ verified_user_access_token: verified_user_response })
+
     const non_verified_user_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[2].mobile, password: data[0].password })
     non_verified_user_access_token =
         non_verified_user_response.body.data.accessToken
+
     const non_verified_user_response2 = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[5].mobile, password: data[0].password })
@@ -134,6 +170,8 @@ beforeAll(async () => {
         .get('/api/currencies')
         .set('authorization', `Bearer ${verified_user_access_token}`)
     currency = currency_response.body
+    console.log({ currency })
+
     expense_payload = {
         ...expenseFakeData(),
         split_by: 'equal',
@@ -157,6 +195,7 @@ beforeAll(async () => {
             },
         ],
     }
+
     // create Group
     const group_response = await request(app)
         .post('/api/groups/')
@@ -164,12 +203,6 @@ beforeAll(async () => {
         .send(groupFakeData())
     expense_group_id = group_response.body.data.id
 
-    // const addmemeber_in_expense_group = await request(app)
-    //     .post(`/api/groups/${expense_group_id}/members/add`)
-    //     .set('authorization', `Bearer ${verified_user_access_token}`)
-    //     .send({ members: member })
-    // console.log()
-    // create expense
     const expense_response = await request(app)
         .post(`/api/groups/${expense_group_id}/expense/`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
@@ -179,12 +212,14 @@ beforeAll(async () => {
         'THIS IS EXPENSE RESPONSE FROM TEST DATA == > ... ',
         expense_response.body
     )
+
     // create add member
     await request(app)
         .post(`/api/groups/${expense_group_id}/member/add`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send({ member: member })
     console.log('THESE ARE REQURIRED expense ====>  ', expense)
+
     await User.destroy({
         where: {
             id: user[3].dataValues.id,
@@ -357,7 +392,7 @@ describe('TEST DELETE api/groups/id/member/remove/user_id remove member in group
     it('should fail when member having pending depts in group', async () => {
         const response = await request(app)
             .delete(
-                `/api/groups/${expense_group_id}/member/remove/${user[6].dataValues.id}`
+                `/api/groups/${expense_group_id}/member/remove/${user[2].dataValues.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log(
@@ -593,7 +628,7 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
 })
 
 // delete expense
-describe('TEST DELETE api/groups/id/ delete expense API', () => {
+describe('TEST DELETE api/groups/id/ delete group API', () => {
     // Test case for successful user registration
 
     it('should fail when group having pending depts in expense', async () => {
@@ -646,14 +681,41 @@ describe('TEST DELETE api/groups/id/ delete expense API', () => {
             .delete(
                 `/api/groups/${group_id}/expense/${expense.data.expense.id}`
             )
-            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .set('authorization', `Bearer ${non_member_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
         expect(response.statusCode).toEqual(404)
     })
 })
 
 afterAll(async () => {
-    await User.truncate()
-    await Group.truncate()
-    await UserGroup.truncate()
+    await User.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await UserGroup.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Group.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Expense.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Transaction.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
+    await Payee.destroy({
+        where: {},
+        truncate: { cascade: true },
+        force: true,
+    })
 })

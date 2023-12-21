@@ -196,6 +196,17 @@ const getAllGroupExpensesByCurrentUser = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const getAllGroupExpensesByCurrentGroup = async (req, res, next) => {
+    try {
+        const { id: payload } = req.params.value
+        const data =
+            await expenseService.getAllGroupExpensesByCurrentGroup(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 
 module.exports = {
     createGroup,
@@ -214,4 +225,5 @@ module.exports = {
     removeMember,
     getAllGroupExpensesByCurrentUser,
     getTotalAmountOwedByCurrentUserForParticularGroup,
+    getAllGroupExpensesByCurrentGroup,
 }
