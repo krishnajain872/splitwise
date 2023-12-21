@@ -1,8 +1,6 @@
 const generic = require('./commonResponse.helper')
 
 const validateRequest = (req, res, next, schema, parameterType) => {
-    console.log('THIS IS VALIDATORS PAYLOAD body ==> ', req.body)
-    console.log('THIS IS VALIDATORS PAYLOAD params ==> ', req.params)
     let requestData = {}
     if (parameterType === 'body') {
         requestData = req.body
@@ -22,7 +20,6 @@ const validateRequest = (req, res, next, schema, parameterType) => {
         }
         return next()
     }
-    console.log('VALIDATOR ERROR ==> ', value.error)
     const errorMessage = value.error.details[0].message
     generic.errorHelper(req, res, errorMessage, 400, value.error)
 }

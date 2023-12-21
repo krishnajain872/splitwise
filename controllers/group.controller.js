@@ -45,7 +45,6 @@ const updateExpense = async (req, res, next) => {
         const { id: group_id, expense_id } = req.params.value
         payload.value.group_id = group_id
         payload.value.expense_id = expense_id
-        console.log('Payload for ==> ', payload)
         const data = await expenseService.updateExpense(payload.value)
         res.data = data
         next()
@@ -67,7 +66,6 @@ const addExpense = async (req, res, next) => {
     try {
         const { body: payload } = req
         const { id: group_id } = req.params.value
-        console.log('PAYLOAD FOR ADD EXPENSE ====>>', req.params)
         payload.value.group_id = group_id
         const data = await expenseService.addExpense(payload.value)
         res.data = data
@@ -154,7 +152,6 @@ const addMember = async (req, res, next) => {
 const removeMember = async (req, res, next) => {
     try {
         const payload = req.params.value
-        console.log('REMOVE MEMBER SERVICE CALLED ', payload)
         const removedBy = req.user
         const data = await groupService.removeMember(payload)
         res.data = data

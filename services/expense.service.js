@@ -9,8 +9,6 @@ const { sequelize } = require('../models')
 const simpliyTransaction = require('../helpers/transaction.helper')
 const { Op } = require('sequelize')
 
-// const { Group } = require('../models')
-
 const addExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
@@ -29,15 +27,6 @@ const addExpense = async (payload) => {
                 })
             })
             data = await Promise.all(promises)
-            console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', data)
-            console.log(
-                'LENGTH OF DATA  FOR EXPENSE ADD FROM SERVICE ==>',
-                data.flat().length
-            )
-            console.log(
-                'LENGTH OF PAYEE MEMBER FOR EXPENSE ADD FROM SERVICE ==>',
-                payload.member.length
-            )
         }
 
         if (data.flat().length != payload.member.length) {
@@ -62,7 +51,6 @@ const addExpense = async (payload) => {
             (sum, member) => sum + Number(member.amount),
             0
         )
-        console.log('expense ==> ', expense)
         if (Number(payload.base_amount) !== totalAmount) {
             const error = Error(
                 'Expense base Amount and total amount of pay by all payee is unequal'
@@ -108,9 +96,6 @@ const addExpense = async (payload) => {
             error.statusCode = 422
             throw error
         }
-
-        console.log('THIS IS TRANSACTION DATA ===>> ', transactionData)
-
         transactionData.forEach((data) => {
             data.amount = data.amount
         })
@@ -154,15 +139,6 @@ const updateExpense = async (payload) => {
                 })
             })
             data = await Promise.all(promises)
-            console.log('PAYLOAD FOR EXPENSE ADD FROM SERVICE ==>', data)
-            console.log(
-                'LENGTH OF DATA  FOR EXPENSE ADD FROM SERVICE ==>',
-                data.flat().length
-            )
-            console.log(
-                'LENGTH OF PAYEE MEMBER FOR EXPENSE ADD FROM SERVICE ==>',
-                payload.member.length
-            )
         }
 
         if (data.flat().length != payload.member.length) {
@@ -283,7 +259,6 @@ const updateExpense = async (payload) => {
 }
 
 const deleteExpense = async (payload) => {
-    console.log('THIS IS DELETE PAYLOAD :: From service ==>> ', payload)
     const t = await sequelize.transaction()
     try {
         const existingExpense = await Expense.findOne(
@@ -296,7 +271,6 @@ const deleteExpense = async (payload) => {
             },
             { transaction: t }
         )
-        console.log('THIS IS  error from delete expense => ', existingExpense)
         if (!existingExpense) {
             const error = Error('Expense not found')
             error.statusCode = 404
@@ -322,7 +296,6 @@ const deleteExpense = async (payload) => {
         await t.commit()
         return true
     } catch (error) {
-        console.log('THIS IS ERROR FROM delete expense ', error)
         await t.rollback()
         throw error
     }

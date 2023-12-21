@@ -28,7 +28,6 @@ const createGroup = async (payload) => {
 }
 
 const deleteGroup = async (payload) => {
-    console.log('DELETE SERVICE ===>>. ', payload.id)
     const existingGroup = await Group.findByPk(payload.id, {
         attributes: ['title', 'category', 'id', 'admin_id'],
     })
@@ -41,13 +40,11 @@ const deleteGroup = async (payload) => {
         where: { id: payload.id },
     })
 
-    console.log(deleted)
     return deleted
 }
 
 const updateGroup = async (payload) => {
     const { id: group_id, ...rest } = payload
-    console.log('THIS IS SERVICE PAYLOAD ==> ', payload)
     const existingGroup = await Group.findByPk(group_id, {
         attributes: ['title', 'category', 'id', 'admin_id'],
     })
@@ -143,7 +140,6 @@ const addMember = async (payload) => {
         throw error
     }
     const userArray = payload.members
-    console.log('ADD MEMBER SERVICE ===> ', payload.members)
     await Promise.all(
         userArray.map(async (user_id, i) => {
             const [existingUser, existingMapping] = await Promise.all([
@@ -177,7 +173,6 @@ const addMember = async (payload) => {
 }
 
 const removeMember = async (payload) => {
-    console.log('Remove MEMBER Service Paylaod   ===>>  ', payload)
     const existingUser = await User.findByPk(payload.user_id, {
         attributes: ['first_name', 'mobile', 'email', 'status', 'id'],
     })
@@ -214,8 +209,6 @@ const removeMember = async (payload) => {
 
     let totalPendingAmount = 0
 
-    console.log('BEFORE TRANSACTION PAYLOAD ==> ', payload)
-
     const userTransactions = await Expense.findAll({
         where: {
             group_id: payload.id,
@@ -246,7 +239,6 @@ const removeMember = async (payload) => {
         ],
     })
 
-    console.log('AFTER TRANSCATION ==> ', userTransactions)
     userTransactions.forEach((transactions) => {
         transactions.transaction.forEach((transaction) => {
             if (

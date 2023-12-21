@@ -12,7 +12,6 @@ const checkPermission = async (req, res, next) => {
     try {
         const { id: group_id } = req.params.value
         const { id: admin_id } = req.user
-        console.log({ group_id, admin_id })
         const existingGroup = await Group.findByPk(group_id)
         if (!existingGroup) {
             const error = new Error('group not found')
@@ -33,7 +32,6 @@ const checkPermission = async (req, res, next) => {
             throw error
         }
     } catch (error) {
-        console.log(error)
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
@@ -107,8 +105,6 @@ const checkPermissionByValidExpenseMember = async (req, res, next) => {
     try {
         const { id: user_id } = req.user
         const { expense_id: expense } = req.params.value
-
-        console.log('THIS IS PERMISSION MIDDLEWARE PAYLOADS ==> ', expense)
         const existingExpense = await Expense.findByPk(expense)
         if (!existingExpense) {
             const error = new Error('Expense not found')
@@ -172,10 +168,6 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
             },
         })
 
-        console.log(
-            'THIS IS GROUP EXPENSES FROM PERMISSION==>  ',
-            groupExpenses
-        )
         groupExpenses.forEach((expense) => {
             expense.transaction.forEach((transaction) => {
                 totalPendingAmount += Number(transaction.amount)

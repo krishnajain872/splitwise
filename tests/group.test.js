@@ -11,10 +11,9 @@ const userFakeData = () => {
     return {
         first_name: faker.internet.userName(),
         last_name: faker.internet.userName(),
-        email: process.env.RECEIVER_EMAIL,
-        avatar: faker.image.avatar(),
+        email: faker.internet.email(),
         password: faker.internet.password(),
-        mobile: String(faker.number.int({ min: 1000000000, max: 9999999999 })),
+        mobile: faker.number.int({ min: 1000000000, max: 9999999999 }),
     }
 }
 
@@ -61,9 +60,6 @@ let non_member_token
 let member
 let currency
 let expense
-// let baseAmount
-// let payer_id
-// let payee_id
 let expense_payload
 beforeAll(async () => {
     await User.truncate()
@@ -95,6 +91,10 @@ beforeAll(async () => {
             ...data[5],
             password,
         },
+        {
+            ...data[6],
+            password,
+        },
     ]
 
     user = await User.bulkCreate(payload)
@@ -102,13 +102,13 @@ beforeAll(async () => {
         user[1].dataValues.id, //verified
         user[2].dataValues.id, //non verified
         user[5].dataValues.id, //non verified
+        user[6].dataValues.id,
     ]
 
     const verified_user_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[0].mobile, password: data[0].password }) //admin
     verified_user_access_token = verified_user_response.body.data.accessToken
-
     const non_verified_user_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[2].mobile, password: data[0].password })
@@ -151,20 +151,35 @@ beforeAll(async () => {
                 user_id: user[2].dataValues.id,
                 amount: 0,
             },
+            {
+                user_id: user[6].dataValues.id,
+                amount: 0,
+            },
         ],
     }
+    // create Group
     const group_response = await request(app)
         .post('/api/groups/')
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(groupFakeData())
     expense_group_id = group_response.body.data.id
+
+    // const addmemeber_in_expense_group = await request(app)
+    //     .post(`/api/groups/${expense_group_id}/members/add`)
+    //     .set('authorization', `Bearer ${verified_user_access_token}`)
+    //     .send({ members: member })
+    // console.log()
+    // create expense
     const expense_response = await request(app)
         .post(`/api/groups/${expense_group_id}/expense/`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(expense_payload)
     expense = expense_response.body
-
-    console.log('THIS IS EXPENSES ===> ', expense.data.expense.id)
+    console.log(
+        'THIS IS EXPENSE RESPONSE FROM TEST DATA == > ... ',
+        expense_response.body
+    )
+    // create add member
     await request(app)
         .post(`/api/groups/${expense_group_id}/member/add`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
@@ -178,7 +193,7 @@ beforeAll(async () => {
 })
 
 // create group
-describe('TEST POST api/groups/  create group API', () => {
+describe('TEST POST api/groups/ create group API', () => {
     // Test case for successful user registration
     it('should create a group with correct data and current login admin as user', async () => {
         const response = await request(app)
@@ -226,13 +241,13 @@ describe('TEST POST api/groups/  create group API', () => {
 })
 
 // add members
-describe('TEST POST api/groups/id/member/add   add member in group API', () => {
+describe('TEST POST api/groups/id/member/add add member in group API', () => {
     // Test case for successful user registration
     it('should create a group with correct data and current login admin as user', async () => {
         const response = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
-            .send({ member: member })
+            .send({ members: member })
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
     })
@@ -241,7 +256,7 @@ describe('TEST POST api/groups/id/member/add   add member in group API', () => {
         const incompleteData = { ...data[2] }
         delete incompleteData.category // remove the email field
         const res = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send(incompleteData)
         expect(res.statusCode).toEqual(400)
@@ -252,7 +267,7 @@ describe('TEST POST api/groups/id/member/add   add member in group API', () => {
         const incompleteData = { ...data[2] }
         delete incompleteData.category // remove the email field
         const res = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .set('authorization', `Bearer ${non_member_token}`)
             .send(incompleteData)
         expect(res.statusCode).toEqual(403)
@@ -261,7 +276,7 @@ describe('TEST POST api/groups/id/member/add   add member in group API', () => {
         const incompleteData = { ...data[2] }
         delete incompleteData.category // remove the email field
         const res = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .set('authorization', `Bearer ${non_verified_user_access_token}`)
             .send(incompleteData)
         expect(res.statusCode).toEqual(401)
@@ -269,7 +284,7 @@ describe('TEST POST api/groups/id/member/add   add member in group API', () => {
     // Test case for invalid email format
     it('should fail and return  un authorized access when access token not find or expired or invalid', async () => {
         const res = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .send(groupFakeData())
         expect(res.statusCode).toEqual(401)
     })
@@ -277,14 +292,14 @@ describe('TEST POST api/groups/id/member/add   add member in group API', () => {
     it('should fail when member already present in  group  ', async () => {
         member = [user[0].dataValues.id]
         const res = await request(app)
-            .post(`/api/groups/${group_id}/member/add`)
+            .post(`/api/groups/${group_id}/members/add`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
-            .send({ member: [user[1].dataValues.id] })
+            .send({ members: member })
         expect(res.statusCode).toEqual(409)
     })
 })
 // update group
-describe('TEST PATCH api/groups/  update group API', () => {
+describe('TEST PATCH api/groups/ update group API', () => {
     // Test case for successful user registration
     it('should update a group with correct data and current verified members', async () => {
         const response = await request(app)
@@ -330,7 +345,7 @@ describe('TEST PATCH api/groups/  update group API', () => {
 })
 
 // this is remove member
-describe('TEST DELETE api/groups/id/member/remove/user_id   remove member in group API', () => {
+describe('TEST DELETE api/groups/id/member/remove/user_id remove member in group API', () => {
     // Test case for successful user registration
     it('should return 401 if logined user part of the group but not verified ', async () => {
         const response = await request(app)
@@ -342,10 +357,13 @@ describe('TEST DELETE api/groups/id/member/remove/user_id   remove member in gro
     it('should fail when member having pending depts in group', async () => {
         const response = await request(app)
             .delete(
-                `/api/groups/${expense_group_id}/member/remove/${user[1].id}`
+                `/api/groups/${expense_group_id}/member/remove/${user[6].dataValues.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
-        console.log('THIS IS REMOVE TEST RESPONSE 409 => ', response.body)
+        console.log(
+            'THIS IS REMOVE TEST RESPONSE 409 iwantthis => ',
+            user[6].dataValues.id
+        )
         expect(response.statusCode).toEqual(409)
     })
     it('should fail not valid group_id or user_id', async () => {
@@ -491,12 +509,11 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
     // Test case for successful user registration
     it('should return 200 add a group with correct data and if any payee not belongs to group than this expense added as non group ', async () => {
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${expense.data.expense.id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({
                 ...expense_payload,
                 base_amount: 4000,
-                expense_id: expense.data.expense.id,
                 member: [
                     {
                         user_id: [expense_payload.member[0].user_id][0],
@@ -520,12 +537,11 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
     // // Test case for missing required field
     it('should fail and return 400 when required fields are missing', async () => {
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${expense.data.expense.id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({
                 ...expense_payload,
                 member: [],
-                expense_id: expense.data.expense.id,
             })
         console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
         expect(response.statusCode).toEqual(400)
@@ -533,28 +549,27 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
 
     it('should fail and return 403 un authorized access user is not part of the group ', async () => {
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${expense.data.expense.id}`)
             .set('authorization', `Bearer ${non_member_token}`)
-            .send({ ...expense_payload, expense_id: expense.data.expense.id })
+            .send({ ...expense_payload })
         console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
         expect(response.statusCode).toEqual(403)
     })
 
     it('should fail and return 401 un authorized access user not verified', async () => {
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${expense.data.expense.id}`)
             .set('authorization', `Bearer ${non_verified_user_access_token2}`)
-            .send({ ...expense_payload, expense_id: expense.data.expense.id })
+            .send({ ...expense_payload })
         console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
         expect(response.statusCode).toEqual(401)
     })
     it('should fail and return 404 if expense not found ', async () => {
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({
                 ...expense_payload,
-                expense_id: [expense_payload.member[0].user_id][0],
             })
         console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
         expect(response.statusCode).toEqual(404)
@@ -562,11 +577,10 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
     it('should fail and return 409 if base_amount and total amount of all the payee is not equal', async () => {
         let member = [...expense_payload.member]
         const response = await request(app)
-            .put(`/api/groups/${group_id}/expense/`)
+            .put(`/api/groups/${group_id}/expense/${expense.data.expense.id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({
                 ...expense_payload,
-                expense_id: expense.data.expense.id,
                 base_amount: 4000,
                 member: [
                     { user_id: member[0].user_id, amount: 400 },
@@ -607,21 +621,23 @@ describe('TEST DELETE api/groups/id/ delete expense API', () => {
         //     )
         //     .set('authorization', `Bearer ${verified_user_access_token}`)
         const response = await request(app)
-            .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
-            )
+            .delete(`/api/groups/${group_id}/expense/${'expense_id'}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
         expect(response.statusCode).toEqual(400)
     })
 
     it('should delete group after all valid checks and condition fullfiled', async () => {
+        await request(app)
+            .get(
+                `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}/transactions/settle-up`
+            )
+            .set('authorization', `Bearer ${verified_user_access_token}`)
         const response = await request(app)
             .delete(
                 `/api/groups/${group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
-        console.log('THIS IS REMOVE TEST RESPONSE 200 => ', response.body)
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
     })
