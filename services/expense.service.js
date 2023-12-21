@@ -13,7 +13,7 @@ const addExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
         let group_id
-        let data
+        let data = []
 
         if (payload.group_id) {
             const promises = payload.member.map((payee) => {
@@ -26,7 +26,7 @@ const addExpense = async (payload) => {
                     },
                 })
             })
-            data = await Promise.all(promises)
+            data.push(...(await Promise.all(promises)))
         }
 
         if (data.flat().length != payload.member.length) {
@@ -125,7 +125,7 @@ const updateExpense = async (payload) => {
     const t = await sequelize.transaction()
     try {
         let group_id
-        let data
+        let data = []
 
         if (payload.group_id) {
             const promises = payload.member.map((payee) => {
@@ -138,7 +138,7 @@ const updateExpense = async (payload) => {
                     },
                 })
             })
-            data = await Promise.all(promises)
+            data.push(...(await Promise.all(promises)))
         }
 
         if (data.flat().length != payload.member.length) {

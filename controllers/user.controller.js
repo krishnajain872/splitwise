@@ -2,6 +2,7 @@ const { errorHelper } = require('../helpers/commonResponse.helper')
 // const groupService = require('../services/group.service')
 const expenseService = require('../services/expense.service')
 const userService = require('../services/user.service')
+const friendService = require('../services/friend.service')
 const getAllUsers = async (req, res, next) => {
     try {
         const users = await userService.getAllUser()
@@ -11,11 +12,37 @@ const getAllUsers = async (req, res, next) => {
         next(error)
     }
 }
+
+const addFriend = async (req, res, next) => {
+    try {
+        const members = req.body.value
+        const user_id = req.user.id
+        let newPayload = { ...members, user_id }
+        const data = await friendService.addFriend(newPayload)
+        res.data = data
+        res.data.added_by = {
+            ...req.user,
+        }
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 const getCurrentUser = async (req, res, next) => {
     try {
         const { id: payload } = req.user
         const user = await userService.getUserById(payload)
         res.data = user
+        next()
+    } catch (error) {
+        next(error)
+    }
+}
+const getCurrentUserFriend = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const friend = await friendService.getCurrentUserFriend(user_id)
+        res.data = friend
         next()
     } catch (error) {
         next(error)
@@ -48,8 +75,19 @@ const updateNonGroupExpense = async (req, res, next) => {
 const deleteNonGroupExpense = async (req, res, next) => {
     try {
         const expense_id = req.params
-        console.log('THIS IS DELETE  EXPENSE CONTROLLER', expense_id)
         const data = await expenseService.deleteExpense(expense_id.value)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const removeFriend = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const friend_id = req.params.value
+        const payload = { user_id, ...friend_id }
+        const data = await friendService.removeFriend(payload)
         res.data = data
         next()
     } catch (error) {
@@ -101,4 +139,7 @@ module.exports = {
     deleteNonGroupExpense,
     getCurrentUser,
     getTotalAmountOwedByCurrentUser,
+    addFriend,
+    removeFriend,
+    getCurrentUserFriend,
 }

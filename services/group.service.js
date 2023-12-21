@@ -129,7 +129,7 @@ const findAllMemberOfCurrentGroup = async (payload) => {
 }
 const addMember = async (payload) => {
     const group_id = payload.group_id
-    let addedGroupMembers = {}
+    let addedGroupMembers = []
 
     const existingGroup = await Group.findByPk(group_id, {
         attributes: ['title', 'category', 'id', 'admin_id'],
@@ -165,7 +165,7 @@ const addMember = async (payload) => {
             }
 
             const member = await UserGroup.create({ group_id, user_id })
-            addedGroupMembers[`member_${++i}`] = member.dataValues
+            addedGroupMembers.push({ [`member_${++i}`]: member.dataValues })
         })
     )
 

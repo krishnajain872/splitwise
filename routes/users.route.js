@@ -46,6 +46,27 @@ router.post(
     userController.addNonGroupExpense,
     genericResponse.responseHelper
 )
+router.post(
+    '/friend',
+    checkAccessToken,
+    groupValidator.addMemberSchema,
+    permission.checkPermissionByRegistrationStatus,
+    userController.addFriend,
+    genericResponse.responseHelper
+)
+router.delete(
+    '/friend/:friend_id',
+    checkAccessToken,
+    groupValidator.friendIdCheck,
+    userController.removeFriend,
+    genericResponse.responseHelper
+)
+router.get(
+    '/friend/',
+    checkAccessToken,
+    userController.getCurrentUserFriend,
+    genericResponse.responseHelper
+)
 router.get(
     '/expense/:expense_id/transaction/:transaction_id/settle-up',
     checkAccessToken,
