@@ -20,6 +20,18 @@ router.get(
     genericResponse.responseHelper
 )
 router.get(
+    '/expenses/pending',
+    checkAccessToken,
+    userController.getAllPendingExpensesByCurrentUser,
+    genericResponse.responseHelper
+)
+router.get(
+    '/expenses/pending/non-group',
+    checkAccessToken,
+    userController.getAllPendingNonGroupExpensesByCurrentUser,
+    genericResponse.responseHelper
+)
+router.get(
     '/all',
     checkAccessToken,
     permission.checkPermissionByRegistrationStatus,
@@ -59,6 +71,20 @@ router.delete(
     checkAccessToken,
     groupValidator.friendIdCheck,
     userController.removeFriend,
+    genericResponse.responseHelper
+)
+router.get(
+    '/friend/:friend_id/transactions',
+    checkAccessToken,
+    groupValidator.friendIdCheck,
+    userController.getAllPendingExpensesWithFriend,
+    genericResponse.responseHelper
+)
+router.get(
+    '/friend/:friend_id/transactions/settle-up',
+    checkAccessToken,
+    groupValidator.friendIdCheck,
+    userController.getAllPendingExpensesWithFriendAndSettleup,
     genericResponse.responseHelper
 )
 router.get(

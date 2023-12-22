@@ -57,44 +57,44 @@ const updateGroup = async (payload) => {
     const update = await Group.update(updatedData, { where: { id: group_id } })
     return update
 }
-// filters
-const findGroupById = async (payload) => {
-    const existingGroup = await Group.findByPk(payload.group_id, {
-        attributes: ['title', 'category', 'id', 'admin_id'],
-    })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
+// // filters
+// const findGroupById = async (payload) => {
+//     const existingGroup = await Group.findByPk(payload.group_id, {
+//         attributes: ['title', 'category', 'id', 'admin_id'],
+//     })
+//     if (!existingGroup) {
+//         const error = new Error('group not found')
+//         error.statusCode = 404
+//         throw error
+//     }
 
-    return existingGroup.dataValues
-}
-const findGroupByName = async (payload) => {
-    const existingGroup = await Group.findOne({
-        where: { name: payload.name },
-        attributes: ['title', 'category', 'id', 'admin_id'],
-    })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
+//     return existingGroup.dataValues
+// // }
+// const findGroupByName = async (payload) => {
+//     const existingGroup = await Group.findOne({
+//         where: { name: payload.name },
+//         attributes: ['title', 'category', 'id', 'admin_id'],
+//     })
+//     if (!existingGroup) {
+//         const error = new Error('group not found')
+//         error.statusCode = 404
+//         throw error
+//     }
 
-    return existingGroup.dataValues
-}
-const findGroupByCategory = async (payload) => {
-    const existingGroup = await Group.findOne(payload.name, {
-        attributes: ['title', 'category', 'id', 'admin_id'],
-    })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
+//     return existingGroup.dataValues
+// }
+// const findGroupByCategory = async (payload) => {
+//     const existingGroup = await Group.findOne(payload.name, {
+//         attributes: ['title', 'category', 'id', 'admin_id'],
+//     })
+//     if (!existingGroup) {
+//         const error = new Error('group not found')
+//         error.statusCode = 404
+//         throw error
+//     }
 
-    return existingGroup.dataValues
-}
+//     return existingGroup.dataValues
+// }
 const findAllGroupForCurrentUser = async (payload) => {
     const existingGroup = await Group.findAll({
         where: { admin_id: payload },
@@ -276,9 +276,9 @@ module.exports = {
     deleteGroup,
     updateGroup,
     // updateGroupAdmin,
-    findGroupById,
-    findGroupByName,
-    findGroupByCategory,
+    // findGroupById,
+    // findGroupByName,
+    // findGroupByCategory,
     findAllGroupForCurrentUser,
     addMember,
     removeMember,

@@ -604,6 +604,168 @@ describe('TEST GET api/currencies/ ', () => {
     })
 })
 
+// describe('TEST EXPENSE', () => {
+//     test('GET /expenses', async () => {
+//         const res = await request(app)
+//             .get('/expenses')
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('GET /expenses/non-group', async () => {
+//         const res = await request(app)
+//             .get('/expenses/non-group')
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('GET /expenses/amount', async () => {
+//         const res = await request(app)
+//             .get('/expenses/amount')
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('GET /', async () => {
+//         const res = await request(app)
+//             .get('/')
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('POST /expense/', async () => {
+//         const res = await request(app)
+//             .post('/expense/')
+//             .send({
+//                 /* your expense data */
+//             })
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('GET /expense/:expense_id/transaction/:transaction_id/settle-up', async () => {
+//         const res = await request(app)
+//             .get(
+//                 `/expense/${expense_id}/transaction/${transaction_id}/settle-up`
+//             ) // Set your expense_id and transaction_id here
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('PUT /expense/:expense_id', async () => {
+//         const res = await request(app)
+//             .put(`/expense/${expense_id}`) // Set your expense_id here
+//             .send({
+//                 /* your updated expense data */
+//             })
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+
+//     test('DELETE /expense/:expense_id', async () => {
+//         const res = await request(app)
+//             .delete(`/expense/${expense_id}`) // Set your expense_id here
+//             .set('Authorization', `Bearer ${token}`) // Set your token here
+//         expect(res.statusCode).toEqual(200)
+//     })
+// })
+
+describe('TEST POST api/users/friend/ ', () => {
+    it('should send 200 and create a friend ship with current user and other mentioned ids if the friend ship is not exist', async () => {
+        const res = await request(app)
+            .post('/friend')
+            .send({ members })
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+    it('should send 409 ids if the friend ship is exist', async () => {
+        const res = await request(app)
+            .post('/friend')
+            .send({ members })
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(409)
+    })
+    it('should send 404  if the friend id not exist', async () => {
+        const res = await request(app)
+            .post('/friend')
+            .send({ members })
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(404)
+    })
+    it('should send 403 if the user not verified ', async () => {
+        const res = await request(app)
+            .post('/friend')
+            .send({ members })
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(403)
+    })
+})
+
+describe('TEST GET api/users/friend/ ', () => {
+    it('should send 200 and get all  friends of current user', async () => {
+        const res = await request(app)
+            .get('/friend')
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+})
+describe('TEST GET api/users/friend/:friend_id/transactions/ ', () => {
+    it('should send 200 and settle up all the pending transaction of user user and friend', async () => {
+        const res = await request(app)
+            .get(`/friend/${friend_id}/transactions`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+    it('should send 200 and settle up all the pending transaction of user user and friend', async () => {
+        const res = await request(app)
+            .get(`/friend/${friend_id}/transactions`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+})
+describe('TEST GET api/users/friend/:friend_id/transactions/settle-up', () => {
+    it('should send 200 and settle up all the pending transaction of user user and friend', async () => {
+        const res = await request(app)
+            .get(`/friend/${friend_id}/transactions/settle-up`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+    it('should send 200 and settle up all the pending transaction of user user and friend', async () => {
+        const res = await request(app)
+            .get(`/friend/${friend_id}/transactions/settle-up`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+})
+
+// test('DELETE /friend/:friend_id', async () => {
+//     const res = await request(app)
+//         .delete(`/friend/${friend_id}`) // Set your friend_id here
+//         .set('Authorization', `Bearer ${token}`) // Set your token here
+//     expect(res.statusCode).toEqual(200)
+// })
+
+// test('GET /friend/:friend_id/transactions', async () => {
+//     const res = await request(app)
+//         .get(`/friend/${friend_id}/transactions`) // Set your friend_id here
+//         .set('Authorization', `Bearer ${token}`) // Set your token here
+//     expect(res.statusCode).toEqual(200)
+// })
+
+// test('GET /friend/:friend_id/transactions/settle-up', async () => {
+//     const res = await request(app)
+//         .get(`/friend/${friend_id}/transactions/settle-up`) // Set your friend_id here
+//         .set('Authorization', `Bearer ${token}`) // Set your token here
+//     expect(res.statusCode).toEqual(200)
+// })
+
+// test('GET /friend/', async () => {
+//     const res = await request(app)
+//         .get('/friend/')
+//         .set('Authorization', `Bearer ${token}`) // Set your token here
+//     expect(res.statusCode).toEqual(200)
+// })
+
 afterAll(async () => {
     await User.destroy({
         where: {},

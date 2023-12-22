@@ -64,7 +64,8 @@ let non_member_token
 let member
 let currency
 let expense
-let expense_payload
+// let share_expense
+// let share_expense_payload
 beforeAll(async () => {
     await User.destroy({
         where: {},
@@ -142,8 +143,6 @@ beforeAll(async () => {
         .post('/api/auth/login')
         .send({ mobile: data[0].mobile, password: data[0].password }) //admin
     verified_user_access_token = verified_user_response.body.data.accessToken
-    console.log({ verified_user_access_token: verified_user_response })
-
     const non_verified_user_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[2].mobile, password: data[0].password })
@@ -170,8 +169,6 @@ beforeAll(async () => {
         .get('/api/currencies')
         .set('authorization', `Bearer ${verified_user_access_token}`)
     currency = currency_response.body
-    console.log({ currency })
-
     expense_payload = {
         ...expenseFakeData(),
         split_by: 'equal',
@@ -195,31 +192,57 @@ beforeAll(async () => {
             },
         ],
     }
-
+    share_expense_payload = {
+        ...expenseFakeData(),
+        split_by: 'share',
+        currency_id: currency[0].id,
+        member: [
+            {
+                user_id: user[0].dataValues.id,
+                amount: 1800,
+                share: 200,
+            },
+            {
+                user_id: user[1].dataValues.id,
+                amount: 200,
+                share: 1800,
+            },
+            {
+                user_id: user[2].dataValues.id,
+                amount: 0,
+            },
+            {
+                user_id: user[6].dataValues.id,
+                amount: 0,
+            },
+        ],
+    }
     // create Group
     const group_response = await request(app)
         .post('/api/groups/')
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(groupFakeData())
     expense_group_id = group_response.body.data.id
-
+    const group_response2 = await request(app)
+        .post('/api/groups/')
+        .set('authorization', `Bearer ${verified_user_access_token}`)
+        .send(groupFakeData())
+    share_expense_group_id = group_response2.body.data.id
     const expense_response = await request(app)
         .post(`/api/groups/${expense_group_id}/expense/`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(expense_payload)
     expense = expense_response.body
-    console.log(
-        'THIS IS EXPENSE RESPONSE FROM TEST DATA == > ... ',
-        expense_response.body
-    )
-
+    const share_expense_response = await request(app)
+        .post(`/api/groups/${share_expense_group_id}/expense/`)
+        .set('authorization', `Bearer ${verified_user_access_token}`)
+        .send(expense_payload)
+    share_expense = share_expense_response.body
     // create add member
     await request(app)
         .post(`/api/groups/${expense_group_id}/member/add`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send({ member: member })
-    console.log('THESE ARE REQURIRED expense ====>  ', expense)
-
     await User.destroy({
         where: {
             id: user[3].dataValues.id,
@@ -331,6 +354,54 @@ describe('TEST POST api/groups/id/member/add add member in group API', () => {
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({ members: member })
         expect(res.statusCode).toEqual(409)
+    })
+})
+
+// get all groups of current user
+describe('TEST GET api/groups/ ', () => {
+    it('should return 200  and all the groups of current login user ', async () => {
+        const response = await request(app)
+            .get('/api/groups/')
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the user does not exist', async () => {
+        const response = await request(app)
+            .get('/api/groups/')
+            .set('authorization', `Bearer ${user_not_found_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+    it('should return 403 if the user is not verified or not valid member', async () => {
+        const response = await request(app)
+            .get('/api/groups/')
+            .set('authorization', `Bearer ${non_verified_user_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(403)
+    })
+})
+describe('TEST GET api/groups/members ', () => {
+    it('should return 200 and all the members of current group', async () => {
+        const response = await request(app)
+            .get(`/api/groups/${expense_group_id}/members`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the user does not exist', async () => {
+        const response = await request(app)
+            .get(`/api/groups/${expense_group_id}/members`)
+            .set('authorization', `Bearer ${user_not_found_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+    it('should return 403 if the user is not verified or not valid group member', async () => {
+        const response = await request(app)
+            .get(`/api/groups/${expense_group_id}/members`)
+            .set('authorization', `Bearer ${non_verified_user_access_token}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(403)
     })
 })
 // update group
@@ -630,11 +701,10 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
 // delete expense
 describe('TEST DELETE api/groups/id/ delete group API', () => {
     // Test case for successful user registration
-
     it('should fail when group having pending depts in expense', async () => {
         const response = await request(app)
             .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
+                `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 409 => ', response.body)
@@ -643,7 +713,7 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
     it('should return 403 if logined user not admin of the group  ', async () => {
         const response = await request(app)
             .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
+                `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${non_verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 403 => ', response.body)
@@ -656,7 +726,7 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
         //     )
         //     .set('authorization', `Bearer ${verified_user_access_token}`)
         const response = await request(app)
-            .delete(`/api/groups/${group_id}/expense/${'expense_id'}`)
+            .delete(`/api/groups/${expense_group_id}/expense/${'expense_id'}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
         expect(response.statusCode).toEqual(400)
@@ -670,20 +740,21 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
             .set('authorization', `Bearer ${verified_user_access_token}`)
         const response = await request(app)
             .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
+                `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log({ res: response.body })
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
     })
-    it('should return 404 if user not present in the group', async () => {
+    it('should return 403 if user not present in the group', async () => {
         const response = await request(app)
             .delete(
-                `/api/groups/${group_id}/expense/${expense.data.expense.id}`
+                `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}`
             )
             .set('authorization', `Bearer ${non_member_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
-        expect(response.statusCode).toEqual(404)
+        expect(response.statusCode).toEqual(403)
     })
 })
 

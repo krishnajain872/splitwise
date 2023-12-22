@@ -94,10 +94,48 @@ const removeFriend = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
+const getAllPendingExpensesWithFriend = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const friend_id = req.params.value
+        const payload = { user_id, ...friend_id }
+        const data =
+            await friendService.getAllPendingExpensesWithFriend(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const getAllPendingExpensesWithFriendAndSettleup = async (req, res, next) => {
+    try {
+        const { id: user_id } = req.user
+        const friend_id = req.params.value
+        const payload = { user_id, ...friend_id }
+        const data =
+            await friendService.getAllPendingExpensesWithFriendAndSettleup(
+                payload
+            )
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
 const getAllExpensesByCurrentUser = async (req, res, next) => {
     try {
         const { id: payload } = req.user
         const data = await expenseService.getAllExpensesByUser(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const getAllPendingExpensesByCurrentUser = async (req, res, next) => {
+    try {
+        const { id: payload } = req.user
+        const data = await expenseService.getAllPendingExpensesByUser(payload)
         res.data = data
         next()
     } catch (error) {
@@ -109,6 +147,19 @@ const getAllNonGroupExpensesByCurrentUser = async (req, res, next) => {
         const { id: payload } = req.user
         const data =
             await expenseService.getAllNonGroupExpensesByCurrentUser(payload)
+        res.data = data
+        next()
+    } catch (error) {
+        errorHelper(req, res, error.message, error.statusCode, error)
+    }
+}
+const getAllPendingNonGroupExpensesByCurrentUser = async (req, res, next) => {
+    try {
+        const { id: payload } = req.user
+        const data =
+            await expenseService.getAllPendingNonGroupExpensesByCurrentUser(
+                payload
+            )
         res.data = data
         next()
     } catch (error) {
@@ -142,4 +193,8 @@ module.exports = {
     addFriend,
     removeFriend,
     getCurrentUserFriend,
+    getAllPendingExpensesWithFriend,
+    getAllPendingExpensesWithFriendAndSettleup,
+    getAllPendingExpensesByCurrentUser,
+    getAllPendingNonGroupExpensesByCurrentUser,
 }
