@@ -1,10 +1,11 @@
 // services/currenciesService.js
 const { Transaction } = require('../models')
 const { Expense } = require('../models')
+const { User } = require('../models')
 
 const getAllTransactionByExpenseId = async (payload) => {
     const transaction = await Expense.findAll({
-        where: { expense_id: payload },
+        where: { id: payload },
         attributes: [
             'category',
             'id',
@@ -14,15 +15,20 @@ const getAllTransactionByExpenseId = async (payload) => {
         ],
         include: [
             {
-                Model: Transaction,
+                model: Transaction,
                 as: 'transaction',
-                attributes: [
-                    'payer_id',
-                    'id',
-                    'payee_id',
-                    'amount',
-                    'currency_id',
-                    'settle_up_at',
+                attributes: ['id', 'amount', 'currency_id', 'settle_up_at'],
+                include: [
+                    {
+                        model: User,
+                        as: 'payee_details',
+                        attributes: ['id', 'first_name', 'mobile', 'status'],
+                    },
+                    {
+                        model: User,
+                        as: 'payer_details',
+                        attributes: ['id', 'first_name', 'mobile', 'status'],
+                    },
                 ],
             },
         ],

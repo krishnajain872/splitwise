@@ -3,7 +3,7 @@ const transactionService = require('../services/transaction.service')
 
 const getAllTransactionByExpenseId = async (req, res, next) => {
     try {
-        const { expense_id: payload } = req.params
+        const { expense_id: payload } = req.params.value
         const data =
             await transactionService.getAllTransactionByExpenseId(payload)
         res.data = data
@@ -12,29 +12,7 @@ const getAllTransactionByExpenseId = async (req, res, next) => {
         errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
-// pending
-const getAllTransactionByCurrentUser = async (req, res, next) => {
-    try {
-        const { expense_id: payload } = req.params
-        const data =
-            await transactionService.getAllTransactionByCurrentUser(payload)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
-// pending
-const getAllTransactionByGroup = async (req, res, next) => {
-    try {
-        const { expense_id: payload } = req.params
-        const data = await transactionService.getAllTransactionByGroup(payload)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
+
 const settleUpAllTransactionOfExpense = async (req, res, next) => {
     try {
         const { id, expense_id } = req.params.value
@@ -72,8 +50,6 @@ const settleUpTransaction = async (req, res, next) => {
 
 module.exports = {
     getAllTransactionByExpenseId,
-    getAllTransactionByCurrentUser,
-    getAllTransactionByGroup,
     settleUpTransaction,
     settleUpAllTransactionOfExpense,
 }

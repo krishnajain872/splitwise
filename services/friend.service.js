@@ -89,13 +89,20 @@ const removeFriend = async (payload) => {
             [Op.and]: [
                 {
                     [Op.or]: [
-                        { payer_id: payload.friend_id },
-                        { payee_id: payload.user_id },
+                        {
+                            payer_id: payload.user_id,
+                            payee_id: payload.friend_id,
+                        },
+                        {
+                            payer_id: payload.friend_id,
+                            payee_id: payload.user_id,
+                        },
                     ],
                 },
                 { settle_up_at: null },
             ],
         },
+
         attributes: ['id', 'amount', 'payer_id', 'payee_id'],
     })
 
@@ -118,6 +125,7 @@ const removeFriend = async (payload) => {
     const total_amount_owed =
         totalPayeeAmount.toFixed(2) - totalPayerAmount.toFixed(2)
     if (total_amount_owed > 0) {
+        console.log(total_amount_owed, 'FROM REMOVE FRIEND WHEN PENDING DEBTS')
         const error = new Error('pending transactions with friend')
         error.statusCode = 409
         throw error
@@ -146,12 +154,12 @@ const getAllPendingExpensesWithFriend = async (payload) => {
             {
                 model: User,
                 as: 'user_details',
-                attributes: ['first_name', 'email', 'mobile'],
+                attributes: ['id', 'first_name', 'email', 'mobile'],
             },
             {
                 model: User,
                 as: 'friend_details',
-                attributes: ['first_name', 'email', 'mobile'],
+                attributes: ['id', 'first_name', 'email', 'mobile'],
             },
         ],
     })
@@ -272,12 +280,12 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
                 {
                     model: User,
                     as: 'user_details',
-                    attributes: ['first_name', 'email', 'mobile'],
+                    attributes: ['id', 'first_name', 'email', 'mobile'],
                 },
                 {
                     model: User,
                     as: 'friend_details',
-                    attributes: ['first_name', 'email', 'mobile'],
+                    attributes: ['id', 'first_name', 'email', 'mobile'],
                 },
             ],
         })

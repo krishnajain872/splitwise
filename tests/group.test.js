@@ -699,7 +699,7 @@ describe('TEST PUT api/groups/id/expense update group expense API', () => {
 })
 
 // delete expense
-describe('TEST DELETE api/groups/id/ delete group API', () => {
+describe('TEST DELETE api/groups/:id/expense/:expense_id delete expense API', () => {
     // Test case for successful user registration
     it('should fail when group having pending depts in expense', async () => {
         const response = await request(app)

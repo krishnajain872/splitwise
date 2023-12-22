@@ -110,6 +110,14 @@ router.put(
     userController.updateNonGroupExpense,
     genericResponse.responseHelper
 )
+router.get(
+    '/expense/:expense_id',
+    checkAccessToken,
+    groupValidator.expenseIdCheck,
+    permission.checkPermissionByValidExpenseMember,
+    transactionController.getAllTransactionByExpenseId,
+    genericResponse.responseHelper
+)
 router.delete(
     '/expense/:expense_id',
     checkAccessToken,
