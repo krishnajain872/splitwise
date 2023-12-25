@@ -34,7 +34,14 @@ const checkAccessToken = async (req, res, next) => {
             throw error
         }
         const user = await User.findByPk(decodedJwt.user_id, {
-            attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+            attributes: [
+                'first_name',
+                'last_name',
+                'id',
+                'mobile',
+                'email',
+                'status',
+            ],
         })
         if (!user) {
             const error = new Error('User not found')

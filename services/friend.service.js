@@ -32,7 +32,9 @@ const addFriend = async (payload) => {
                 throw error
             }
             if (existingMapping) {
-                const error = new Error('user already present in the group')
+                const error = new Error(
+                    'user already present in the friend list'
+                )
                 error.statusCode = 409
                 throw error
             }

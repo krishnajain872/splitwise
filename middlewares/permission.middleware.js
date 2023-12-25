@@ -18,13 +18,7 @@ const checkPermission = async (req, res, next) => {
             error.statusCode = 404
             throw error
         }
-        const existingAdmin = await User.findByPk(admin_id)
-        if (!existingAdmin) {
-            const error = new Error('admin not found')
-            error.statusCode = 404
-            throw error
-        }
-        if (existingGroup.admin_id === existingAdmin.id) {
+        if (existingGroup.admin_id === admin_id) {
             next()
         } else {
             const error = new Error('unAuthorized Access')
@@ -39,18 +33,8 @@ const checkPermission = async (req, res, next) => {
 // all the permissions check by this for only verified user
 const checkPermissionByRegistrationStatus = async (req, res, next) => {
     try {
-        const { id: user_id } = req.user
-
-        const existingUser = await User.findByPk(user_id)
-        if (!existingUser) {
-            const error = new Error('user not found')
-            error.statusCode = 404
-            throw error
-        }
-        if (
-            existingUser.status === 'dummy' ||
-            existingUser.status === 'unVerified'
-        ) {
+        const { status } = req.user
+        if (status === 'dummy' || status === 'unVerified') {
             const error = new Error('user is not verified')
             error.statusCode = 403
             throw error
@@ -67,6 +51,12 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
     try {
         const { id: user_id } = req.user
         const { id: group_id } = req.params.value
+        const existGroup = await Group.findByPk(group_id)
+        if (!existGroup || existGroup === null) {
+            const error = new Error('group not found')
+            error.statusCode = 404
+            throw error
+        }
         const existingUser = await UserGroup.findOne({
             include: [
                 {
@@ -79,6 +69,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
                 group_id,
             },
         })
+        console.log('THIS IS CONSOLE FROM GROUP permission', existGroup)
         if (!existingUser) {
             const error = new Error(
                 'unAuthorized access user is not part of the group'
@@ -103,7 +94,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
 // all the permissions check by this for all the valid  group members
 const checkPermissionByValidExpenseMember = async (req, res, next) => {
     try {
-        const { id: user_id } = req.user
+        const { id: user_id, status } = req.user
         const { expense_id: expense } = req.params.value
         const existingExpense = await Expense.findByPk(expense)
         if (!existingExpense) {
@@ -124,17 +115,8 @@ const checkPermissionByValidExpenseMember = async (req, res, next) => {
             error.statusCode = 403
             throw error
         }
-        const existingUser = await User.findByPk(user_id)
-        if (!existingUser) {
-            const error = new Error('user not found')
-            error.statusCode = 404
-            throw error
-        }
 
-        if (
-            existingUser.status === 'dummy' ||
-            existingUser.status === 'unVerified'
-        ) {
+        if (status === 'dummy' || status === 'unVerified') {
             const error = new Error('user is not verified')
             error.statusCode = 401
             throw error
