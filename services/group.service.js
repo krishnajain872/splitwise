@@ -6,16 +6,7 @@ const { UserGroup } = require('../models')
 const { Op } = require('sequelize')
 
 const createGroup = async (payload) => {
-    const existingUser = await User.findByPk(payload.admin_id, {
-        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
-    })
-    if (!existingUser) {
-        const error = new Error('user not found')
-        error.statusCode = 404
-        throw error
-    }
     let addAdminInGroup
-
     const group = await Group.create(payload)
     if (group) {
         addAdminInGroup = await UserGroup.create({
@@ -28,18 +19,9 @@ const createGroup = async (payload) => {
 }
 
 const deleteGroup = async (payload) => {
-    const existingGroup = await Group.findByPk(payload.id, {
-        attributes: ['title', 'category', 'id', 'admin_id'],
-    })
-    if (!existingGroup || existingGroup.deleted_at != null) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
     const deleted = await Group.destroy({
         where: { id: payload.id },
     })
-
     return deleted
 }
 
@@ -48,11 +30,6 @@ const updateGroup = async (payload) => {
     const existingGroup = await Group.findByPk(group_id, {
         attributes: ['title', 'category', 'id', 'admin_id'],
     })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
     const updatedData = { ...existingGroup.dataValues, ...rest }
     const update = await Group.update(updatedData, { where: { id: group_id } })
     return update
@@ -106,11 +83,6 @@ const findAllMemberOfCurrentGroup = async (payload) => {
     const existingGroup = await Group.findByPk(payload, {
         attributes: ['title', 'category', 'id', 'admin_id'],
     })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
     const members = await UserGroup.findAll({
         include: [
             {
@@ -130,15 +102,6 @@ const findAllMemberOfCurrentGroup = async (payload) => {
 const addMember = async (payload) => {
     const group_id = payload.group_id
     let addedGroupMembers = []
-
-    const existingGroup = await Group.findByPk(group_id, {
-        attributes: ['title', 'category', 'id', 'admin_id'],
-    })
-    if (!existingGroup) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
     const userArray = payload.members
     await Promise.all(
         userArray.map(async (user_id, i) => {
@@ -154,7 +117,7 @@ const addMember = async (payload) => {
                 }),
             ])
             if (!existingUser) {
-                const error = new Error('user not found')
+                const error = new Error('member not found')
                 error.statusCode = 404
                 throw error
             }
@@ -177,18 +140,13 @@ const removeMember = async (payload) => {
         attributes: ['first_name', 'mobile', 'email', 'status', 'id'],
     })
     if (!existingUser) {
-        const error = new Error('User not found')
+        const error = new Error('member not found')
         error.statusCode = 404
         throw error
     }
     const group = await Group.findByPk(payload.id, {
         attributes: ['admin_id', 'title', 'category', 'id'],
     })
-    if (!group) {
-        const error = new Error('group not found')
-        error.statusCode = 404
-        throw error
-    }
     if (payload.user_id === group.dataValues.admin_id) {
         const error = new Error('unAuthorized Access , cannot remove admin')
         error.statusCode = 403
@@ -202,7 +160,7 @@ const removeMember = async (payload) => {
         attributes: ['group_id', 'user_id'],
     })
     if (!existingGroupUser) {
-        const error = new Error('user not present in the Group')
+        const error = new Error('member not present in the Group')
         error.statusCode = 404
         throw error
     }

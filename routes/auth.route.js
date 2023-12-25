@@ -33,8 +33,8 @@ router.get(
 )
 router.post(
     '/access-token',
-    authMiddleware.checkRefreshToken,
     authValidator.accessTokenSchema,
+    authMiddleware.checkRefreshToken,
     authController.generateAccessToken,
     genericResponse.responseHelper
 )

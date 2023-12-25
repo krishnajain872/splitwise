@@ -29,11 +29,6 @@ getUserById = async (payload) => {
             'status',
         ],
     })
-    if (!user) {
-        const error = new Error('user not found!')
-        error.statusCode = 404
-        throw error
-    }
     return user
 }
 

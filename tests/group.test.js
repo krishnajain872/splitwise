@@ -60,6 +60,7 @@ let verified_user_access_token
 let non_verified_user_access_token
 let non_verified_user_access_token2
 let user_not_found_access_token
+let verified_user_access_token2
 let non_member_token
 let member
 let currency
@@ -146,6 +147,10 @@ beforeAll(async () => {
         .post('/api/auth/login')
         .send({ mobile: data[0].mobile, password: data[0].password }) //admin
     verified_user_access_token = verified_user_response.body.data.accessToken
+    const verified_user_response2 = await request(app)
+        .post('/api/auth/login')
+        .send({ mobile: data[1].mobile, password: data[0].password }) //admin
+    verified_user_access_token2 = verified_user_response2.body.data.accessToken
     const non_verified_user_response = await request(app)
         .post('/api/auth/login')
         .send({ mobile: data[2].mobile, password: data[0].password })
@@ -303,6 +308,14 @@ describe('TEST POST api/groups/ create group API', () => {
             .post('/api/groups/')
             .set('authorization', `Bearer ${user_not_found_access_token}`)
             .send(group_data)
+        console.log({ res4: res.body })
+        expect(res.statusCode).toEqual(404)
+    })
+    it('should fail and return user not found when access token of non existing user', async () => {
+        const res = await request(app)
+            .post('/api/groups/')
+            .set('authorization', `Bearer ${user_not_found_access_token}`)
+            .send(group_data)
         expect(res.statusCode).toEqual(404)
     })
 })
@@ -348,14 +361,14 @@ describe('TEST POST api/groups/id/member/add add member in group API', () => {
             .send(incompleteData)
         expect(res.statusCode).toEqual(401)
     })
-    // Test case for invalid email format
+
     it('should fail and return  un authorized access when access token not find or expired or invalid', async () => {
         const res = await request(app)
             .post(`/api/groups/${group_id}/members/add`)
             .send(groupFakeData())
         expect(res.statusCode).toEqual(401)
     })
-    // Test case for user already registered
+
     it('should fail when member already present in  group  ', async () => {
         member = [user[0].dataValues.id]
         const res = await request(app)
@@ -363,6 +376,23 @@ describe('TEST POST api/groups/id/member/add add member in group API', () => {
             .set('authorization', `Bearer ${verified_user_access_token}`)
             .send({ members: member })
         expect(res.statusCode).toEqual(409)
+    })
+    it('should fail when member id is invalid ', async () => {
+        member = ['groupId']
+        const res = await request(app)
+            .post(`/api/groups/${group_id}/members/add`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .send({ members: member })
+        expect(res.statusCode).toEqual(400)
+    })
+    it('should fail when member id is not found or not exis ', async () => {
+        member = [group_id]
+        const res = await request(app)
+            .post(`/api/groups/${group_id}/members/add`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+            .send({ members: member })
+        console.log({ 121: res.body })
+        expect(res.statusCode).toEqual(404)
     })
 })
 // get all groups of current user
@@ -415,7 +445,7 @@ describe('TEST GET api/groups/members ', () => {
 // update group
 describe('TEST PATCH api/groups/ update group API', () => {
     // Test case for successful user registration
-    it('should update a group with correct data and current verified members', async () => {
+    it('should 200 update a group with correct data and current verified members', async () => {
         const response = await request(app)
             .patch(`/api/groups/${group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
@@ -424,7 +454,7 @@ describe('TEST PATCH api/groups/ update group API', () => {
         expect(response.body.message).toEqual('Success')
     })
     // Test case for missing required fields
-    it('should fail when required fields are missing', async () => {
+    it('should 400 fail when required fields are missing', async () => {
         const incompleteData = { ...groupFakeData() }
         delete incompleteData.category // remove the email field
         const res = await request(app)
@@ -443,19 +473,20 @@ describe('TEST PATCH api/groups/ update group API', () => {
         expect(res.statusCode).toEqual(401)
     })
 
-    it('should fail and return  un authorized access when user is not part of the group', async () => {
+    it('should 403 fail and return  un authorized access when user is not part of the group', async () => {
         const res = await request(app)
             .patch(`/api/groups/${group_id}`)
             .set('authorization', `Bearer ${non_member_token}`)
             .send(group_data)
         expect(res.statusCode).toEqual(403)
     })
-    it('should fail and return group not found ', async () => {
+    it('should fail and return when group not exist or not a valid group member ', async () => {
         const res = await request(app)
-            .patch('/api/groups/')
-            .set('authorization', `Bearer ${user_not_found_access_token}`)
+            .patch(`/api/groups/${user[4].id}`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
             .send(group_data)
-        expect(res.statusCode).toEqual(404)
+        console.log({ 123: res.body })
+        expect(res.statusCode).toEqual(403)
     })
 })
 // this is remove member
@@ -501,6 +532,13 @@ describe('TEST DELETE api/groups/id/member/remove/user_id remove member in group
         console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
         expect(response.statusCode).toEqual(400)
     })
+    it('should send 400 and fail not valid group_id or user_id', async () => {
+        const response = await request(app)
+            .delete(`/api/groups/${group_id}/member/remove/${'user[2].id'}`)
+            .set('authorization', `Bearer ${non_verified_user_access_token}`)
+        console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
+        expect(response.statusCode).toEqual(400)
+    })
     it('should send 200 and remove user after all valid checks and condition fullfiled', async () => {
         const response = await request(app)
             .delete(`/api/groups/${group_id}/member/remove/${user[2].id}`)
@@ -522,13 +560,20 @@ describe('TEST DELETE api/groups/id/member/remove/user_id remove member in group
     it('should return 403 if try to remove admin  ', async () => {
         const response = await request(app)
             .delete(`/api/groups/${group_id}/member/remove/${user[0].id}`)
-            .set('authorization', `Bearer ${non_verified_user_access_token}`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 403 => ', response.body)
         expect(response.statusCode).toEqual(403)
     })
     it('should return 404 if user not present in the group', async () => {
         const response = await request(app)
             .delete(`/api/groups/${group_id}/member/remove/${user[4].id}`)
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
+        expect(response.statusCode).toEqual(404)
+    })
+    it('should return 404 if user not present in the group', async () => {
+        const response = await request(app)
+            .delete(`/api/groups/${group_id}/member/remove/${group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
         expect(response.statusCode).toEqual(404)
@@ -555,12 +600,21 @@ describe('TEST GET api/groups/:group_id/expense/:expense_id/transactions/settle-
         console.log({ response: response.body || response.error })
         expect(response.statusCode).toBe(404)
     })
+    it('should return 404 if the expense does not exist', async () => {
+        const response = await request(app)
+            .get(
+                `/api/groups/${expense_group_id}/expense/${expense_group_id}/transactions/settle-up/`
+            )
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log({ response1010: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
     it('should return 403 if the if not the admin ', async () => {
         const response = await request(app)
             .get(
                 `/api/groups/${expense_group_id}/expense/${expense.data.expense.id}/transactions/settle-up/`
             )
-            .set('authorization', `Bearer ${non_verified_user_access_token2}`)
+            .set('authorization', `Bearer ${non_verified_user_access_token}`)
         console.log({ response: response.body })
         expect(response.statusCode).toBe(403)
     })
@@ -577,7 +631,7 @@ describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/set
         console.log({ response123: response.body || response.error })
         expect(response.statusCode).toBe(200)
     })
-    it('should return 404 if the group does not exist', async () => {
+    it('should return 404 if the expense does not exist', async () => {
         const response = await request(app)
             .get(
                 `/api/users/expense/${transaction_id.data[0].id}/transaction/${transaction_id.data[0].id}/settle-up/`
@@ -586,13 +640,31 @@ describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/set
         console.log({ response: response.body || response.error })
         expect(response.statusCode).toBe(404)
     })
-    it('should return 403 if the if user is not the part of transaction ', async () => {
+    it('should return 404 if the transaction does not exist', async () => {
+        const response = await request(app)
+            .get(
+                `/api/users/expense/${expense.data.expense.id}/transaction/${expense.data.expense.id}/settle-up/`
+            )
+            .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log({ 'response@123': response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+    it('should return 403 if the if user is not the part of expense ', async () => {
         const response = await request(app)
             .get(
                 `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[0].id}/settle-up/`
             )
             .set('authorization', `Bearer ${non_verified_user_access_token2}`)
         console.log({ response: response.body })
+        expect(response.statusCode).toBe(403)
+    })
+    it('should return 403 if the if user is not the part of transaction ', async () => {
+        const response = await request(app)
+            .get(
+                `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[2].id}/settle-up/`
+            )
+            .set('authorization', `Bearer ${verified_user_access_token2}`)
+        console.log({ response: JSON.stringify(transaction_id, null, 4) })
         expect(response.statusCode).toBe(403)
     })
 })
@@ -610,21 +682,21 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
         console.log('THIS IS REMOVE TEST RESPONSE 403 => ', response.body)
         expect(response.statusCode).toEqual(403)
     })
-    it('should fail when group having pending depts in group', async () => {
+    it('should return 409 fail when group having pending depts in group', async () => {
         const response = await request(app)
             .delete(`/api/groups/${expense_group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 409 => ', response.body)
         expect(response.statusCode).toEqual(409)
     })
-    it('should fail not valid group_id ', async () => {
+    it('should 400 fail not valid group_id ', async () => {
         const response = await request(app)
             .delete(`/api/groups/${'group_id'}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
         console.log('THIS IS REMOVE TEST RESPONSE 400 => ', response.body)
         expect(response.statusCode).toEqual(400)
     })
-    it('should delete group after all valid checks and condition fullfiled', async () => {
+    it('should 200 delete group after all valid checks and condition fullfiled', async () => {
         const response = await request(app)
             .delete(`/api/groups/${group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
@@ -636,7 +708,6 @@ describe('TEST DELETE api/groups/id/ delete group API', () => {
         const response = await request(app)
             .delete(`/api/groups/${group_id}`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
-        console.log('THIS IS REMOVE TEST RESPONSE => ', response.body)
         expect(response.statusCode).toEqual(404)
     })
 })

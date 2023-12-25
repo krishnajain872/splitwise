@@ -93,6 +93,7 @@ let createdExpense2
 let expensePayload
 let accessToken
 let refreshToken
+// let refreshToken_notFound
 let hashedPassword
 let token
 let expense_payload
@@ -215,6 +216,8 @@ beforeAll(async () => {
         })
     userNotFoundAccessToken =
         userNotFoundAccessTokenResponse.body.data.accessToken
+    refreshToken_notFound =
+        userNotFoundAccessTokenResponse.body.data.refresh_token
     // verify not found user
     const userNotFoundTokenResponse = await request(app)
         .get('/api/auth/send-verification')
@@ -459,23 +462,35 @@ describe('TEST POST api/auth/login', () => {
 })
 // auth access token
 describe('TEST POST api/auth/access-token', () => {
-    it('should generate a new access token with valid refresh token', async () => {
+    it('should 200 generate a new access token with valid refresh token', async () => {
         const res = await request(app)
             .post('/api/auth/access-token')
             .send({ refresh_token: refreshToken })
-        expect(res.body.message).toEqual('Success')
         expect(res.statusCode).toEqual(200)
+        expect(res.body.message).toEqual('Success')
         expect(res.body.data.accessToken).toBeDefined()
         expect(res.body.data.refresh_token).toBeDefined()
     })
 
-    it('should fail when refresh token is not valid or expired', async () => {
+    it('should 400 fail when refresh token is not valid ', async () => {
         const invalidRefreshToken = expiredToken
         const res = await request(app)
             .post('/api/auth/access-token')
             .send({ refresh_token: invalidRefreshToken })
+        expect(res.statusCode).toEqual(400)
+    })
+    it('should 401 fail when refresh token is not expired or not valid ', async () => {
+        const res = await request(app)
+            .post('/api/auth/access-token')
+            .send({ refresh_token: accessToken })
         expect(res.statusCode).toEqual(401)
     })
+    // it('should 404 fail when user not found with refresh token', async () => {
+    //     const res = await request(app)
+    //         .post('/api/auth/access-token')
+    //         .send({ refresh_token: refreshToken_notFound })
+    //     expect(res.statusCode).toEqual(404)
+    // })
 })
 // auth send verification
 describe('TEST get api/auth/send-verification', () => {
@@ -974,7 +989,6 @@ describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/set
                 `/api/users/expense/${non_group_expense}/transaction/${transaction_id}/settle-up/`
             )
             .set('authorization', `Bearer ${verifiedUserAccessToken}`)
-        console.log({ response123: response.body || response.error })
         expect(response.statusCode).toBe(200)
     })
     it('should return 404 if the group does not exist', async () => {

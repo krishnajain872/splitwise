@@ -27,12 +27,6 @@ const checkAccessToken = async (req, res, next) => {
             throw error
         }
         const { JWT_AUTH_TOKEN_SECRET: secret } = process.env
-        if (!accessToken) {
-            const error = new Error('UnAuthorized Access')
-            error.statusCode = 401
-            throw error
-        }
-
         const decodedJwt = await jwt.verify(accessToken, secret)
         if (!decodedJwt) {
             const error = new Error('UnAuthorized Access')
@@ -66,22 +60,8 @@ const checkAccessToken = async (req, res, next) => {
     }
 }
 const checkRefreshToken = async (req, res, next) => {
-    const { refresh_token: refresh } = req.body
+    const { refresh_token: refresh } = req.body.value
     const { JWT_REFRESH_TOKEN_SECRET: secret } = process.env
-
-    if (!refresh) {
-        const error = new Error('token not found')
-        error.statusCode = 404
-        throw error
-    }
-
-    const value = schema.validate(refresh)
-    if (!value.error) {
-        const error = new Error('refesh token is not valid ' + value.error)
-        error.statusCode = 401
-        throw error
-    }
-
     let decodedJwt
     try {
         decodedJwt = await jwt.verify(refresh, secret)

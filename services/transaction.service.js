@@ -36,6 +36,7 @@ const getAllTransactionByExpenseId = async (payload) => {
     return expense
 }
 const settleUpTransaction = async (payload) => {
+    console.log('THIS IS SETTLE UP PAYLOAD  SERVICE ==> Hare krishna ', payload)
     const transaction = await Transaction.findOne({
         where: { id: payload.transaction_id },
         include: [
@@ -51,20 +52,25 @@ const settleUpTransaction = async (payload) => {
             },
         ],
     })
-    console.log(
-        'THIS IS SETTLE UP PAYLOAD  SERVICE ==> Hare krishna ',
-        transaction.dataValues.payer_id != payload.user_id
-    )
+
     if (!transaction) {
-        const error = Error('Transaction not found')
+        const error = new Error('Transaction not found')
         error.statusCode = 404
         throw error
     }
+
+    console.log(
+        'THIS IS SETTLE UP PAYLOAD  SERVICE ==> Hare krishna ',
+        transaction.dataValues
+    )
+
     if (
         transaction.dataValues.payer_id !== payload.user_id &&
         transaction.dataValues.payee_id !== payload.user_id
     ) {
-        const error = Error('Unauthorized user is not part of this transaction')
+        const error = new Error(
+            'Unauthorized user is not part of this transaction'
+        )
         error.statusCode = 403
         throw error
     }
@@ -94,6 +100,7 @@ const settleUpAllTransactionOfExpense = async (payload) => {
     let transactions = await Transaction.findAll({
         where: {
             expense_id: payload.expense_id,
+            settle_up_at: null,
         },
         attributes: ['id', 'amount', 'currency_id', 'settle_up_at'],
         include: [
@@ -110,7 +117,7 @@ const settleUpAllTransactionOfExpense = async (payload) => {
         ],
     })
     if (transactions.length === 0) {
-        const error = new Error('Transactions not found')
+        const error = new Error('no pending transactions found')
         error.statusCode = 404
         throw error
     }
