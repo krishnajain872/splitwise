@@ -84,36 +84,36 @@ const addExpense = async (req, res, next) => {
 //         errorHelper(req, res, error.message, error.statusCode, error)
 //     }
 // }
-const findGroupById = async (req, res, next) => {
-    try {
-        const { params: payload } = req
-        const data = await groupService.deleteGroup(payload)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
-const findGroupByName = async (req, res, next) => {
-    try {
-        const { params: payload } = req
-        const data = await groupService.findGroupByName(payload)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
-const findGroupByCategory = async (req, res, next) => {
-    try {
-        const { params: payload } = req
-        const data = await groupService.findGroupByCategory(payload)
-        res.data = data
-        next()
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
+// const findGroupById = async (req, res, next) => {
+//     try {
+//         const { params: payload } = req
+//         const data = await groupService.deleteGroup(payload)
+//         res.data = data
+//         next()
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
+// const findGroupByName = async (req, res, next) => {
+//     try {
+//         const { params: payload } = req
+//         const data = await groupService.findGroupByName(payload)
+//         res.data = data
+//         next()
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
+// const findGroupByCategory = async (req, res, next) => {
+//     try {
+//         const { params: payload } = req
+//         const data = await groupService.findGroupByCategory(payload)
+//         res.data = data
+//         next()
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
 const findAllGroupForCurrentUser = async (req, res, next) => {
     try {
         const { id: payload } = req.user
@@ -238,9 +238,9 @@ module.exports = {
     deleteGroup,
     updateGroup,
     // updateGroupAdmin,
-    findGroupById,
-    findGroupByName,
-    findGroupByCategory,
+    // findGroupById,
+    // findGroupByName,
+    // findGroupByCategory,
     findAllGroupForCurrentUser,
     addMember,
     updateExpense,

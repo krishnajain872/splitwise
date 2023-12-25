@@ -24,6 +24,22 @@ const generateFakeUserData = () => {
     }
 }
 
+const expense_categories = ['transport', 'food', 'game', 'other']
+const expense_category =
+    expense_categories[Math.floor(Math.random() * expense_categories.length)]
+
+const split_by = ['equal', 'share']
+const split = split_by[Math.floor(Math.random() * split_by.length)]
+// expence payload
+const expenseFakeData = () => {
+    return {
+        description: faker.lorem.lines(1),
+        base_amount: 2000,
+        category: expense_category,
+        split_by: split,
+    }
+}
+
 // Available categories for groups
 const categories = ['trip', 'home', 'couple', 'other', 'foodie']
 const selectedCategory =
@@ -79,6 +95,13 @@ let accessToken
 let refreshToken
 let hashedPassword
 let token
+let expense_payload
+let share_expense_payload
+// let share_expense_payload2
+let currency
+let non_group_expense
+let share_non_group_expense
+let transaction_id
 // let expired_refresh_token =
 //     'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZTM0MzBmNTMtZDQ1NS00NzdhLThkOGItMGZhNTFjNzZlMTQ0IiwiaWF0IjoxNzAzMDY5OTY4LCJleHAiOjE3MDMxNTYzNjh9.gXSlvwXf6yv934K2BMXcAr2rfDmJsmN084Qo8350iDQ'
 let expiredToken =
@@ -260,17 +283,82 @@ beforeAll(async () => {
         .post(`/api/groups/${expenseGroupId}/expense/`)
         .set('authorization', `Bearer ${verifiedUserAccessToken}`)
         .send(expensePayload)
-    createdExpense = expenseResponse.body
-
+    createdExpense = expenseResponse.body.data
     const expenseResponse2 = await request(app)
         .post(`/api/users/expense`)
         .set('authorization', `Bearer ${verifiedUserAccessToken}`)
         .send(expensePayload2)
-    createdExpense2 = expenseResponse2.body
-    console.log(
-        'THIS THE EXPENS ==> ',
-        JSON.stringify(createdExpense2, null, 4)
-    )
+    createdExpense2 = expenseResponse2.body.data
+    console.log({ createdExpense2 })
+    const currency_response = await request(app)
+        .get('/api/currencies')
+        .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+    currency = currency_response.body
+
+    expense_payload = {
+        ...expenseFakeData(),
+        split_by: 'equal',
+        currency_id: currency[0].id,
+        member: [
+            {
+                user_id: users[0].dataValues.id,
+                amount: 1800,
+            },
+            {
+                user_id: users[1].dataValues.id,
+                amount: 100,
+            },
+            {
+                user_id: users[2].dataValues.id,
+                amount: 100,
+            },
+        ],
+    }
+    share_expense_payload = {
+        ...expenseFakeData(),
+        split_by: 'share',
+        currency_id: currency[0].id,
+        member: [
+            {
+                user_id: users[0].dataValues.id,
+                amount: 2000,
+                share: 2000,
+            },
+            {
+                user_id: users[1].dataValues.id,
+                amount: 0,
+                share: 0,
+            },
+            {
+                user_id: users[2].dataValues.id,
+                amount: 0,
+                share: 0,
+            },
+        ],
+    }
+    share_expense_payload2 = {
+        ...expenseFakeData(),
+        split_by: 'share',
+        currency_id: currency[0].id,
+        member: [
+            {
+                user_id: users[0].dataValues.id,
+                amount: 2000,
+                share: 2000,
+            },
+            {
+                user_id: users[1].dataValues.id,
+                amount: 0,
+                share: 0,
+            },
+            {
+                user_id: users[2].dataValues.id,
+                amount: 0,
+                share: 0,
+            },
+        ],
+    }
+
     // Delete a user
     await User.destroy({
         where: {
@@ -278,7 +366,7 @@ beforeAll(async () => {
         },
     })
 })
-
+// auth sign up
 describe('TEST POST api/auth/signup', () => {
     // Successful user registration
     it('should sign in a user with correct data', async () => {
@@ -327,7 +415,7 @@ describe('TEST POST api/auth/signup', () => {
         expect(res.statusCode).toEqual(409)
     })
 })
-
+// auth login
 describe('TEST POST api/auth/login', () => {
     it('should log in a user with correct data', async () => {
         const res = await request(app).post('/api/auth/login').send({
@@ -369,7 +457,7 @@ describe('TEST POST api/auth/login', () => {
         expect(res.statusCode).toEqual(401)
     })
 })
-
+// auth access token
 describe('TEST POST api/auth/access-token', () => {
     it('should generate a new access token with valid refresh token', async () => {
         const res = await request(app)
@@ -389,7 +477,7 @@ describe('TEST POST api/auth/access-token', () => {
         expect(res.statusCode).toEqual(401)
     })
 })
-
+// auth send verification
 describe('TEST get api/auth/send-verification', () => {
     // Test case for successful verification link generation
     it('should generate a verification link for a valid user => 200', async () => {
@@ -449,6 +537,7 @@ describe('TEST get api/auth/send-verification', () => {
         jest.spyOn(mail, 'sendMail').mockRestore()
     })
 })
+// verify
 describe('TEST get api/auth/verify', () => {
     // Test case for successful verification
     it('should accept a valid token and verify the user', async () => {
@@ -481,7 +570,7 @@ describe('TEST get api/auth/verify', () => {
         expect(res.statusCode).toEqual(400)
     })
 })
-
+// forget-password
 describe('TEST post api/auth/forget-password', () => {
     // Test case for successful verification link generation
     it('should generate a forget password link for a valid user', async () => {
@@ -538,7 +627,7 @@ describe('TEST post api/auth/forget-password', () => {
         jest.spyOn(mail, 'sendMail').mockRestore()
     })
 })
-
+// rest-password
 describe('TEST POST api/reset-password  ', () => {
     it('should return 401 if the token is invalidor expired', async () => {
         const response = await request(app)
@@ -578,7 +667,7 @@ describe('TEST POST api/reset-password  ', () => {
         expect(response.body.data).toHaveProperty('email')
     })
 })
-
+// get all users
 describe('TEST GET api/users/all', () => {
     it('should return 200 if the logined user is verified it return all splitwise users', async () => {
         const response = await request(app)
@@ -599,7 +688,7 @@ describe('TEST GET api/users/all', () => {
         expect(response.statusCode).toBe(403)
     })
 })
-
+// get current logined user
 describe('TEST GET api/users/ ', () => {
     it('should return 200 if the logined user ', async () => {
         const response = await request(app)
@@ -614,6 +703,7 @@ describe('TEST GET api/users/ ', () => {
         expect(response.statusCode).toBe(404)
     })
 })
+// get all currencies
 describe('TEST GET api/currencies/ ', () => {
     it('should return 200 if the logined user  ', async () => {
         const response = await request(app)
@@ -628,72 +718,6 @@ describe('TEST GET api/currencies/ ', () => {
         expect(response.statusCode).toBe(404)
     })
 })
-
-// describe('TEST EXPENSE', () => {
-//     test('GET /expenses', async () => {
-//         const res = await request(app)
-//             .get('/expenses')
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('GET /expenses/non-group', async () => {
-//         const res = await request(app)
-//             .get('/expenses/non-group')
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('GET /expenses/amount', async () => {
-//         const res = await request(app)
-//             .get('/expenses/amount')
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('GET /', async () => {
-//         const res = await request(app)
-//             .get('/')
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('POST /expense/', async () => {
-//         const res = await request(app)
-//             .post('/expense/')
-//             .send({
-//                 /* your expense data */
-//             })
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('GET /expense/:expense_id/transaction/:transaction_id/settle-up', async () => {
-//         const res = await request(app)
-//             .get(
-//                 `/expense/${expense_id}/transaction/${transaction_id}/settle-up`
-//             ) // Set your expense_id and transaction_id here
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('PUT /expense/:expense_id', async () => {
-//         const res = await request(app)
-//             .put(`/expense/${expense_id}`) // Set your expense_id here
-//             .send({
-//                 /* your updated expense data */
-//             })
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-
-//     test('DELETE /expense/:expense_id', async () => {
-//         const res = await request(app)
-//             .delete(`/expense/${expense_id}`) // Set your expense_id here
-//             .set('Authorization', `Bearer ${token}`) // Set your token here
-//         expect(res.statusCode).toEqual(200)
-//     })
-// })
 // add friends
 describe('TEST POST api/users/friend/ ', () => {
     it('should send 200 and create a friend ship with current user and other mentioned ids if the friend ship is not exist', async () => {
@@ -750,7 +774,6 @@ describe('TEST GET api/users/friend/:friend_id/transactions/ ', () => {
         expect(res.statusCode).toEqual(404)
     })
 })
-
 // settle-up total amount pending with friend
 describe('TEST GET api/users/friend/:friend_id/transactions/settle-up', () => {
     it('should send 200 and settle up all the pending transaction of user user and friend', async () => {
@@ -769,6 +792,7 @@ describe('TEST GET api/users/friend/:friend_id/transactions/settle-up', () => {
         expect(res.statusCode).toEqual(404)
     })
 })
+// delete friend
 describe('TEST DELETE /api/users/friend/:friend_id', () => {
     it('should send 409 if friend having pending debts', async () => {
         const res = await request(app)
@@ -788,6 +812,334 @@ describe('TEST DELETE /api/users/friend/:friend_id', () => {
             .delete(`/api/users/friend/${users[6].dataValues.id}`) // Use friend_id instead of expenseGroupId
             .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
         expect(res.statusCode).toEqual(404)
+    })
+})
+
+// add expense
+describe('TEST POST api/users/expense add non-group expense API', () => {
+    // Test case for successful user registration
+    it('should return 200 add a group with correct data and if any payee not belongs to group than this expense added as non group ', async () => {
+        const response = await request(app)
+            .post(`/api/users/expense/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send(expense_payload)
+        non_group_expense = response.body.data.expense.id
+        expect(response.statusCode).toEqual(200)
+        expect(response.body.message).toEqual('Success')
+    })
+    it('should return 200 add a non-group expense with correct data and this expense added as non group ', async () => {
+        const response = await request(app)
+            .post(`/api/users/expense/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send(share_expense_payload)
+        share_non_group_expense = response.body.data.expense.id
+        expect(response.statusCode).toEqual(200)
+        expect(response.body.message).toEqual('Success')
+    })
+    // // Test case for missing required field
+    it('should fail and return 400 when required fields are missing', async () => {
+        const response = await request(app)
+            .post(`/api/users/expense/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({ ...expense_payload, member: [] })
+        expect(response.statusCode).toEqual(400)
+    })
+    it('should fail and return 401 un authorized access user not verified', async () => {
+        const response = await request(app)
+            .post(`/api/users/expense/`)
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken2}`)
+            .send({ ...expense_payload })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(403)
+    })
+    it('should fail and return 409 if base_amount and total amount of all the payee is not equal', async () => {
+        let member = [...expense_payload.member]
+        const response = await request(app)
+            .post(`/api/users/expense/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({
+                ...expense_payload,
+                base_amount: 4000,
+                member: [
+                    { user_id: member[0].user_id, amount: 400 },
+                    { user_id: member[1].user_id, amount: 1700 },
+                ],
+            })
+        expect(response.statusCode).toEqual(409)
+    })
+})
+// update expense
+describe('TEST PUT api/users/expense/expense_id update group expense API', () => {
+    // Test case for successful user registration
+    it('should return 200 add a group with correct data and if any payee not belongs to group than this expense added as non group ', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({
+                ...expense_payload,
+                base_amount: 4000,
+                member: [
+                    {
+                        user_id: [expense_payload.member[0].user_id][0],
+                        amount: 4000,
+                        share: 2900,
+                    },
+                    {
+                        user_id: [expense_payload.member[1].user_id][0],
+                        amount: 0,
+                        share: 1000,
+                    },
+                    {
+                        user_id: [expense_payload.member[1].user_id][0],
+                        amount: 0,
+                        share: 100,
+                    },
+                ],
+            })
+        console.log(
+            'THIS IS CREATE GROUP EXPENSE TEST  UPDATED => ',
+            response.body
+        )
+        expect(response.statusCode).toEqual(200)
+        expect(response.body.message).toEqual('Success')
+
+        // expect(response.body.data).toHaveProperty(group_id).toEqual(group_id)
+    })
+    // // Test case for missing required field
+    it('should fail and return 400 when required fields are missing', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({
+                ...expense_payload,
+                member: [],
+            })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(400)
+    })
+
+    it('should fail and return 403 un authorized access user is not part of the group ', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken2}`)
+            .send({ ...expense_payload })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(403)
+    })
+
+    it('should fail and return 401 un authorized access user not verified', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken}`)
+            .send({ ...expense_payload })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(403)
+    })
+    it('should fail and return 404 if expense not found ', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${users[0].id}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({
+                ...expense_payload,
+            })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(404)
+    })
+    it('should fail and return 409 if base_amount and total amount of all the payee is not equal', async () => {
+        let member = [...expense_payload.member]
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .send({
+                ...expense_payload,
+                base_amount: 4000,
+                member: [
+                    { user_id: member[0].user_id, amount: 400 },
+                    { user_id: member[1].user_id, amount: 1700 },
+                ],
+            })
+        console.log('THIS IS CREATE GROUP EXPENSE TEST  => ', response.body)
+        expect(response.statusCode).toEqual(409)
+    })
+})
+// settle-up transaction
+describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/settle-up/', () => {
+    it('should return 200 and all the transaction of the an expense', async () => {
+        const res = await request(app)
+            .get(`/api/users/expense/${non_group_expense}`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        transaction_id = res.body.data[0].transaction[0].id
+        const response = await request(app)
+            .get(
+                `/api/users/expense/${non_group_expense}/transaction/${transaction_id}/settle-up/`
+            )
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ response123: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the group does not exist', async () => {
+        const response = await request(app)
+            .get(
+                `/api/users/expense/${transaction_id}/transaction/${transaction_id}/settle-up/`
+            )
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+    it('should return 403 if the if user is not the part of transaction ', async () => {
+        const response = await request(app)
+            .get(
+                `/api/users/expense/${non_group_expense}/transaction/${transaction_id}/settle-up/`
+            )
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken2}`)
+        console.log({ response: response.body })
+        expect(response.statusCode).toBe(403)
+    })
+})
+// delete expense
+describe('TEST DELETE api/users/expense/expense_id delete expense API', () => {
+    it('should fail and return 409 if expense having pending debts', async () => {
+        const response = await request(app)
+            .delete(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(response.statusCode).toEqual(409)
+    })
+    it('should return 200 add a group with correct data and if any payee not belongs to group than this expense added as non group ', async () => {
+        const response = await request(app)
+            .delete(`/api/users/expense/${share_non_group_expense}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(response.statusCode).toEqual(200)
+        expect(response.body.message).toEqual('Success')
+    })
+    it('should fail and return 400 when required fields are missing', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${'non_group_expense'}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(response.statusCode).toEqual(400)
+    })
+    it('should fail and return 403 un authorized access user is not part of the group ', async () => {
+        const response = await request(app)
+            .put(`/api/users/expense/${non_group_expense}`)
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken2}`)
+            .send({ ...expense_payload })
+        expect(response.statusCode).toEqual(403)
+    })
+
+    it('should fail and return 404 if expense not found ', async () => {
+        const response = await request(app)
+            .delete(`/api/users/expense/${transaction_id}`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(response.statusCode).toEqual(404)
+    })
+})
+
+// ------completed
+
+// get all transactions of an expense (done)
+describe('GET /api/users/expense/:expense_id', () => {
+    it('should send 200 and get all the transactions of a particular expense', async () => {
+        console.log({ createdExpense2: createdExpense2.expense.id })
+        const res = await request(app)
+            .get(`/api/users/expense/${createdExpense2.expense.id}`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(200)
+    })
+    it('should send 404 when expense not found ', async () => {
+        const res = await request(app)
+            .get(`/api/users/expense/${expenseGroupId}`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+
+        expect(res.statusCode).toEqual(404)
+    })
+    it('should send 403 when current user is not part of  expense   ', async () => {
+        const res = await request(app)
+            .get(`/api/users/expense/${createdExpense2.expense.id}`)
+            .set('Authorization', `Bearer ${nonVerifiedUserAccessToken}`)
+        expect(res.statusCode).toEqual(403)
+    })
+})
+// get all user expenses (done)
+describe('GET /api/users/expenses/', () => {
+    it('should send 200 and get all the transactions of a particular expense', async () => {
+        const res = await request(app)
+            .get(`/api/users/expenses/`)
+            .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+
+        expect(res.statusCode).toEqual(200)
+    })
+    it('should send 404 when user not found ', async () => {
+        const res = await request(app)
+            .get(`/api/users/expenses/`)
+            .set('Authorization', `Bearer ${userNotFoundAccessToken}`)
+
+        expect(res.statusCode).toEqual(404)
+    })
+})
+
+// get all pending non-group expense of a user (done)
+describe('TEST GET api/users/expenses/pending/non-group ', () => {
+    it('should return 200 and all the members of current group', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/pending/non-group `)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the group does not exist', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/pending/non-group `)
+            .set('authorization', `Bearer ${userNotFoundAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+})
+// get all pending expense of a user (done)
+describe('TEST GET api/users/expenses/pending/  ', () => {
+    it('should return 200 and all the members of current group', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/pending/  `)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the group does not exist', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/pending/ `)
+            .set('authorization', `Bearer ${userNotFoundAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
+    })
+})
+// get all non-group expense of a user
+describe('TEST GET api/users/expenses/non-group ', () => {
+    it('should return 200 and all the members of current group', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/non-group/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the group does not exist', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/non-group/`)
+            .set('authorization', `Bearer ${userNotFoundAccessToken}`)
+        expect(response.statusCode).toBe(404)
+    })
+})
+// get all total owed amount of a user
+describe('TEST GET api/users/expenses/amount/ ', () => {
+    it('should return 200 and all the members of current group', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/amount/`)
+            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(200)
+    })
+    it('should return 404 if the group does not exist', async () => {
+        const response = await request(app)
+            .get(`/api/users/expenses/amount/`)
+            .set('authorization', `Bearer ${userNotFoundAccessToken}`)
+        console.log({ response: response.body || response.error })
+        expect(response.statusCode).toBe(404)
     })
 })
 afterAll(async () => {

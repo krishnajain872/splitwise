@@ -5,8 +5,9 @@ const getAllCurrencies = async (req, res, next) => {
     try {
         const currencies = await currenciesService.getAllCurrencies()
         res.status(200).json(currencies)
+        next()
     } catch (error) {
-        next(error)
+        errorHelper(req, res, error.message, error.statusCode, error)
     }
 }
 

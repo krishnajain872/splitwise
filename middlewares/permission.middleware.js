@@ -186,65 +186,65 @@ const checkPermissionByTransactionDebt = async (req, res, next) => {
     }
 }
 
-const checkPermissionByUserDebt = async (req, res, next) => {
-    try {
-        const { id: user_id } = req.params.value
+// const checkPermissionByUserDebt = async (req, res, next) => {
+//     try {
+//         const { id: user_id } = req.params.value
 
-        const existingUser = await User.findByPk(user_id)
+//         const existingUser = await User.findByPk(user_id)
 
-        if (!existingUser) {
-            const error = new Error('user not found')
-            error.statusCode = 404
-            throw error
-        }
+//         if (!existingUser) {
+//             const error = new Error('user not found')
+//             error.statusCode = 404
+//             throw error
+//         }
 
-        let totalPendingAmount = 0
+//         let totalPendingAmount = 0
 
-        const userTransactions = await Transaction.findAll({
-            where: {
-                [Op.and]: [
-                    { settle_up_at: null },
-                    {
-                        [Op.or]: [{ payer_id: user_id }, { payee_id: user_id }],
-                    },
-                ],
-            },
-            include: [
-                {
-                    Model: Expense,
-                    as: 'expense_details',
-                    attributes: ['group_id'],
-                    where: {
-                        group_id: null,
-                    },
-                },
-            ],
-            attributes: ['amount', 'payer_id'],
-        })
+//         const userTransactions = await Transaction.findAll({
+//             where: {
+//                 [Op.and]: [
+//                     { settle_up_at: null },
+//                     {
+//                         [Op.or]: [{ payer_id: user_id }, { payee_id: user_id }],
+//                     },
+//                 ],
+//             },
+//             include: [
+//                 {
+//                     Model: Expense,
+//                     as: 'expense_details',
+//                     attributes: ['group_id'],
+//                     where: {
+//                         group_id: null,
+//                     },
+//                 },
+//             ],
+//             attributes: ['amount', 'payer_id'],
+//         })
 
-        userTransactions.forEach((transaction) => {
-            if (transaction.payer_id === user_id) {
-                totalPendingAmount += Number(transaction.amount)
-            }
-        })
+//         userTransactions.forEach((transaction) => {
+//             if (transaction.payer_id === user_id) {
+//                 totalPendingAmount += Number(transaction.amount)
+//             }
+//         })
 
-        if (totalPendingAmount > 0) {
-            const error = new Error('pending debts for  user')
-            error.statusCode = 409
-            throw error
-        } else {
-            next()
-        }
-    } catch (error) {
-        errorHelper(req, res, error.message, error.statusCode, error)
-    }
-}
+//         if (totalPendingAmount > 0) {
+//             const error = new Error('pending debts for  user')
+//             error.statusCode = 409
+//             throw error
+//         } else {
+//             next()
+//         }
+//     } catch (error) {
+//         errorHelper(req, res, error.message, error.statusCode, error)
+//     }
+// }
 
 module.exports = {
     checkPermission,
     checkPermissionByRegistrationStatus,
     checkPermissionByTransactionDebt,
     checkPermissionByValidGroupMember,
-    checkPermissionByUserDebt,
     checkPermissionByValidExpenseMember,
+    // checkPermissionByUserDebt,
 }

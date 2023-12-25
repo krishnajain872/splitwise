@@ -215,7 +215,7 @@ const updateExpense = async (payload) => {
 
             if (Number(payload.base_amount) !== totalAmount) {
                 const error = Error(
-                    'Expense base Amount and total amount of pay by all payee is unequal'
+                    'Expense base Amount and total amount of share by all payee is unequal'
                 )
                 error.statusCode = 409
                 throw error

@@ -111,7 +111,7 @@ router.get(
     genericResponse.responseHelper
 )
 router.get(
-    '/:id/member/expenses/all',
+    '/:id/expenses',
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
@@ -119,7 +119,7 @@ router.get(
     genericResponse.responseHelper
 )
 router.get(
-    '/:id/member/expenses/all/pending',
+    '/:id/expenses/pending',
     checkAccessToken,
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,

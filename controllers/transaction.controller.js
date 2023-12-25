@@ -31,9 +31,11 @@ const settleUpAllTransactionOfExpense = async (req, res, next) => {
 const settleUpTransaction = async (req, res, next) => {
     try {
         const { expense_id, transaction_id } = req.params.value
+        const user_id = req.user.id
         const payload = {
             expense_id,
             transaction_id,
+            user_id,
         }
 
         console.log(
