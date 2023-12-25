@@ -602,7 +602,7 @@ const getAllPendingGroupExpensesByCurrentUser = async (user_id) => {
             expenseIds.push(payee.expense_details.id)
         }
     })
-    console.log('THIS IS PAYEEE => ', expenseIds)
+
     // Then, find all the expenses with those IDs
     const expenses = await Expense.findAll({
         where: { id: expenseIds },
@@ -716,8 +716,6 @@ const getAllPendingGroupExpensesByCurrentGroup = async (group_id) => {
             },
         ],
     })
-
-    console.log('THESES ARE EXPESNSE FOR GROUP ===> ', expenses)
 
     return expenses
 }
@@ -904,7 +902,7 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
             expenseIds.push(payee.expense_details.id)
         }
     })
-    console.log('THIS IS PAYEEE => ', expenseIds)
+
     // Then, find all the expenses with those IDs
     const expenses = await Expense.findAll({
         where: { id: expenseIds },
@@ -960,8 +958,6 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
             },
         ],
     })
-
-    console.log('THESES ARE EXPESNSE FOR GROUP ===> ', expenses)
 
     return expenses
 }
@@ -1021,8 +1017,6 @@ const getAllGroupExpensesByCurrentGroup = async (group_id) => {
             },
         ],
     })
-
-    console.log('THESES ARE EXPESNSE FOR GROUP ===> ', expenses)
 
     return expenses
 }

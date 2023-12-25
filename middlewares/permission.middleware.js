@@ -52,6 +52,10 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
         const { id: user_id } = req.user
         const { id: group_id } = req.params.value
         const existGroup = await Group.findByPk(group_id)
+        console.log('THIS IS GROUP ID WHEN ADD EXPENSE ==> 1234@1234', {
+            existGroup,
+            group_id,
+        })
         if (!existGroup || existGroup === null) {
             const error = new Error('group not found')
             error.statusCode = 404
@@ -69,7 +73,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
                 group_id,
             },
         })
-        console.log('THIS IS CONSOLE FROM GROUP permission', existGroup)
+
         if (!existingUser) {
             const error = new Error(
                 'unAuthorized access user is not part of the group'
