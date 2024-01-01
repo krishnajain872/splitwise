@@ -55,7 +55,7 @@ const sendVerificationLink = async (payload) => {
 
     userData.dataValues.token = token
     userData.dataValues.status = 'unVerified'
-    return userData.dataValues
+    return userData
 }
 const userRegistration = async (payload) => {
     const { PASSWORD_HASH_SALTS: salt } = process.env
@@ -150,12 +150,10 @@ const userLogin = async (payload) => {
     const accessToken = jwt.sign({ user_id: user.dataValues.id }, auth_secret, {
         expiresIn: auth_expire,
     })
+    user.dataValues.accessToken = accessToken
+    user.dataValues.refresh_token = refresh_token
 
-    return {
-        ...user.dataValues,
-        accessToken,
-        refresh_token,
-    }
+    return user
 }
 
 const generateAccessToken = async (payload) => {
@@ -178,10 +176,9 @@ const generateAccessToken = async (payload) => {
     let newAccessToken = jwt.sign({ user_id: user.id }, auth_secret, {
         expiresIn: auth_expire,
     })
-    return {
-        accessToken: newAccessToken,
-        refresh_token: payload.refresh_token,
-    }
+    user.dataValues.accessToken = newAccessToken
+    user.dataValues.refresh_token = payload.refresh_token
+    return user
 }
 const userVerification = async (payload) => {
     const response = verification.validateToken(payload.token)
@@ -200,7 +197,7 @@ const userVerification = async (payload) => {
     }
     userData.status = 'verified'
     await userData.save()
-    return userData.dataValues
+    return userData
 }
 const resetPassword = async (payload) => {
     const { PASSWORD_HASH_SALTS: salt } = process.env
@@ -214,7 +211,14 @@ const resetPassword = async (payload) => {
     }
 
     const userData = await User.findByPk(response.data, {
-        attributes: ['first_name', 'last_name', 'id', 'mobile', 'email'],
+        attributes: [
+            'first_name',
+            'last_name',
+            'id',
+            'mobile',
+            'email',
+            'updated_at',
+        ],
     })
     if (!userData) {
         const error = new Error('User not found')
@@ -228,7 +232,7 @@ const resetPassword = async (payload) => {
     if (updateResponse) {
         userData.dataValues.password = passHash
     }
-    return userData.dataValues
+    return userData
 }
 
 module.exports = {
