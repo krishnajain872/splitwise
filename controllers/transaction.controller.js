@@ -37,11 +37,6 @@ const settleUpTransaction = async (req, res, next) => {
             transaction_id,
             user_id,
         }
-
-        console.log(
-            'THIS IS PAYLAOD OF THE SETTLE TRANSACTION CONTROLLER ==> ',
-            payload
-        )
         const data = await transactionService.settleUpTransaction(payload)
         res.data = data
         next()

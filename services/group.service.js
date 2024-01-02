@@ -14,8 +14,15 @@ const createGroup = async (payload) => {
             user_id: payload.admin_id,
         })
     }
-    group.dataValues.member = [addAdminInGroup.user_id]
-    return group.dataValues
+    group.dataValues.member = [
+        {
+            id: addAdminInGroup.user_id,
+            mobile: payload.user.mobile,
+            email: payload.user.email,
+            firstName: payload.user.first_name,
+        },
+    ]
+    return { group }
 }
 
 const deleteGroup = async (payload) => {

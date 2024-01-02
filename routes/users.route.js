@@ -7,47 +7,55 @@ const { checkAccessToken } = require('../middlewares/auth.middleware')
 const genericResponse = require('./../helpers/commonResponse.helper')
 const groupValidator = require('../validators/group.validator.js')
 const permission = require('../middlewares/permission.middleware')
+const userSerializer = require('../serializers/user.serializer')
 router.get(
     '/expenses',
     checkAccessToken,
     userController.getAllExpensesByCurrentUser,
+    userSerializer.getAllExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
     '/expenses/non-group',
     checkAccessToken,
     userController.getAllNonGroupExpensesByCurrentUser,
+    userSerializer.getAllExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
     '/expenses/pending',
     checkAccessToken,
     userController.getAllPendingExpensesByCurrentUser,
+    userSerializer.getAllPendingExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
     '/expenses/pending/non-group',
     checkAccessToken,
     userController.getAllPendingNonGroupExpensesByCurrentUser,
+    userSerializer.getAllExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
-    '/all',
+    '/',
     checkAccessToken,
     permission.checkPermissionByRegistrationStatus,
     userController.getAllUsers,
+    userSerializer.getAllUser,
     genericResponse.responseHelper
 )
 router.get(
     '/expenses/amount',
     checkAccessToken,
     userController.getTotalAmountOwedByCurrentUser,
+    userSerializer.getTotalAmountOwedByCurrentUser,
     genericResponse.responseHelper
 )
 router.get(
-    '/',
+    '/me',
     checkAccessToken,
     userController.getCurrentUser,
+    userSerializer.getLoginUser,
     genericResponse.responseHelper
 )
 router.post(
@@ -56,6 +64,7 @@ router.post(
     groupValidator.expenseSchema,
     permission.checkPermissionByRegistrationStatus,
     userController.addNonGroupExpense,
+    userSerializer.expense,
     genericResponse.responseHelper
 )
 router.post(
@@ -64,6 +73,7 @@ router.post(
     groupValidator.addMemberSchema,
     permission.checkPermissionByRegistrationStatus,
     userController.addFriend,
+    userSerializer.addFriend,
     genericResponse.responseHelper
 )
 router.delete(
@@ -78,6 +88,7 @@ router.get(
     checkAccessToken,
     groupValidator.friendIdCheck,
     userController.getAllPendingExpensesWithFriend,
+    userSerializer.totalAmountOwedWithFriend,
     genericResponse.responseHelper
 )
 router.get(
@@ -85,12 +96,14 @@ router.get(
     checkAccessToken,
     groupValidator.friendIdCheck,
     userController.getAllPendingExpensesWithFriendAndSettleup,
+    userSerializer.settletotalAmountAndAllExpensesOwedWithFriend,
     genericResponse.responseHelper
 )
 router.get(
     '/friend/',
     checkAccessToken,
     userController.getCurrentUserFriend,
+    userSerializer.getAllFriends,
     genericResponse.responseHelper
 )
 router.get(
@@ -99,6 +112,7 @@ router.get(
     groupValidator.transactionIdCheck,
     permission.checkPermissionByValidExpenseMember,
     transactionController.settleUpTransaction,
+    userSerializer.settleUpTransaction,
     genericResponse.responseHelper
 )
 router.put(
@@ -108,6 +122,7 @@ router.put(
     groupValidator.expenseSchema,
     permission.checkPermissionByValidExpenseMember,
     userController.updateNonGroupExpense,
+    userSerializer.expense,
     genericResponse.responseHelper
 )
 router.get(
@@ -116,6 +131,7 @@ router.get(
     groupValidator.expenseIdCheck,
     permission.checkPermissionByValidExpenseMember,
     transactionController.getAllTransactionByExpenseId,
+    userSerializer.getAllTransactionofAnExpense,
     genericResponse.responseHelper
 )
 router.delete(

@@ -8,6 +8,7 @@ const createGroup = async (req, res, next) => {
         const { id: user_id } = req.user
         const newPayload = {
             admin_id: user_id,
+            user: req.user,
             ...payload.value,
         }
         const data = await groupService.createGroup(newPayload)

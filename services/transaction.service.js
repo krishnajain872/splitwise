@@ -2,9 +2,10 @@
 const { Transaction } = require('../models')
 const { Expense } = require('../models')
 const { User } = require('../models')
+const { Currency } = require('../models')
 
 const getAllTransactionByExpenseId = async (payload) => {
-    const expense = await Expense.findAll({
+    const expense = await Expense.findOne({
         where: { id: payload },
         attributes: [
             'category',
@@ -12,6 +13,7 @@ const getAllTransactionByExpenseId = async (payload) => {
             'description',
             'split_by',
             'base_amount',
+            'created_at',
         ],
         include: [
             {
@@ -36,10 +38,26 @@ const getAllTransactionByExpenseId = async (payload) => {
     return expense
 }
 const settleUpTransaction = async (payload) => {
-    console.log('THIS IS SETTLE UP PAYLOAD  SERVICE ==> Hare krishna ', payload)
     const transaction = await Transaction.findOne({
         where: { id: payload.transaction_id },
         include: [
+            {
+                model: Expense,
+                as: 'expense_details',
+                attributes: [
+                    'id',
+                    'base_amount',
+                    'split_by',
+                    'description',
+                    'created_at',
+                    'group_id',
+                ],
+            },
+            {
+                model: Currency,
+                as: 'currency_details',
+                attributes: ['code'],
+            },
             {
                 model: User,
                 as: 'payee_details',
@@ -58,11 +76,6 @@ const settleUpTransaction = async (payload) => {
         error.statusCode = 404
         throw error
     }
-
-    console.log(
-        'THIS IS SETTLE UP PAYLOAD  SERVICE ==> Hare krishna ',
-        transaction.dataValues
-    )
 
     if (
         transaction.dataValues.payer_id !== payload.user_id &&
@@ -104,6 +117,23 @@ const settleUpAllTransactionOfExpense = async (payload) => {
         },
         attributes: ['id', 'amount', 'currency_id', 'settle_up_at'],
         include: [
+            {
+                model: Expense,
+                as: 'expense_details',
+                attributes: [
+                    'id',
+                    'base_amount',
+                    'split_by',
+                    'description',
+                    'created_at',
+                    'group_id',
+                ],
+            },
+            {
+                model: Currency,
+                as: 'currency_details',
+                attributes: ['code'],
+            },
             {
                 model: User,
                 as: 'payee_details',

@@ -6,7 +6,7 @@ const groupPermission = require('../middlewares/permission.middleware')
 const groupValidator = require('../validators/group.validator.js')
 const genericResponse = require('./../helpers/commonResponse.helper')
 const { checkAccessToken } = require('../middlewares/auth.middleware')
-
+const groupSerializer = require('../serializers/group.serializers')
 const router = Router()
 
 router.post(
@@ -15,6 +15,7 @@ router.post(
     groupPermission.checkPermissionByRegistrationStatus,
     groupValidator.createGroupSchema,
     groupController.createGroup,
+    groupSerializer.createGroup,
     genericResponse.responseHelper
 )
 router.post(

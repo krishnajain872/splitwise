@@ -66,7 +66,7 @@ const addExpense = async (payload) => {
         }))
         const payees = await Payee.bulkCreate(payeePayload, { transaction: t })
         let allPayeeData = payees.map((payee) => payee.dataValues)
-        let Transactions = []
+        // let Transactions = []
         let transactionData
         if (payload.split_by === 'equal') {
             transactionData = simpliyTransaction.calculateTransactions(
@@ -106,15 +106,63 @@ const addExpense = async (payload) => {
                 transaction: t,
             }
         )
-        Transactions = transactionResponse.map(
-            (transaction) => transaction.dataValues
-        )
-        const response = {}
-        response.expense = expense
-        response.allPayeeData = allPayeeData
-        response.Transactions = Transactions
+        transactionResponse.map((transaction) => transaction.dataValues)
         await t.commit()
-        return response
+        const expenseData = await Expense.findByPk(expense.dataValues.id, {
+            attributes: [
+                'base_amount',
+                'description',
+                'category',
+                'group_id',
+                'id',
+                'split_by',
+                'created_at',
+            ],
+            include: [
+                {
+                    model: Currency,
+                    as: 'expense_currency',
+                    attributes: ['code'],
+                },
+                {
+                    model: Payee,
+                    as: 'payees',
+                    required: true,
+                    attributes: ['amount'],
+                    include: [
+                        {
+                            model: User,
+                            as: 'user_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                        {
+                            model: User,
+                            as: 'user_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                    ],
+                },
+                {
+                    model: Transaction,
+                    as: 'transaction',
+                    where: { settle_up_at: null },
+                    include: [
+                        {
+                            model: User,
+                            as: 'payer_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                        {
+                            model: User,
+                            as: 'payee_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                    ],
+                    attributes: ['id', 'amount', 'settle_up_at'],
+                },
+            ],
+        })
+        return expenseData
     } catch (error) {
         await t.rollback()
         throw error
@@ -200,7 +248,7 @@ const updateExpense = async (payload) => {
 
         let allPayeeData = payees.map((payee) => payee.dataValues)
 
-        let Transactions = []
+        // let Transactions = []
         let transactionData
         if (payload.split_by === 'equal') {
             transactionData = simpliyTransaction.calculateTransactions(
@@ -242,16 +290,62 @@ const updateExpense = async (payload) => {
             }
         )
 
-        Transactions = transactionResponse.map(
-            (transaction) => transaction.dataValues
-        )
+        transactionResponse.map((transaction) => transaction.dataValues)
         await t.commit()
-
-        return {
-            expense: expense.dataValues,
-            allPayeeData,
-            Transactions,
-        }
+        const expenseData = await Expense.findByPk(expense.dataValues.id, {
+            attributes: [
+                'base_amount',
+                'description',
+                'category',
+                'group_id',
+                'id',
+                'split_by',
+            ],
+            include: [
+                {
+                    model: Currency,
+                    as: 'expense_currency',
+                    attributes: ['code'],
+                },
+                {
+                    model: Payee,
+                    as: 'payees',
+                    required: true,
+                    attributes: ['amount'],
+                    include: [
+                        {
+                            model: User,
+                            as: 'user_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                        {
+                            model: User,
+                            as: 'user_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                    ],
+                },
+                {
+                    model: Transaction,
+                    as: 'transaction',
+                    where: { settle_up_at: null },
+                    include: [
+                        {
+                            model: User,
+                            as: 'payer_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                        {
+                            model: User,
+                            as: 'payee_details',
+                            attributes: ['first_name', 'email', 'id', 'mobile'],
+                        },
+                    ],
+                    attributes: ['id', 'amount', 'settle_up_at'],
+                },
+            ],
+        })
+        return expenseData
     } catch (error) {
         await t.rollback()
         throw error
@@ -398,7 +492,7 @@ const getTotalAmountOwedByCurrentUser = async (payload) => {
                 attributes: ['code'],
             },
         ],
-        attributes: ['id', 'amount', 'payer_id', 'payee_id'],
+        attributes: ['id', 'amount', 'payer_id', 'payee_id', 'settle_up_at'],
     })
 
     let totalPayeeAmount = 0
@@ -435,6 +529,7 @@ const getAllPendingExpensesByUser = async (user_id) => {
         attributes: [
             'description',
             'category',
+            'created_at',
             'split_by',
             'base_amount',
             'group_id',
@@ -523,6 +618,7 @@ const getAllPendingNonGroupExpensesByCurrentUser = async (user_id) => {
             'base_amount',
             'description',
             'category',
+            'created_at',
             'group_id',
             'id',
             'split_by',
@@ -609,6 +705,7 @@ const getAllPendingGroupExpensesByCurrentUser = async (user_id) => {
         attributes: [
             'base_amount',
             'description',
+            'created_at',
             'category',
             'group_id',
             'id',
@@ -670,6 +767,7 @@ const getAllPendingGroupExpensesByCurrentGroup = async (group_id) => {
             'category',
             'group_id',
             'id',
+            'created_at',
             'split_by',
         ],
         include: [
@@ -738,6 +836,7 @@ const getAllExpensesByUser = async (user_id) => {
             'split_by',
             'base_amount',
             'group_id',
+            'created_at',
             'id',
         ],
         include: [
@@ -825,6 +924,7 @@ const getAllNonGroupExpensesByCurrentUser = async (user_id) => {
             'category',
             'group_id',
             'id',
+            'created_at',
             'split_by',
         ],
         include: [
@@ -912,6 +1012,7 @@ const getAllGroupExpensesByCurrentUser = async (user_id) => {
             'category',
             'group_id',
             'id',
+            'created_at',
             'split_by',
         ],
         include: [
@@ -971,6 +1072,7 @@ const getAllGroupExpensesByCurrentGroup = async (group_id) => {
             'category',
             'group_id',
             'id',
+            'created_at',
             'split_by',
         ],
         include: [

@@ -1,6 +1,6 @@
 const { dateHelper } = require('../helpers/date.helper')
 
-const userSignupData = async (res, next) => {
+const userSignupData = async (_, res, next) => {
     let recievedData = res.data || {}
     let resultData
     if (recievedData) {
@@ -18,7 +18,7 @@ const userSignupData = async (res, next) => {
     res.data = resultData
     next()
 }
-const userSendVerification = async (res, next) => {
+const userSendVerification = async (_, res, next) => {
     let recievedData = res.data.dataValues || {}
     let resultData
     if (recievedData) {
@@ -35,7 +35,7 @@ const userSendVerification = async (res, next) => {
     res.data = resultData
     next()
 }
-const userVerification = async (res, next) => {
+const userVerification = async (_, res, next) => {
     let recievedData = res.data.dataValues || {}
     let resultData
     if (recievedData) {
@@ -52,7 +52,7 @@ const userVerification = async (res, next) => {
     res.data = resultData
     next()
 }
-const userLogin = async (res, next) => {
+const userLogin = async (_, res, next) => {
     let recievedData = res.data.dataValues || {}
     let resultData
     if (recievedData) {
@@ -70,7 +70,7 @@ const userLogin = async (res, next) => {
     res.data = resultData
     next()
 }
-const userResetPassword = async (res, next) => {
+const userResetPassword = async (_, res, next) => {
     let recievedData = res.data.dataValues || {}
     let resultData
     if (recievedData) {
@@ -87,7 +87,7 @@ const userResetPassword = async (res, next) => {
     res.data = resultData
     next()
 }
-const userGenerateAccessToken = async (res, next) => {
+const userGenerateAccessToken = async (_, res, next) => {
     let recievedData = res.data.dataValues || {}
     let resultData
     if (recievedData) {

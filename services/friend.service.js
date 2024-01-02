@@ -8,13 +8,11 @@ const { Expense } = require('../models')
 
 const addFriend = async (payload) => {
     const friendArray = [...payload.members]
-    console.log('THIS IS FRIEND ARRAY ==> ', friendArray)
     const user_id = payload.user_id
 
     let friends = []
     await Promise.all(
         friendArray.map(async (friend_id, i) => {
-            console.log('FRIEND FROM MAP ==> ', friend_id)
             const [existingUser, existingMapping] = await Promise.all([
                 User.findByPk(friend_id),
                 FriendList.findOne({
@@ -250,7 +248,7 @@ const getAllPendingExpensesWithFriend = async (payload) => {
     let response
     if (total_amount_borrowed <= 0) {
         response = {
-            total_Amount_friend_borrowed: Math.abs(total_amount_borrowed),
+            totalAmountFriendBorrowed: Math.abs(total_amount_borrowed),
             friend,
             message: `your friend borrowed ${Math.abs(
                 total_amount_borrowed
@@ -258,7 +256,7 @@ const getAllPendingExpensesWithFriend = async (payload) => {
         }
     } else {
         response = {
-            total_Amount_User_borrowed: Math.abs(total_amount_borrowed),
+            totalAmountUserBorrowed: Math.abs(total_amount_borrowed),
             user,
             message: `you borrowed ${Math.abs(
                 total_amount_borrowed
@@ -322,18 +320,14 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
                     {
                         model: User,
                         as: 'payer_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['id', 'first_name', 'email', 'mobile'],
                     },
                     {
                         model: User,
                         as: 'payee_details',
-                        attributes: ['first_name', 'email', 'mobile'],
+                        attributes: ['id', 'first_name', 'email', 'mobile'],
                     },
-                    {
-                        model: Currency,
-                        as: 'currency_details',
-                        attributes: ['code'],
-                    },
+
                     {
                         model: Expense,
                         as: 'expense_details',
@@ -345,6 +339,14 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
                             'group_id',
                             'id',
                             'split_by',
+                            'created_at',
+                        ],
+                        include: [
+                            {
+                                model: Currency,
+                                as: 'expense_currency',
+                                attributes: ['code'],
+                            },
                         ],
                     },
                 ],
@@ -391,6 +393,7 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
             const transaction_data = {
                 expense_details: { ...transaction.expense_details.dataValues },
                 settle_up_at: date,
+                amount: transaction.amount,
                 transaction_id: transaction.id,
                 payer_details: { ...transaction.payer_details.dataValues },
                 payee_details: { ...transaction.payee_details.dataValues },
@@ -404,7 +407,7 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
         let response
         if (total_amount_borrowed <= 0) {
             response = {
-                total_Amount_friend_borrowed: Math.abs(total_amount_borrowed),
+                totalAmountFriendBorrowed: Math.abs(total_amount_borrowed),
                 friend,
                 message: ` your friend borrowed ${Math.abs(
                     total_amount_borrowed
@@ -412,7 +415,7 @@ const getAllPendingExpensesWithFriendAndSettleup = async (payload) => {
             }
         } else {
             response = {
-                total_Amount_User_borrowed: Math.abs(total_amount_borrowed),
+                totalAmountUserBorrowed: Math.abs(total_amount_borrowed),
                 user,
                 message: `you borrowed ${Math.abs(
                     total_amount_borrowed
