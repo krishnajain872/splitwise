@@ -163,10 +163,10 @@ const settleUpAllTransactionOfExpense = async (payload) => {
                     where: { id: transaction.id },
                 }
             )
+            transaction.settle_up_at = settle_up_at
             return transaction
         })
     )
-
     return transactions
 }
 

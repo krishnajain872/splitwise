@@ -66,6 +66,36 @@ const addMembers = async (_, res, next) => {
     res.data = resultData
     next()
 }
+const removeMember = async (_, res, next) => {
+    let recievedData = res.data || {}
+    let resultData = {}
+    let removedBy = {}
+    if (recievedData) {
+        resultData.member = {
+            id: recievedData.member.id,
+            firstName: recievedData.member.first_name,
+            email: recievedData.member.email,
+            mobile: recievedData.member.mobile,
+        }
+        resultData.groupDetails = {
+            title: recievedData.group.title,
+            category: recievedData.group.category,
+            id: recievedData.group.id,
+            adminId: recievedData.group.admin_id,
+        }
+
+        removedBy.firstName = recievedData.removed_by.first_name
+        removedBy.LastName = recievedData.removed_by.last_name
+        removedBy.status = recievedData.removed_by.status
+        removedBy.email = recievedData.removed_by.email
+        removedBy.id = recievedData.removed_by.id
+        removedBy.mobile = recievedData.removed_by.mobile
+
+        resultData.removed_by = removedBy
+    }
+    res.data = resultData
+    next()
+}
 
 const findGroupMembers = async (_, res, next) => {
     let recievedData = res.data || {}
@@ -125,4 +155,5 @@ module.exports = {
     findGroups,
     addMembers,
     findGroupMembers,
+    removeMember,
 }

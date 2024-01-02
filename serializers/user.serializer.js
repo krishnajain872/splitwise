@@ -85,6 +85,46 @@ const settleUpTransaction = async (_, res, next) => {
     res.data = resultData
     next()
 }
+const settleUpAllTransactionsOfExpance = async (_, res, next) => {
+    let recievedData = res.data || {}
+    let resultData
+    let expenses = []
+    if (recievedData) {
+        recievedData.map((recievedData) => {
+            expenses.push({
+                id: recievedData.expense_details.id,
+                baseAmount: recievedData.expense_details.base_amount,
+                splitBy: recievedData.expense_details.split_by,
+                description: recievedData.expense_details.description,
+                groupId: recievedData.expense_details.group_id,
+                createdAt: dateHelper(recievedData.expense_details.created_at),
+                currency: recievedData.currency_details.code,
+                transaction: {
+                    id: recievedData.id,
+                    amount: recievedData.amount,
+                    settleUpAt: dateHelper(recievedData.settle_up_at),
+                    payer: {
+                        id: recievedData.payer_details.id,
+                        firstName: recievedData.payer_details.first_name,
+                        mobile: recievedData.payer_details.mobile,
+                        email: recievedData.payer_details.email,
+                        status: recievedData.payer_details.status,
+                    },
+                    payee: {
+                        id: recievedData.payee_details.id,
+                        firstName: recievedData.payee_details.first_name,
+                        mobile: recievedData.payee_details.mobile,
+                        email: recievedData.payee_details.email,
+                        status: recievedData.payer_details.status,
+                    },
+                },
+            })
+        })
+        resultData = expenses
+    }
+    res.data = resultData
+    next()
+}
 const expense = async (_, res, next) => {
     let recievedData = res.data || {}
     let resultData = {}
@@ -197,6 +237,15 @@ const getTotalAmountOwedByCurrentUser = async (_, res, next) => {
                     firstName: transaction.payee_details.first_name,
                     mobile: transaction.payee_details.mobile,
                     email: transaction.payee_details.email,
+                },
+                expense: {
+                    id: transaction.expense_details.id,
+                    baseAmount: transaction.expense_details.base_amount,
+                    splitBy: transaction.expense_details.split_by,
+                    category: transaction.expense_details.category,
+                    description: transaction.expense_details.description,
+                    groupId: transaction.expense_details.group_id,
+                    currency: transaction.currency_details,
                 },
             })
         })
@@ -484,4 +533,5 @@ module.exports = {
     totalAmountOwedWithFriend,
     settletotalAmountAndAllExpensesOwedWithFriend,
     addFriend,
+    settleUpAllTransactionsOfExpance,
 }

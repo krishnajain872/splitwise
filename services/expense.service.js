@@ -492,6 +492,11 @@ const getTotalAmountOwedByCurrentUser = async (payload) => {
                 as: 'currency_details',
                 attributes: ['code'],
             },
+            {
+                model: Expense,
+                as: 'expense_details',
+                attributes: ['base_amount', 'id', 'category', 'description'],
+            },
         ],
         attributes: ['id', 'amount', 'payer_id', 'payee_id', 'settle_up_at'],
     })

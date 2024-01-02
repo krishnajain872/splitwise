@@ -35,6 +35,7 @@ router.delete(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.removeMember,
+    groupSerializer.removeMember,
     genericResponse.responseHelper
 )
 router.patch(
@@ -144,6 +145,7 @@ router.get(
     groupValidator.expenseIdCheck,
     groupPermission.checkPermission,
     transactionController.settleUpAllTransactionOfExpense,
+    groupExpenseSerializer.settleUpAllTransactionsOfExpance,
     genericResponse.responseHelper
 )
 router.delete(

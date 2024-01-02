@@ -747,7 +747,7 @@ describe('TEST POST api/users/friend/ ', () => {
     it('should send 404  if the friend id not exist', async () => {
         const res = await request(app)
             .post('/api/users/friend')
-            .send({ members: [expenseGroupId] })
+            .send({ members: [non_group_expense] })
             .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
         expect(res.statusCode).toEqual(404)
     })
