@@ -129,13 +129,46 @@ const addMember = async (payload) => {
                 throw error
             }
             if (existingMapping) {
-                const error = new Error('user already present in the group')
+                const error = new Error(
+                    `user ${i + 1} already present in the group`
+                )
                 error.statusCode = 409
                 throw error
             }
 
-            const member = await UserGroup.create({ group_id, user_id })
-            addedGroupMembers.push({ [`member_${++i}`]: member.dataValues })
+            await UserGroup.create({ group_id, user_id })
+            const memberDetails = await UserGroup.findOne({
+                where: {
+                    [Op.and]: [
+                        {
+                            group_id: group_id,
+                        },
+                        {
+                            user_id: user_id,
+                        },
+                    ],
+                },
+                include: [
+                    {
+                        model: Group,
+                        as: 'group_details',
+                        attributes: ['title', 'id', 'category', 'admin_id'],
+                    },
+                    {
+                        model: User,
+                        as: 'user_details',
+                        attributes: [
+                            'first_name',
+                            'id',
+                            'status',
+                            'mobile',
+                            'email',
+                        ],
+                    },
+                ],
+            })
+
+            addedGroupMembers.push(memberDetails.dataValues)
         })
     )
 

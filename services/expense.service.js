@@ -300,6 +300,7 @@ const updateExpense = async (payload) => {
                 'group_id',
                 'id',
                 'split_by',
+                'created_at',
             ],
             include: [
                 {

@@ -7,6 +7,7 @@ const groupValidator = require('../validators/group.validator.js')
 const genericResponse = require('./../helpers/commonResponse.helper')
 const { checkAccessToken } = require('../middlewares/auth.middleware')
 const groupSerializer = require('../serializers/group.serializers')
+const groupExpenseSerializer = require('../serializers/user.serializer')
 const router = Router()
 
 router.post(
@@ -25,6 +26,7 @@ router.post(
     groupPermission.checkPermissionByValidGroupMember,
     groupValidator.addMemberSchema,
     groupController.addMember,
+    groupSerializer.addMembers,
     genericResponse.responseHelper
 )
 router.delete(
@@ -49,6 +51,7 @@ router.get(
     checkAccessToken,
     groupPermission.checkPermissionByRegistrationStatus,
     groupController.findAllGroupForCurrentUser,
+    groupSerializer.findGroups,
     genericResponse.responseHelper
 )
 router.get(
@@ -57,6 +60,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.findAllMemberForGroup,
+    groupSerializer.findGroupMembers,
     genericResponse.responseHelper
 )
 router.delete(
@@ -76,6 +80,7 @@ router.put(
     groupPermission.checkPermissionByValidGroupMember,
     groupPermission.checkPermissionByValidExpenseMember,
     groupController.updateExpense,
+    groupExpenseSerializer.expense,
     genericResponse.responseHelper
 )
 router.post(
@@ -85,6 +90,7 @@ router.post(
     groupValidator.expenseSchema,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.addExpense,
+    groupExpenseSerializer.expense,
     genericResponse.responseHelper
 )
 router.get(
@@ -93,6 +99,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.getTotalAmountOwedByCurrentUserForParticularGroup,
+    groupExpenseSerializer.getTotalAmountOwedByCurrentUser,
     genericResponse.responseHelper
 )
 router.get(
@@ -101,6 +108,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.getAllGroupExpensesByCurrentUser,
+    groupExpenseSerializer.getAllPendingExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
@@ -109,6 +117,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.getAllPendingGroupExpensesByCurrentUser,
+    groupExpenseSerializer.getAllPendingExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
@@ -117,6 +126,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.getAllGroupExpensesByCurrentGroup,
+    groupExpenseSerializer.getAllPendingExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
@@ -125,6 +135,7 @@ router.get(
     groupValidator.paramsIdCheck,
     groupPermission.checkPermissionByValidGroupMember,
     groupController.getAllPendingGroupExpensesByCurrentGroup,
+    groupExpenseSerializer.getAllPendingExpensesOfUsers,
     genericResponse.responseHelper
 )
 router.get(
