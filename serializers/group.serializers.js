@@ -141,7 +141,7 @@ const findGroups = async (_, res, next) => {
                 displayPicture: group.display_picture,
                 adminId: group.admin_id,
                 category: group.category,
-                createdAt: dateHelper(group.created_at),
+                // createdAt: dateHelper(group.created_at),
             })
         })
         resultData.groups = groups

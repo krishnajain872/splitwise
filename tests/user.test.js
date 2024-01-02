@@ -747,8 +747,9 @@ describe('TEST POST api/users/friend/ ', () => {
     it('should send 404  if the friend id not exist', async () => {
         const res = await request(app)
             .post('/api/users/friend')
-            .send({ members: [non_group_expense] })
+            .send({ members: [users[3].dataValues.id] })
             .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
+        console.log({ non_group_expense })
         expect(res.statusCode).toEqual(404)
     })
     it('should send 403 if the user not verified ', async () => {
@@ -796,7 +797,9 @@ describe('TEST GET api/users/friend/:friend_id/transactions/settle-up', () => {
     })
     it('should send 404 and if friend not found', async () => {
         const res = await request(app)
-            .get(`/api/users/friend/${expenseGroupId}/transactions/settle-up`)
+            .get(
+                `/api/users/friend/${users[0].dataValues.id}/transactions/settle-up`
+            )
             .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
         expect(res.statusCode).toEqual(404)
     })
@@ -833,6 +836,7 @@ describe('TEST POST api/users/expense add non-group expense API', () => {
             .set('authorization', `Bearer ${verifiedUserAccessToken}`)
             .send(expense_payload)
         non_group_expense = response.body.data.expense.id
+        console.log('response.body.data ==>', non_group_expense)
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
     })
@@ -1053,7 +1057,7 @@ describe('GET /api/users/expense/:expense_id', () => {
     })
     it('should send 404 when expense not found ', async () => {
         const res = await request(app)
-            .get(`/api/users/expense/${expenseGroupId}`)
+            .get(`/api/users/expense/${users[0].dataValues.id}`)
             .set('Authorization', `Bearer ${verifiedUserAccessToken}`)
 
         expect(res.statusCode).toEqual(404)
@@ -1137,7 +1141,7 @@ describe('TEST GET api/users/expenses/amount/ ', () => {
     it('should return 200 and all the members of current group', async () => {
         const response = await request(app)
             .get(`/api/users/expenses/amount/`)
-            .set('authorization', `Bearer ${verifiedUserAccessToken}`)
+            .set('authorization', `Bearer ${nonVerifiedUserAccessToken}`)
         expect(response.statusCode).toBe(200)
     })
     it('should return 404 if the group does not exist', async () => {

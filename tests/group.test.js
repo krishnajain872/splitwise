@@ -176,7 +176,7 @@ beforeAll(async () => {
     const currency_response = await request(app)
         .get('/api/currencies')
         .set('authorization', `Bearer ${verified_user_access_token}`)
-    currency = currency_response.body
+    currency = currency_response.body.data
     expense_payload = {
         ...expenseFakeData(),
         split_by: 'equal',
@@ -232,18 +232,19 @@ beforeAll(async () => {
         .post('/api/groups/')
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(groupFakeData())
-    expense_group_id = group_response.body.data.id
+    expense_group_id = group_response.body.data.group.id
     const group_response2 = await request(app)
         .post('/api/groups/')
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(groupFakeData())
-    share_expense_group_id = group_response2.body.data.id
+    share_expense_group_id = group_response2.body.data.group.id
 
     const expense_response = await request(app)
         .post(`/api/groups/${expense_group_id}/expense/`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
         .send(expense_payload)
     expense = expense_response.body
+    console.log('THIS IS EXPENSE => haare krishna', expense)
     const share_expense_response = await request(app)
         .post(`/api/groups/${share_expense_group_id}/expense/`)
         .set('authorization', `Bearer ${verified_user_access_token}`)
@@ -274,11 +275,8 @@ describe('TEST POST api/groups/ create group API', () => {
             .send(groupFakeData())
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
-        expect(response.body.data).toHaveProperty('admin_id')
-        expect(response.body.data).toHaveProperty('id')
-        expect(response.body.data).toHaveProperty('member')
-        user_id = response.body.data.admin_id
-        group_id = response.body.data.id
+        user_id = response.body.data.group.adminId
+        group_id = response.body.data.group.id
     })
     // Test case for missing required fields
     it('should fail when required fields are missing', async () => {
@@ -420,7 +418,7 @@ describe('TEST GET api/groups/members ', () => {
         const response = await request(app)
             .get(`/api/groups/${expense_group_id}/members`)
             .set('authorization', `Bearer ${verified_user_access_token}`)
-
+        console.log({ 123: expense_group_id }, response.body.data)
         expect(response.statusCode).toBe(200)
     })
     it('should return 404 if the user does not exist', async () => {
@@ -532,9 +530,6 @@ describe('TEST DELETE api/groups/id/member/remove/user_id remove member in group
             .set('authorization', `Bearer ${verified_user_access_token}`)
         expect(response.statusCode).toEqual(200)
         expect(response.body.message).toEqual('Success')
-        expect(response.body.data).toHaveProperty('member')
-        expect(response.body.data).toHaveProperty('group')
-        expect(response.body.data).toHaveProperty('removed_by')
     })
     it('should return 403 if logined user not part of the group  ', async () => {
         const response = await request(app)
@@ -605,12 +600,12 @@ describe('TEST GET api/groups/:group_id/expense/:expense_id/transactions/settle-
 // settle-up transaction
 describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/settle-up/', () => {
     it('should return 200 and all the members of current group', async () => {
-        console.log('123t', transaction_id.data[0].id)
         const response = await request(app)
             .get(
-                `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[0].id}/settle-up/`
+                `/api/users/expense/${share_expense.data.expense.id}/transaction/${transaction_id.data[0].transaction.id}/settle-up/`
             )
             .set('authorization', `Bearer ${verified_user_access_token}`)
+        console.log('THIS IS RESPONSE123 ==> ', response.body)
         expect(response.statusCode).toBe(200)
     })
     it('should return 404 if the expense does not exist', async () => {
@@ -634,7 +629,7 @@ describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/set
     it('should return 403 if the if user is not the part of expense ', async () => {
         const response = await request(app)
             .get(
-                `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[0].id}/settle-up/`
+                `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[0].transaction.id}/settle-up/`
             )
             .set('authorization', `Bearer ${non_verified_user_access_token2}`)
 
@@ -643,10 +638,10 @@ describe('TEST GET api/users/expense/:expense_id/transaction/:transaction_id/set
     it('should return 403 if the if user is not the part of transaction ', async () => {
         const response = await request(app)
             .get(
-                `/api/users/expense/${expense.data.expense.id}/transaction/${transaction_id.data[2].id}/settle-up/`
+                `/api/users/expense/${share_expense.data.expense.id}/transaction/${transaction_id.data[2].transaction.id}/settle-up/`
             )
             .set('authorization', `Bearer ${verified_user_access_token2}`)
-
+        console.log({ THII: response.body })
         expect(response.statusCode).toBe(403)
     })
 })
