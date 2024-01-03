@@ -80,6 +80,21 @@ const friendIdCheck = async (req, res, next) => {
     validateRequest(req, res, next, schema, 'params')
 }
 
+const commentIdSchema = async (req, res, next) => {
+    console.log(req.params)
+    const schema = Joi.object({
+        expense_id: Joi.string().guid().required(),
+        id: Joi.string().guid(),
+    })
+    validateRequest(req, res, next, schema, 'params')
+}
+const commentSchema = async (req, res, next) => {
+    const schema = Joi.object({
+        description: Joi.string().required(),
+    })
+    validateRequest(req, res, next, schema, 'body')
+}
+
 module.exports = {
     createGroupSchema,
     updateGroupSchema,
@@ -89,4 +104,6 @@ module.exports = {
     expenseIdCheck,
     transactionIdCheck,
     friendIdCheck,
+    commentSchema,
+    commentIdSchema,
 }

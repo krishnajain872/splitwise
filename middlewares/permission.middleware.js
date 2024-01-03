@@ -57,6 +57,7 @@ const checkPermissionByValidGroupMember = async (req, res, next) => {
             error.statusCode = 404
             throw error
         }
+        req.group = existGroup.dataValues
         const existingUser = await UserGroup.findOne({
             include: [
                 {
@@ -102,6 +103,7 @@ const checkPermissionByValidExpenseMember = async (req, res, next) => {
             error.statusCode = 404
             throw error
         }
+        req.expense = existingExpense.dataValues
         const existingPayee = await Payee.findOne({
             where: {
                 user_id,

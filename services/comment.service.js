@@ -1,6 +1,8 @@
+const { Op } = require('sequelize')
 const { Comment } = require('../models')
 
 const addComment = async (payload) => {
+    console.log({ payload })
     let type
     if (!payload.user_id) {
         type = 'SPLITWISE'
@@ -25,7 +27,10 @@ const getCommentByExpenseId = async (payload) => {
 const getCommentByUserId = async (payload) => {
     const comment = await Comment.findAll({
         where: {
-            expense_id: payload.expense_id,
+            [Op.and]: [
+                { expense_id: payload.expense_id },
+                { user_id: payload.user_id },
+            ],
         },
     })
     return comment
@@ -49,13 +54,13 @@ const udpateComment = async (payload) => {
         error.statusCode = 403
         throw error
     }
-    await comment.update(
+    await Comment.update(
+        { description: payload.description },
         {
             where: {
                 id: payload.id,
             },
-        },
-        { description: payload.description }
+        }
     )
     comment.dataValues.description = payload.description
     return comment

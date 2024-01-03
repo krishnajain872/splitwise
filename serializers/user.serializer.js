@@ -519,6 +519,104 @@ const addFriend = async (_, res, next) => {
     res.data = resultData
     next()
 }
+const addComment = async (req, res, next) => {
+    let recievedData = res.data.dataValues || {}
+    let resultData
+    if (recievedData) {
+        resultData = {
+            comment: {
+                id: recievedData.id,
+                description: recievedData.description,
+                type: recievedData.type,
+                expenseId: recievedData.expense_id,
+                userId: recievedData.user_id,
+                createdAt: dateHelper(recievedData.created_at),
+            },
+            expense: {
+                id: recievedData.expense_id,
+                description: req.expense.description,
+                baseAmount: req.expense.base_amount,
+                splitBy: req.expense.split_by,
+            },
+            addedBy: {
+                id: req.user.id,
+                firstName: req.user.first_name,
+                mobile: req.user.mobile,
+                status: req.user.status,
+            },
+        }
+    }
+    res.data = resultData
+    next()
+}
+const getCommentByExpense = async (req, res, next) => {
+    let recievedData = res.data || []
+    let resultData = []
+    let totalCommentCount
+    if (recievedData) {
+        recievedData.map((comment, i) => {
+            resultData.push({
+                [` comment${++i}`]: {
+                    id: comment.id,
+                    description: comment.description,
+                    type: comment.type,
+                    expenseId: comment.expense_id,
+                    userId: comment.user_id,
+                    createdAt: dateHelper(comment.created_at),
+                },
+            })
+            totalCommentCount = i
+        })
+
+        resultData.push(
+            {
+                expense: {
+                    id: recievedData.expense_id,
+                    description: req.expense.description,
+                    baseAmount: req.expense.base_amount,
+                    splitBy: req.expense.split_by,
+                },
+            },
+            { totalCommentCount }
+        )
+    }
+    res.data = resultData
+    next()
+}
+const getCommentByUser = async (req, res, next) => {
+    let recievedData = res.data || []
+    let resultData = []
+    let totalCommentCount
+    if (recievedData) {
+        recievedData.map((comment, i) => {
+            resultData.push({
+                [` comment${++i}`]: {
+                    id: comment.id,
+                    description: comment.description,
+                    type: comment.type,
+                    expenseId: comment.expense_id,
+                    userId: comment.user_id,
+                    createdAt: dateHelper(comment.created_at),
+                },
+            })
+            totalCommentCount = i
+        })
+
+        resultData.push(
+            {
+                addedBy: {
+                    id: req.user.id,
+                    firstName: req.user.first_name,
+                    mobile: req.user.mobile,
+                    status: req.user.status,
+                },
+            },
+            { totalCommentCount }
+        )
+    }
+    res.data = resultData
+    next()
+}
 module.exports = {
     getAllUser,
     getLoginUser,
@@ -534,4 +632,7 @@ module.exports = {
     settletotalAmountAndAllExpensesOwedWithFriend,
     addFriend,
     settleUpAllTransactionsOfExpance,
+    addComment,
+    getCommentByUser,
+    getCommentByExpense,
 }
