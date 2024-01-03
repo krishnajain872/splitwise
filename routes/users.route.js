@@ -8,6 +8,7 @@ const { checkAccessToken } = require('../middlewares/auth.middleware')
 const genericResponse = require('./../helpers/commonResponse.helper')
 const expenseValidator = require('../validators/group.validator.js')
 const permission = require('../middlewares/permission.middleware')
+const systemMiddleware = require('../middlewares/system.middleware')
 const userSerializer = require('../serializers/user.serializer')
 router.get(
     '/expenses',
@@ -170,6 +171,7 @@ router.put(
     expenseValidator.expenseSchema,
     permission.checkPermissionByValidExpenseMember,
     userController.updateNonGroupExpense,
+    systemMiddleware.addSystemComments,
     userSerializer.expense,
     genericResponse.responseHelper
 )
@@ -188,6 +190,7 @@ router.delete(
     expenseValidator.expenseIdCheck,
     permission.checkPermissionByValidExpenseMember,
     userController.deleteNonGroupExpense,
+    systemMiddleware.addSystemComments,
     genericResponse.responseHelper
 )
 module.exports = router

@@ -8,7 +8,59 @@ const genericResponse = require('./../helpers/commonResponse.helper')
 const { checkAccessToken } = require('../middlewares/auth.middleware')
 const groupSerializer = require('../serializers/group.serializers')
 const groupExpenseSerializer = require('../serializers/user.serializer')
+// const commentController = require('../controllers/comment.controller')
+// const userSerializer = require('../serializers/user.serializer')
 const router = Router()
+
+// router.post(
+//     '/:id/expense/:expense_id/comment/',
+//     checkAccessToken,
+//     groupValidator.expenseIdCheck,
+//     groupValidator.commentSchema,
+//     groupPermission.checkPermissionByValidGroupMember,
+//     groupPermission.checkPermissionByValidExpenseMember,
+//     commentController.addComment,
+//     userSerializer.addComment,
+//     genericResponse.responseHelper
+// )
+// router.patch(
+//     '/:id/expense/:expense_id/comment/:comment_id',
+//     checkAccessToken,
+//     groupValidator.expenseIdCheck,
+//     groupValidator.commentSchema,
+//     groupPermission.checkPermissionByValidGroupMember,
+//     groupPermission.checkPermissionByValidExpenseMember,
+//     commentController.udpateComment,
+//     userSerializer.addComment,
+//     genericResponse.responseHelper
+// )
+// router.get(
+//     '/id:/expense/:expense_id/comment/:id',
+//     checkAccessToken,
+//     expenseValidator.commentIdSchema,
+//     permission.checkPermissionByValidExpenseMember,
+//     commentController.getCommentById,
+//     userSerializer.addComment,
+//     genericResponse.responseHelper
+// )
+// router.get(
+//     '/id:/expense/:expense_id/my/comment',
+//     checkAccessToken,
+//     expenseValidator.commentIdSchema,
+//     permission.checkPermissionByValidExpenseMember,
+//     commentController.getCommentByUserId,
+//     userSerializer.getCommentByUser,
+//     genericResponse.responseHelper
+// )
+// router.get(
+//     '/id:/expense/:expense_id/comments',
+//     checkAccessToken,
+//     expenseValidator.commentIdSchema,
+//     permission.checkPermissionByValidExpenseMember,
+//     commentController.getCommentByExpenseId,
+//     userSerializer.getCommentByExpense,
+//     genericResponse.responseHelper
+// )
 
 router.post(
     '/',

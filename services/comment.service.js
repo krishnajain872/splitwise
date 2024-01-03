@@ -5,7 +5,7 @@ const addComment = async (payload) => {
     console.log({ payload })
     let type
     if (!payload.user_id) {
-        type = 'SPLITWISE'
+        type = 'SYSTEM'
     }
     const comment_payload = {
         type,
@@ -48,7 +48,7 @@ const udpateComment = async (payload) => {
     }
     if (
         payload.user_id !== comment.dataValues.user_id ||
-        comment.dataValues.type === 'SPLITWISE'
+        comment.dataValues.type === 'SYSTEM'
     ) {
         const error = new Error('unauthorized access!')
         error.statusCode = 403
