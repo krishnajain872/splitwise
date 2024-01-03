@@ -6,10 +6,10 @@
     "scripts": {
         "start": "node index.js",
         "dev": "NODE_ENV=test nodemon index.js",
-        "dev-setup": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create && NODE_ENV=test  npx sequelize-cli db:migrate:undo:all && NODE_ENV=test npx sequelize-cli db:migrate &&NODE_ENV=test npx sequelize-cli db:seed:all && NODE_ENV=test nodemon index.js",
+        "dev-setup": "NODE_ENV=test  npx sequelize-cli db:migrate:undo:all && NODE_ENV=test npx sequelize-cli db:migrate &&NODE_ENV=test npx sequelize-cli db:seed:all && NODE_ENV=test nodemon index.js",
         "test": "NODE_ENV=test npx jest  --detectOpenHandles --coverage",
         "db-setup": "NODE_ENV=test npx sequelize-cli db:migrate &&NODE_ENV=test npx sequelize-cli db:seed:all",
-        "db-drop": "NODE_ENV=test npx sequelize-cli db:drop",
+        "db-drop": "NODE_ENV=test npx sequelize-cli db:drop && NODE_ENV=test npx sequelize-cli db:create && ",
         "factory": "NODE_ENV=test node factory.js",
         "db-create": "NODE_ENV=test npx sequelize-cli db:create",
         "db-seed-undo": "NODE_ENV=test npx sequelize-cli db:seed:undo:all",
