@@ -2,18 +2,20 @@ require('dotenv').config({ path: __dirname + '/../.env' })
 const {
     DB_TEST: db_test,
     DB_DATABASE: db,
-    USER_NAME: user,
+    user: user,
     PASSWORD: password,
-    DIALECT: db_dialect,
     DB_HOST: host,
+    DIALECT: db_dialect,
+    DB_URL: url,
 } = process.env
 
 module.exports = {
     development: {
+        use_env_variable: url,
         username: user,
         password: password,
-        database: db,
         host: host,
+        database: db,
         dialect: db_dialect,
         logging: false,
         define: {
@@ -24,10 +26,11 @@ module.exports = {
         },
     },
     test: {
+        use_env_variable: url,
         username: user,
         password: password,
-        database: db_test,
         host: host,
+        database: db_test,
         dialect: db_dialect,
         logging: false,
         define: {
@@ -38,10 +41,11 @@ module.exports = {
         },
     },
     production: {
+        use_env_variable: url,
         username: user,
         password: password,
-        database: db,
         host: host,
+        database: db,
         dialect: db_dialect,
         define: {
             underscored: true,
