@@ -35,8 +35,8 @@ const secureServer = async function () {
             'Database connectivity established in secure server successfully'
         )
         const options = {
-            key: fs.readFileSync('certificates/key.pem'),
-            cert: fs.readFileSync('certificates/cert.pem'),
+            key: fs.readFileSync('/key.pem'),
+            cert: fs.readFileSync('/cert.pem'),
         }
         const secure_server_port = secure || 403
 

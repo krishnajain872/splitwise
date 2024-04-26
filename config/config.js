@@ -20,9 +20,7 @@ module.exports = {
         dialect: db_dialect,
         dialectOptions: {
             ssl: {
-                ca: fs.readFileSync(
-                    __dirname + '/../certificates/psql-certificates/psql.pem'
-                ),
+                ca: fs.readFileSync(__dirname + '/../psql.pem'),
             },
         },
         logging: false,

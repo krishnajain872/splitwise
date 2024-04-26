@@ -20,3 +20,4 @@ factory.js
 
 # SSL CERTIFICATES
 certificates
+*.pem
