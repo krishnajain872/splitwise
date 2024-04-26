@@ -1,11 +1,12 @@
+const fs = require('fs')
 require('dotenv').config({ path: __dirname + '/../.env' })
 const {
     DB_TEST: db_test,
     DB_DATABASE: db,
-    user: user,
+    USER_NAME: user,
     PASSWORD: password,
-    DB_HOST: host,
     DIALECT: db_dialect,
+    DB_HOST: host,
     DB_URL: url,
 } = process.env
 
@@ -14,9 +15,16 @@ module.exports = {
         use_env_variable: url,
         username: user,
         password: password,
-        host: host,
         database: db,
+        host: host,
         dialect: db_dialect,
+        dialectOptions: {
+            ssl: {
+                ca: fs.readFileSync(
+                    __dirname + '/../certificates/psql-certificates/psql.pem'
+                ),
+            },
+        },
         logging: false,
         define: {
             underscored: true,
@@ -26,12 +34,19 @@ module.exports = {
         },
     },
     test: {
-        use_env_variable: url,
+        use_env_variable: url || undefined,
         username: user,
         password: password,
-        host: host,
         database: db_test,
+        host: host,
         dialect: db_dialect,
+        dialectOptions: {
+            ssl: {
+                ca: fs.readFileSync(
+                    __dirname + '/../certificates/psql-certificates/psql.pem'
+                ),
+            },
+        },
         logging: false,
         define: {
             underscored: true,
@@ -41,12 +56,19 @@ module.exports = {
         },
     },
     production: {
-        use_env_variable: url,
+        use_env_variable: url || undefined,
         username: user,
         password: password,
-        host: host,
         database: db,
+        host: host,
         dialect: db_dialect,
+        dialectOptions: {
+            ssl: {
+                ca: fs.readFileSync(
+                    __dirname + '/../certificates/psql-certificates/psql.pem'
+                ),
+            },
+        },
         define: {
             underscored: true,
             createdAt: 'created_at',
