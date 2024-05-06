@@ -4,6 +4,9 @@ const router = express.Router()
 const app = express()
 require('dotenv').config()
 const routes = require('./routes')
+
+app.use(cors()) // Use cors as a middleware without any options
+
 // routes and bodyparsers
 app.use(router)
 app.use(bodyParser.urlencoded({ extended: true }))
