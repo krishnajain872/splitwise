@@ -2,8 +2,12 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const router = express.Router()
 const app = express()
+const cors = require('cors') // Import the cors package
 require('dotenv').config()
 const routes = require('./routes')
+
+app.use(cors()) // Use cors as a middleware without any options
+
 // routes and bodyparsers
 app.use(router)
 app.use(bodyParser.urlencoded({ extended: true }))
